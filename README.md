@@ -24,11 +24,10 @@
 
 ## 快速开始
 
-1. 初始化数据库（MySQL 8.x）：
+1. 初始化数据库（MySQL 8.x，建库建表 + 演示数据一步完成）：
 
    ```sql
    SOURCE vben-admin-backend/sql/init.sql;
-   SOURCE vben-admin-backend/sql/seed.sql;
    ```
 
 2. 启动 Java 后端（默认 `localhost:8080`，前缀 `/api`）：

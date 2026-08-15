@@ -34,6 +34,9 @@ public class SysMenu {
     /** 组件：BasicLayout/IFrameView/views 相对路径 */
     private String component;
 
+    /** 目录节点重定向目标（如 /dashboard → /analytics） */
+    private String redirect;
+
     /** 权限码（button 型使用，对应 /auth/codes） */
     private String authCode;
 

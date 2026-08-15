@@ -70,6 +70,7 @@ public class SysMenuService {
         node.put("name", menu.getName());
         node.put("path", menu.getPath());
         putIfNotNull(node, "component", menu.getComponent());
+        putIfNotNull(node, "redirect", menu.getRedirect());
         putIfNotNull(node, "meta", parseMeta(menu.getMeta()));
         List<Map<String, Object>> children = buildTree(menu.getId(), menus);
         if (!children.isEmpty()) {
