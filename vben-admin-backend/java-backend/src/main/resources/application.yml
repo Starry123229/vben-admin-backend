@@ -1,0 +1,15 @@
+# Vben Admin Java 后端 - 主配置（环境相关配置放 application-{profile}.yml）
+
+spring:
+  application:
+    name: vben-backend
+  profiles:
+    # 生产环境用 --spring.profiles.active=prod 覆盖
+    active: dev
+
+server:
+  # 与前端 vite 代理目标一致：/api/** → http://localhost:8080/api/**
+  port: 8080
+  servlet:
+    # 统一接口前缀，对齐前端 VITE_GLOB_API_URL=/api
+    context-path: /api

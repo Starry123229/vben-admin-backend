@@ -1,0 +1,6 @@
+# 开发环境配置（敏感信息用环境变量或 application-local.yml 注入，后者已 gitignore）
+# 数据源 / Sa-Token / MyBatis-Plus 配置随对应模块补充。
+
+logging:
+  level:
+    com.vben: debug
