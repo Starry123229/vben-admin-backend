@@ -30,3 +30,9 @@ Thumbs.db
 
 # Runtime
 uploads/
+
+# MCP 配置（使用用户级 ~/.codebuddy/mcp.json，勿提交项目级配置）
+.mcp.json
+
+# CodeBuddy 工作区数据（memory 等，不纳入版本控制）
+.codebuddy/
