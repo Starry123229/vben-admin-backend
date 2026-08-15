@@ -1,0 +1,27 @@
+{
+  "name": "vben-node-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Node (Nitro) backend for vue-vben-admin, API-compatible with the official backend-mock",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "nitro dev",
+    "build": "nitro build",
+    "start": "node .output/server/index.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^24.0.0",
+    "h3": "^1.15.11",
+    "nitropack": "^2.13.4",
+    "typescript": "^5.9.2"
+  }
+}

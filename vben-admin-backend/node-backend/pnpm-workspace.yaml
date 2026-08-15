@@ -1,0 +1,4 @@
+# pnpm v11 配置：构建脚本许可制（supply-chain 安全策略，v11 起替代 v10 的 onlyBuiltDependencies）
+# esbuild 是 Nitro 的编译依赖（官方包，可信），显式允许其执行安装脚本
+allowBuilds:
+  esbuild: true
