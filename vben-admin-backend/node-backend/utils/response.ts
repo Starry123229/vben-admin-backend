@@ -75,3 +75,8 @@ export function pagination<T = any>(
     ? array.slice(offset)
     : array.slice(offset, offset + Number(pageSize));
 }
+
+/** 人为延迟（演示接口保留加载态，与官方 mock 行为一致） */
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

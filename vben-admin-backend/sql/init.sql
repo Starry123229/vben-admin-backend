@@ -18,7 +18,18 @@ CREATE TABLE `sys_role_code` (
 	CONSTRAINT `sys_role_code_id` PRIMARY KEY(`id`)
 );
 
--- 菜单表（树形结构，pid=0 为根节点，meta 存前端渲染所需的 JSON）
+-- 部门表（树形结构，pid=0 为根节点，/system/dept CRUD 数据源）
+CREATE TABLE `sys_dept` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`pid` int NOT NULL DEFAULT 0,
+	`name` varchar(64) NOT NULL,
+	`status` tinyint NOT NULL DEFAULT 1,
+	`remark` varchar(255),
+	`create_time` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `sys_dept_id` PRIMARY KEY(`id`)
+);
+
+-- 菜单表（一表两用：导航菜单 /menu/all 按角色绑定过滤；菜单管理 /system/menu/list 全量树）
 CREATE TABLE `sys_menu` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`pid` int NOT NULL DEFAULT 0,
@@ -28,6 +39,10 @@ CREATE TABLE `sys_menu` (
 	`redirect` varchar(128),
 	`meta` json NOT NULL,
 	`sort` int NOT NULL DEFAULT 0,
+	`type` varchar(16) NOT NULL DEFAULT 'menu',
+	`auth_code` varchar(64),
+	`status` tinyint NOT NULL DEFAULT 1,
+	`create_time` timestamp NOT NULL DEFAULT (now()),
 	CONSTRAINT `sys_menu_id` PRIMARY KEY(`id`)
 );
 
@@ -50,6 +65,18 @@ CREATE TABLE `sys_refresh_token` (
 	CONSTRAINT `sys_refresh_token_token_hash_unique` UNIQUE(`token_hash`)
 );
 
+-- 角色表（code 与 sys_user.roles、sys_role_menu.role 关联）
+CREATE TABLE `sys_role` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`name` varchar(64) NOT NULL,
+	`code` varchar(32) NOT NULL,
+	`status` tinyint NOT NULL DEFAULT 1,
+	`remark` varchar(255),
+	`create_time` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `sys_role_id` PRIMARY KEY(`id`),
+	CONSTRAINT `sys_role_code_unique` UNIQUE(`code`)
+);
+
 -- 用户表（password 存 bcrypt 哈希；roles 为 JSON 数组）
 CREATE TABLE `sys_user` (
 	`id` int AUTO_INCREMENT NOT NULL,
@@ -58,6 +85,10 @@ CREATE TABLE `sys_user` (
 	`real_name` varchar(64) NOT NULL,
 	`roles` json NOT NULL,
 	`home_path` varchar(128),
+	`status` tinyint NOT NULL DEFAULT 1,
+	`dept_id` int,
+	`remark` varchar(255),
+	`create_time` timestamp NOT NULL DEFAULT (now()),
 	CONSTRAINT `sys_user_id` PRIMARY KEY(`id`),
 	CONSTRAINT `sys_user_username_unique` UNIQUE(`username`)
 );
