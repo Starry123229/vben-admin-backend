@@ -19,6 +19,10 @@ export const overridesPreferences = defineOverridesPreferences({
   // overrides
   app: {
     name: import.meta.env.VITE_APP_TITLE,
+    // 开启无感刷新（默认 false）
+    enableRefreshToken: true,
+    // 后端菜单模式：前端从 /menu/all 拉取动态路由
+    accessMode: 'backend',
   },
 });
 
