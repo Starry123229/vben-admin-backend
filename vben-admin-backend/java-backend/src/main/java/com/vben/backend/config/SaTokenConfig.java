@@ -18,7 +18,9 @@ public class SaTokenConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new SaInterceptor(handle -> StpUtil.checkLogin()))
                 .addPathPatterns("/**")
-                // login/refresh 无需 accessToken；logout 按 mock 契约恒成功
-                .excludePathPatterns("/auth/login", "/auth/refresh", "/auth/logout");
+                // login/refresh 无需 accessToken；logout 按 mock 契约恒成功；API 文档静态资源
+                .excludePathPatterns("/auth/login", "/auth/refresh", "/auth/logout",
+                        "/doc.html", "/webjars/**", "/v3/api-docs/**", "/knife4j/**",
+                        "/swagger-ui/**", "/swagger-resources/**", "/favicon.ico");
     }
 }

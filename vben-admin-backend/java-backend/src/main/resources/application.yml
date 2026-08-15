@@ -34,3 +34,12 @@ vben:
     # HTTPS 下设 true + SameSite=None；开发走 http 代理用 Lax
     cookie-secure: false
     cookie-same-site: Lax
+
+# API 文档：knife4j-next（基于 springdoc-openapi 3），入口 /api/doc.html；生产环境建议关闭
+springdoc:
+  api-docs:
+    enabled: true
+knife4j:
+  enable: true
+  setting:
+    language: zh-CN

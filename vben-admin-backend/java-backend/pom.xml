@@ -27,6 +27,8 @@
     <!-- 第三方依赖版本集中管理 -->
     <sa-token.version>1.45.0</sa-token.version>
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
+    <!-- knife4j-next：社区维护分支，官方版暂不支持 Boot 4 -->
+    <knife4j.version>5.0.18</knife4j.version>
   </properties>
 
   <dependencies>
@@ -74,6 +76,13 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-crypto</artifactId>
+    </dependency>
+
+    <!-- API 文档：knife4j-next（Boot 4 专用 starter，内置 springdoc-openapi 3） -->
+    <dependency>
+      <groupId>com.baizhukui</groupId>
+      <artifactId>knife4j-openapi3-boot4-spring-boot-starter</artifactId>
+      <version>${knife4j.version}</version>
     </dependency>
 
     <!-- Lombok：仅编译期 -->
