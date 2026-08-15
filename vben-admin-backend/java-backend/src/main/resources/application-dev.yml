@@ -1,5 +1,19 @@
 # 开发环境配置（敏感信息用环境变量或 application-local.yml 注入，后者已 gitignore）
-# 数据源 / Sa-Token / MyBatis-Plus 配置随对应模块补充。
+
+spring:
+  datasource:
+    # 首次使用先手动执行 src/main/resources/db/schema.sql 建库建表
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/vben_admin?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+
+mybatis-plus:
+  configuration:
+    # 开发期控制台打印 SQL
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
 
 logging:
   level:
