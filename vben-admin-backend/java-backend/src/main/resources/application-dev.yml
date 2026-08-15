@@ -2,10 +2,11 @@
 
 spring:
   datasource:
-    # 首次使用先手动执行 src/main/resources/db/schema.sql 建库建表
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/vben_admin?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+    # 首次使用先手动执行仓库根目录 sql/init.sql + seed.sql（Java/Node 双端共用）
+    # characterEncoding 用 Java 字符集名 UTF-8（驱动自动映射 MySQL utf8mb4）
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/vben_admin?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
+    password: ${DB_PASSWORD:123456}
 
 mybatis-plus:
   configuration:

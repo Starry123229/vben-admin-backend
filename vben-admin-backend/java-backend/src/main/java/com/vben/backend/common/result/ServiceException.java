@@ -33,4 +33,9 @@ public class ServiceException extends RuntimeException {
     public static ServiceException forbidden() {
         return new ServiceException(HttpStatus.FORBIDDEN, "Forbidden Exception");
     }
+
+    /** 403 禁止访问（自定义消息） */
+    public static ServiceException forbidden(String message) {
+        return new ServiceException(HttpStatus.FORBIDDEN, message);
+    }
 }

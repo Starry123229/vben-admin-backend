@@ -1,5 +1,6 @@
 package com.vben.backend.config;
 
+import cn.dev33.satoken.exception.NotLoginException;
 import com.vben.backend.common.result.R;
 import com.vben.backend.common.result.ServiceException;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<R<Void>> handleService(ServiceException e) {
         return ResponseEntity.status(e.getStatus()).body(R.fail(e.getMessage()));
+    }
+
+    /** Sa-Token 未登录：401（前端据此触发无感刷新，契约必需） */
+    @ExceptionHandler(NotLoginException.class)
+    public ResponseEntity<R<Void>> handleNotLogin(NotLoginException e) {
+        return ResponseEntity.status(401).body(R.fail("Unauthorized Exception"));
     }
 
     /** 参数校验失败：400 + 首条校验消息 */

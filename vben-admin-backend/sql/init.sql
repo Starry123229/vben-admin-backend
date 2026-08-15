@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Vben Admin 共享数据库结构（Java / Node 双后端共用，契约见 docs/api-contract.md §6）
--- 数据库: MySQL 8.4+, 字符集 utf8mb4。手动执行: mysql -u root -p < schema.sql
+-- 数据库: MySQL 8.4+, 字符集 utf8mb4。手动执行: mysql -u root -p < init.sql（随后可执行 seed.sql 灌入演示数据）
 -- ==============================================================================
 
 CREATE DATABASE IF NOT EXISTS `vben_admin` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;

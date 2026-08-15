@@ -13,3 +13,24 @@ server:
   servlet:
     # 统一接口前缀，对齐前端 VITE_GLOB_API_URL=/api
     context-path: /api
+
+# Sa-Token（accessToken）：从 Authorization: Bearer 头读取，有效期 2 小时
+sa-token:
+  token-name: Authorization
+  token-prefix: Bearer
+  timeout: 7200
+  active-timeout: -1
+  is-concurrent: true
+  is-share: false
+  token-style: uuid
+  is-read-cookie: false
+  is-read-header: true
+  is-log: false
+
+# 自定义认证配置（refreshToken：HttpOnly Cookie，轮换式，有效期默认 7 天）
+vben:
+  auth:
+    refresh-token-days: 7
+    # HTTPS 下设 true + SameSite=None；开发走 http 代理用 Lax
+    cookie-secure: false
+    cookie-same-site: Lax

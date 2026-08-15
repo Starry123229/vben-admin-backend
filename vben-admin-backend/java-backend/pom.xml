@@ -63,6 +63,19 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Sa-Token 认证（Boot 4 专用 starter，1.45.0 起官方提供） -->
+    <dependency>
+      <groupId>cn.dev33</groupId>
+      <artifactId>sa-token-spring-boot4-starter</artifactId>
+      <version>${sa-token.version}</version>
+    </dependency>
+
+    <!-- 仅用其 BCrypt 实现，不引入 Security 过滤链 -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+    </dependency>
+
     <!-- Lombok：仅编译期 -->
     <dependency>
       <groupId>org.projectlombok</groupId>
