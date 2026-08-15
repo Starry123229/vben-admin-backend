@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1786756085922,
+      "tag": "0000_puzzling_havok",
+      "breakpoints": true
+    }
+  ]
+}

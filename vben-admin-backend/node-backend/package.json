@@ -11,17 +11,24 @@
     "dev": "nitro dev",
     "build": "nitro build",
     "start": "node .output/server/index.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "seed": "tsx db/seed.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
-    "jsonwebtoken": "^9.0.2"
+    "drizzle-orm": "^0.45.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.23.3"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^24.0.0",
+    "drizzle-kit": "^0.31.10",
     "h3": "^1.15.11",
     "nitropack": "^2.13.4",
+    "tsx": "^4.23.12",
     "typescript": "^5.9.2"
   }
 }
