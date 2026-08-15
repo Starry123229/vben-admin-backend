@@ -2,10 +2,13 @@ package com.vben.backend.module.system.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.vben.backend.common.result.R;
+import com.vben.backend.module.system.dto.ChangePasswordRequest;
 import com.vben.backend.module.system.entity.SysUser;
 import com.vben.backend.module.system.service.SysUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -35,5 +38,12 @@ public class UserController {
         data.put("roles", userService.getRoleCodes(userId));
         data.put("homePath", user.getHomePath());
         return R.ok(data);
+    }
+
+    /** POST /user/password：当前登录用户修改自己的密码（无需角色权限） */
+    @PostMapping("/user/password")
+    public R<Void> changePassword(@RequestBody ChangePasswordRequest req) {
+        userService.changePassword(req);
+        return R.ok();
     }
 }
