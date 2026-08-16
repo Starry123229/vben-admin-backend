@@ -74,4 +74,12 @@ export const useVbenVxeGrid = <T extends Record<string, any>>(
   ...rest: Parameters<typeof useGrid<T, ComponentType, ComponentPropsMap>>
 ) => useGrid<T, ComponentType, ComponentPropsMap>(...rest);
 
+export type OnActionClickParams<T = Record<string, any>> = {
+  code: string;
+  row: T;
+};
+export type OnActionClickFn<T = Record<string, any>> = (
+  params: OnActionClickParams<T>,
+) => void;
+
 export type * from '@vben/plugins/vxe-table';

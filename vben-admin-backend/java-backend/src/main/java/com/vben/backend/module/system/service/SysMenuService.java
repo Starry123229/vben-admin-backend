@@ -112,6 +112,24 @@ public class SysMenuService {
         menuMapper.deleteById(id);
     }
 
+    /** 菜单名是否存在（排除指定 ID，用于唯一性校验） */
+    public boolean nameExists(String name, Long excludeId) {
+        LambdaQueryWrapper<SysMenu> w = new LambdaQueryWrapper<SysMenu>().eq(SysMenu::getName, name);
+        if (excludeId != null) {
+            w.ne(SysMenu::getId, excludeId);
+        }
+        return menuMapper.selectCount(w) > 0;
+    }
+
+    /** 菜单路径是否存在（排除指定 ID，用于唯一性校验） */
+    public boolean pathExists(String path, Long excludeId) {
+        LambdaQueryWrapper<SysMenu> w = new LambdaQueryWrapper<SysMenu>().eq(SysMenu::getPath, path);
+        if (excludeId != null) {
+            w.ne(SysMenu::getId, excludeId);
+        }
+        return menuMapper.selectCount(w) > 0;
+    }
+
     // ----------------------------------------------------------------- 私有方法
 
     /** 递归组树：同层按 sort 升序 */

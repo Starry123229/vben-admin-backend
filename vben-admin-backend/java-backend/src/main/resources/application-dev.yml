@@ -2,7 +2,7 @@
 
 spring:
   datasource:
-    # 首次使用先手动执行仓库根目录 sql/init.sql + seed.sql（Java/Node 双端共用）
+    # 首次使用先手动执行仓库根目录 sql/init.sql（Java/Node 双端共用，含系统管理菜单种子）
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/vben_admin?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:123456}

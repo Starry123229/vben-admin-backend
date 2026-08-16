@@ -13,6 +13,7 @@ import {
   enUS,
   lightTheme,
   NConfigProvider,
+  NDialogProvider,
   NMessageProvider,
   NNotificationProvider,
   zhCN,
