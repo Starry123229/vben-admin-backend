@@ -41,9 +41,12 @@ public class SystemDeptController {
         return R.ok(deptService.create(req));
     }
 
-    /** PUT /system/dept：更新部门 */
-    @PutMapping
-    public R<Void> update(@RequestBody DeptSaveRequest req) {
+    /** PUT /system/dept/{id}：更新部门（id 走路径，body 无 id 时以路径为准） */
+    @PutMapping("/{id}")
+    public R<Void> update(@PathVariable Long id, @RequestBody DeptSaveRequest req) {
+        if (req.getId() == null) {
+            req.setId(id);
+        }
         deptService.update(req);
         return R.ok();
     }

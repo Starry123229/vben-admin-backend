@@ -97,20 +97,20 @@ function onAppend(row: SystemMenuApi.SystemMenu) {
 
 function confirm(content: string, title: string) {
   return new Promise<boolean>((resolve, reject) => {
-    Modal.confirm({
-      title,
-      content,
-      okText: '确定',
-      cancelText: '取消',
-      onOk: () => resolve(true),
-      onCancel: () => reject(new Error('已取消')),
+    DialogPlugin.confirm({
+      header: title,
+      body: content,
+      confirmBtn: '确定',
+      cancelBtn: '取消',
+      onConfirm: () => resolve(true),
+      onClose: () => reject(new Error('已取消')),
     });
   });
 }
 
 function onDelete(row: SystemMenuApi.SystemMenu) {
-  confirm(`确定删除菜单【${row.name}】吗？`, '删除菜单')
-    .then(() => deleteMenu(row.id))
+  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+  deleteMenu(row.id)
     .then(() => {
       message.success(`删除 ${row.name} 成功`);
       onRefresh();

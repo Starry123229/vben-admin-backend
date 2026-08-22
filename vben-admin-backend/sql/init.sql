@@ -99,23 +99,23 @@ CREATE TABLE IF NOT EXISTS `sys_refresh_token` (
 -- ==============================================================================
 
 -- 角色
-INSERT IGNORE INTO `sys_role` (`id`, `name`, `code`, `status`) VALUES
+INSERT INTO `sys_role` (`id`, `name`, `code`, `status`) VALUES
 (1, '超级管理员', 'super', 1),
 (2, '管理员',     'admin', 1),
 (3, '普通用户',   'user',  1);
 
 -- 用户（password_hash = BCrypt('123456')）
-INSERT IGNORE INTO `sys_user` (`id`, `username`, `password_hash`, `real_name`, `home_path`, `status`) VALUES
+INSERT INTO `sys_user` (`id`, `username`, `password_hash`, `real_name`, `home_path`, `status`) VALUES
 (1, 'vben',  '$2a$10$pz916cL5nZa7hoSQ7/tadeI.i9wSELV9knz6n3NiKLetpw6k8Uun2', 'Vben',  NULL,         1),
 (2, 'admin', '$2a$10$pz916cL5nZa7hoSQ7/tadeI.i9wSELV9knz6n3NiKLetpw6k8Uun2', 'Admin', '/workspace', 1),
 (3, 'jack',  '$2a$10$pz916cL5nZa7hoSQ7/tadeI.i9wSELV9knz6n3NiKLetpw6k8Uun2', 'Jack',  '/analytics', 1);
 
-INSERT IGNORE INTO `sys_user_role` (`user_id`, `role_id`) VALUES
+INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 (1, 1), (2, 2), (3, 3);
 
 -- 菜单（与前端实际视图对齐：仅保留各 app 通用存在的 Dashboard / About。
 -- 原 Vben 完整模板的 Demos/Access 权限演示页在轻量版 apps/* 中不存在对应 .vue，会被前端回退成 404，故移除）
-INSERT IGNORE INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `redirect`, `status`, `sort`, `meta`) VALUES
+INSERT INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `redirect`, `status`, `sort`, `meta`) VALUES
 (1,  0,  'Dashboard',               'catalog', '/dashboard',                NULL,                          '/analytics',                 1, 0, '{"order":-1,"title":"page.dashboard.title"}'),
 (2,  1,  'Analytics',               'menu',    '/analytics',                '/dashboard/analytics/index',  NULL,                         1, 0, '{"affixTab":true,"title":"page.dashboard.analytics"}'),
 (3,  1,  'Workspace',               'menu',    '/workspace',                '/dashboard/workspace/index',  NULL,                         1, 1, '{"title":"page.dashboard.workspace"}'),
@@ -126,21 +126,8 @@ INSERT IGNORE INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`,
 
 -- 授权关系（super: 全部权限码；admin: AC_100010/20/30；user: AC_1000001/02，对齐 mock）
 -- 14 号「菜单可见但 403」演示节点授权给全部角色：mock 对三角色均返回，由前端 authority:['no-body'] 过滤
-INSERT IGNORE INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
 -- 公共菜单：三角色一致（Dashboard 目录 + Analytics + Workspace + About）
 (1,1),(1,2),(1,3),(1,20),
 (2,1),(2,2),(2,3),(2,20),
 (3,1),(3,2),(3,3),(3,20);
-
--- 系统管理菜单（组件路径对应各 app 的 src/views/system/{user,role,dept,menu}/index.vue；
--- 前端 accessMode:'backend' 经 /menu/all 拉取并生成路由。授权给超级管理员(1)与管理员(2)，普通用户(3)不授权）
-INSERT IGNORE INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `status`, `sort`, `meta`) VALUES
-(100, 0,   'System',     'catalog', '/system', NULL,                  1, 1, '{"title":"系统管理","icon":"lucide:settings","order":1}'),
-(101, 100, 'SystemUser', 'menu',    '/user',   '/system/user/index',  1, 0, '{"title":"用户管理","icon":"lucide:user"}'),
-(102, 100, 'SystemRole', 'menu',    '/role',   '/system/role/index',  1, 1, '{"title":"角色管理","icon":"lucide:users"}'),
-(103, 100, 'SystemDept', 'menu',    '/dept',   '/system/dept/index',  1, 2, '{"title":"部门管理","icon":"lucide:building-2"}'),
-(104, 100, 'SystemMenu', 'menu',    '/menu',   '/system/menu/index',  1, 3, '{"title":"菜单管理","icon":"lucide:menu"}');
-
-INSERT IGNORE INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
-(1, 100), (1, 101), (1, 102), (1, 103), (1, 104),
-(2, 100), (2, 101), (2, 102), (2, 103), (2, 104);

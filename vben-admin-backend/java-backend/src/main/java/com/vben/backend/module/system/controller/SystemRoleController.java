@@ -46,9 +46,12 @@ public class SystemRoleController {
         return R.ok(roleService.createRole(req));
     }
 
-    /** PUT /system/role：更新角色 */
-    @PutMapping
-    public R<Void> update(@RequestBody RoleSaveRequest req) {
+    /** PUT /system/role/{id}：更新角色（id 走路径，body 无 id 时以路径为准） */
+    @PutMapping("/{id}")
+    public R<Void> update(@PathVariable Long id, @RequestBody RoleSaveRequest req) {
+        if (req.getId() == null) {
+            req.setId(id);
+        }
         roleService.updateRole(req);
         return R.ok();
     }

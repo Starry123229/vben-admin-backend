@@ -80,13 +80,13 @@ function onActionClick(e: OnActionClickParams<SystemUserApi.SystemUser>) {
 
 function confirm(content: string, title: string) {
   return new Promise<boolean>((resolve, reject) => {
-    Modal.confirm({
-      title,
-      content,
-      okText: '确定',
-      cancelText: '取消',
-      onOk: () => resolve(true),
-      onCancel: () => reject(new Error('已取消')),
+    DialogPlugin.confirm({
+      header: title,
+      body: content,
+      confirmBtn: '确定',
+      cancelBtn: '取消',
+      onConfirm: () => resolve(true),
+      onClose: () => reject(new Error('已取消')),
     });
   });
 }
@@ -110,8 +110,8 @@ function onEdit(row: SystemUserApi.SystemUser) {
 }
 
 function onDelete(row: SystemUserApi.SystemUser) {
-  confirm(`确定删除用户【${row.username}】吗？`, '删除用户')
-    .then(() => deleteUser(row.id))
+  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+  deleteUser(row.id)
     .then(() => {
       message.success(`删除 ${row.username} 成功`);
       onRefresh();

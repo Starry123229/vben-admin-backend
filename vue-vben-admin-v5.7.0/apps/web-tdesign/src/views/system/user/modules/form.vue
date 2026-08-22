@@ -22,6 +22,13 @@ const [Drawer, drawerApi] = useVbenDrawer({
     const { valid } = await formApi.validate();
     if (!valid) return;
     const values = await formApi.getValues();
+    // ApiSelect(multiple) 会把选中值序列化为字符串，提交前统一转为数字数组
+    if (values.roleIds) {
+      values.roleIds = (Array.isArray(values.roleIds)
+        ? values.roleIds
+        : String(values.roleIds).split(',')
+      ).map(Number);
+    }
     // 编辑且密码留空：不修改密码
     if (id.value && !values.password) {
       delete values.password;

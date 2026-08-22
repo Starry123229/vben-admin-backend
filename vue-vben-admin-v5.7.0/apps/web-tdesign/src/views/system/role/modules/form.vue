@@ -9,6 +9,7 @@ import {
   assignRoleMenus,
   createRole,
   getRoleMenus,
+  updateRole,
 } from '#/api/system/role';
 import { getMenuTree } from '#/api/system/menu';
 import { useRoleFormSchema } from '../data';
@@ -34,9 +35,10 @@ const [Drawer, drawerApi] = useVbenDrawer({
     delete values.id;
     drawerApi.lock();
     try {
-      const roleId = id.value ? id.value : await createRole(values);
-      if (!id.value) {
-        id.value = roleId as number;
+      if (id.value) {
+        await updateRole(id.value, values);
+      } else {
+        id.value = (await createRole(values)) as number;
       }
       await assignRoleMenus(id.value, { menuIds });
       emits('success');

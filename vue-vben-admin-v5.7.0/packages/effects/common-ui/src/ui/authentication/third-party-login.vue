@@ -16,9 +16,18 @@ defineOptions({
   name: 'ThirdPartyLogin',
 });
 
+const emit = defineEmits<{
+  /** 用户点击某个第三方登录图标 */
+  login: [provider: 'github' | 'google' | 'qq' | 'wechat'];
+}>();
+
 const {
   auth: { dingding: dingdingAuthConfig },
 } = useAppConfig(import.meta.env, import.meta.env.PROD);
+
+function handleLogin(provider: 'github' | 'google' | 'qq' | 'wechat') {
+  emit('login', provider);
+}
 </script>
 
 <template>
@@ -36,6 +45,7 @@ const {
         :tooltip="$t('authentication.wechatLogin')"
         tooltip-side="top"
         class="mb-3"
+        @click="handleLogin('wechat')"
       >
         <SvgWeChatIcon />
       </VbenIconButton>
@@ -43,6 +53,7 @@ const {
         :tooltip="$t('authentication.qqLogin')"
         tooltip-side="top"
         class="mb-3"
+        @click="handleLogin('qq')"
       >
         <SvgQQChatIcon />
       </VbenIconButton>
@@ -50,6 +61,7 @@ const {
         :tooltip="$t('authentication.githubLogin')"
         tooltip-side="top"
         class="mb-3"
+        @click="handleLogin('github')"
       >
         <SvgGithubIcon />
       </VbenIconButton>
@@ -57,6 +69,7 @@ const {
         :tooltip="$t('authentication.googleLogin')"
         tooltip-side="top"
         class="mb-3"
+        @click="handleLogin('google')"
       >
         <SvgGoogleIcon />
       </VbenIconButton>

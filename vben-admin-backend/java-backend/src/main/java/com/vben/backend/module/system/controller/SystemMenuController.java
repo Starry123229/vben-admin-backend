@@ -6,7 +6,15 @@ import com.vben.backend.common.result.R;
 import com.vben.backend.module.system.dto.MenuSaveRequest;
 import com.vben.backend.module.system.service.SysMenuService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -42,9 +50,12 @@ public class SystemMenuController {
         return R.ok(menuService.create(req));
     }
 
-    /** PUT /system/menu：更新菜单 */
-    @PutMapping
-    public R<Void> update(@RequestBody MenuSaveRequest req) {
+    /** PUT /system/menu/{id}：更新菜单（id 走路径，body 无 id 时以路径为准） */
+    @PutMapping("/{id}")
+    public R<Void> update(@PathVariable Long id, @RequestBody MenuSaveRequest req) {
+        if (req.getId() == null) {
+            req.setId(id);
+        }
         menuService.update(req);
         return R.ok();
     }

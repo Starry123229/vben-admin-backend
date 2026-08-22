@@ -67,16 +67,15 @@ function onActionClick(e: OnActionClickParams<SystemRoleApi.SystemRole>) {
 }
 
 function confirm(content: string, title: string) {
-  return new Promise<boolean>((resolve, reject) => {
-    Modal.confirm({
-      title,
-      content,
-      okText: '确定',
-      cancelText: '取消',
-      onOk: () => resolve(true),
-      onCancel: () => reject(new Error('已取消')),
+  return ElMessageBox.confirm(content, title, {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  })
+    .then(() => true)
+    .catch(() => {
+      throw new Error('已取消');
     });
-  });
 }
 
 async function onStatusChange(newStatus: number, row: SystemRoleApi.SystemRole) {

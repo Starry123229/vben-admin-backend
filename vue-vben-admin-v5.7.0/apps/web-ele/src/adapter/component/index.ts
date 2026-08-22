@@ -186,10 +186,12 @@ export type ComponentType =
   | 'IconPicker'
   | 'Input'
   | 'InputNumber'
+  | 'InputPassword'
   | 'RadioGroup'
   | 'Select'
   | 'Space'
   | 'Switch'
+  | 'Textarea'
   | 'TimePicker'
   | 'TreeSelect'
   | 'Upload'
@@ -208,10 +210,12 @@ export interface ComponentPropsMap {
   IconPicker: IconPickerProps;
   Input: InputProps;
   InputNumber: InputNumberProps;
+  InputPassword: InputProps;
   RadioGroup: RadioGroupProps;
   Select: SelectV2Props;
   Space: SpaceProps;
   Switch: SwitchProps;
+  Textarea: InputProps;
   TimePicker: ElTimePickerSchemaProps;
   TreeSelect: ElTreeSelectSchemaProps;
   Upload: UploadProps;
@@ -287,6 +291,9 @@ async function initComponentAdapter() {
     InputNumber: withDefaultPlaceholder(ElInputNumber, 'input', {
       style: { width: '100%' },
     }),
+    InputPassword: withDefaultPlaceholder(ElInput, 'input', {
+      type: 'password',
+    }),
     RadioGroup: (props, { attrs, slots }) => {
       let defaultSlot;
       if (Reflect.has(slots, 'default')) {
@@ -311,6 +318,9 @@ async function initComponentAdapter() {
     },
     Space: ElSpace,
     Switch: ElSwitch,
+    Textarea: withDefaultPlaceholder(ElInput, 'input', {
+      type: 'textarea',
+    }),
     TimePicker: (props, { attrs, slots }) => {
       const { name, id, isRange } = props;
       const extraProps: Recordable<any> = {};

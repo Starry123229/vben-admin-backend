@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import type { Recordable } from '@vben/types';
+
 import type { VbenFormSchema } from '@vben-core/form-ui';
 
-import { computed, reactive } from 'vue';
+import { computed, onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { $t } from '@vben/locales';
@@ -33,6 +35,10 @@ interface Props {
    * @zh_CN 按钮文本
    */
   submitButtonText?: string;
+  /**
+   * @zh_CN 是否显示发送验证码按钮
+   */
+  showSendCode?: boolean;
 }
 
 defineOptions({
@@ -41,6 +47,7 @@ defineOptions({
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
+  showSendCode: false,
   loginPath: '/auth/login',
   submitButtonText: '',
   subTitle: '',
@@ -48,7 +55,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  submit: [Record<string, any>];
+  submit: [Recordable<any>];
+  sendCode: [Recordable<any>];
 }>();
 
 const [Form, formApi] = useVbenForm(
@@ -64,6 +72,28 @@ const [Form, formApi] = useVbenForm(
 
 const router = useRouter();
 
+const countdown = ref(0);
+let timer: ReturnType<typeof setInterval> | null = null;
+
+function startCountdown(seconds = 60) {
+  stopCountdown();
+  countdown.value = seconds;
+  timer = setInterval(() => {
+    countdown.value -= 1;
+    if (countdown.value <= 0) {
+      stopCountdown();
+    }
+  }, 1000);
+}
+
+function stopCountdown() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    countdown.value = 0;
+  }
+}
+
 async function handleSubmit() {
   const { valid } = await formApi.validate();
   const values = await formApi.getValues();
@@ -72,12 +102,22 @@ async function handleSubmit() {
   }
 }
 
+async function handleSendCode() {
+  const values = await formApi.getValues();
+  emit('sendCode', values);
+}
+
 function goToLogin() {
   router.push(props.loginPath);
 }
 
+onUnmounted(() => {
+  stopCountdown();
+});
+
 defineExpose({
   getFormApi: () => formApi,
+  startCountdown,
 });
 </script>
 
@@ -96,6 +136,15 @@ defineExpose({
     <Form />
 
     <div>
+      <VbenButton
+        v-if="showSendCode"
+        class="mt-2 w-full"
+        :disabled="countdown > 0"
+        variant="outline"
+        @click="handleSendCode"
+      >
+        {{ countdown > 0 ? $t('authentication.sendText', [countdown]) : $t('authentication.sendCode') }}
+      </VbenButton>
       <VbenButton
         :class="{
           'cursor-wait': loading,

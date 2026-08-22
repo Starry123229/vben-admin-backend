@@ -72,9 +72,20 @@ public class AuthService {
         if (user == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
             throw ServiceException.forbidden("Username or password is incorrect.");
         }
-        // Sa-Token 登录，获得 accessToken
-        StpUtil.login(user.getId());
-        issueRefreshToken(user.getId(), response);
+        return loginByUserId(user.getId(), response);
+    }
+
+    /** 按用户 ID 直接签发双 token（注册/手机号/二维码/第三方登录复用）。禁用用户阻止登录。 */
+    public String loginByUserId(long userId, HttpServletResponse response) {
+        SysUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw ServiceException.forbidden("账号不存在");
+        }
+        if (user.getStatus() != null && user.getStatus() == 0) {
+            throw ServiceException.forbidden("该账号已被禁用，请联系管理员");
+        }
+        StpUtil.login(userId);
+        issueRefreshToken(userId, response);
         return StpUtil.getTokenValue();
     }
 

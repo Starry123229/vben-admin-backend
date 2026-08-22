@@ -11,7 +11,7 @@ import { Plus } from '@vben/icons';
 import { Button, message, Modal } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteDept, getDeptList } from '#/api/system/dept';
+import { deleteDept, getDeptList, updateDept } from '#/api/system/dept';
 
 import { useDeptColumns, useDeptGridFormSchema } from './data';
 import Form from './modules/form.vue';
@@ -85,8 +85,8 @@ function onEdit(row: SystemDeptApi.SystemDept) {
 }
 
 function onDelete(row: SystemDeptApi.SystemDept) {
-  confirm(`确定删除部门【${row.name}】吗？`, '删除部门')
-    .then(() => deleteDept(row.id))
+  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+  deleteDept(row.id)
     .then(() => {
       message.success(`删除 ${row.name} 成功`);
       onRefresh();

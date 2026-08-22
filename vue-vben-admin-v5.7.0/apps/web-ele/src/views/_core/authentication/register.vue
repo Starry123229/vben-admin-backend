@@ -7,9 +7,13 @@ import { computed, h, ref } from 'vue';
 import { AuthenticationRegister, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
+import { registerApi } from '#/api/core/auth';
+import { useAuthStore } from '#/store';
+
 defineOptions({ name: 'Register' });
 
 const loading = ref(false);
+const authStore = useAuthStore();
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
@@ -81,8 +85,17 @@ const formSchema = computed((): VbenFormSchema[] => {
   ];
 });
 
-function handleSubmit(value: Recordable<any>) {
-  void value;
+async function handleSubmit(value: Recordable<any>) {
+  loading.value = true;
+  try {
+    const { accessToken } = await registerApi({
+      username: value.username,
+      password: value.password,
+    });
+    await authStore.finishLogin(accessToken);
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 

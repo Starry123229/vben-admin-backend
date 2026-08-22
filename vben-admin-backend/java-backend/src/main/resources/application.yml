@@ -34,6 +34,10 @@ vben:
     # HTTPS 下设 true + SameSite=None；开发走 http 代理用 Lax
     cookie-secure: false
     cookie-same-site: Lax
+    # 登录辅助功能：开发期 mock 可全流程联通（短信/邮箱验证码接口回显验证码）；
+    # 生产配置外部服务后改为 false 并接入真实短信/邮件/OAuth 凭证即可
+    sms-mock: true
+    email-mock: true
 
 # API 文档：knife4j-next（基于 springdoc-openapi 3），入口 /api/doc.html；生产环境建议关闭
 springdoc:

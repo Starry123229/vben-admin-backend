@@ -1,8 +1,6 @@
 <script lang="ts" setup>
 import type { SystemMenuApi } from '#/api/system/menu';
 
-import type { Recordable } from '@vben/types';
-
 import { computed, nextTick, ref } from 'vue';
 
 import { Tree, useVbenDrawer, useVbenForm } from '@vben/common-ui';

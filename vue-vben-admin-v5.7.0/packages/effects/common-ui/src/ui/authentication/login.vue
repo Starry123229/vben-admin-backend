@@ -44,6 +44,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   submit: [Recordable<any>];
+  oauth: ['github' | 'google' | 'qq' | 'wechat'];
 }>();
 
 const [Form, formApi] = useVbenForm(
@@ -168,7 +169,10 @@ defineExpose({
 
     <!-- 第三方登录 -->
     <slot name="third-party-login">
-      <ThirdPartyLogin v-if="showThirdPartyLogin" />
+      <ThirdPartyLogin
+        v-if="showThirdPartyLogin"
+        @login="(provider: any) => emit('oauth', provider)"
+      />
     </slot>
 
     <slot name="to-register">

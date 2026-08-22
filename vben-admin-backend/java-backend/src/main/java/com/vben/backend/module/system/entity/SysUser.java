@@ -34,6 +34,12 @@ public class SysUser {
     /** 登录后首页路径 */
     private String homePath;
 
+    /** 手机号（手机号登录用） */
+    private String phone;
+
+    /** 邮箱（忘记密码用） */
+    private String email;
+
     /** 部门 ID */
     private Long deptId;
 

@@ -45,9 +45,12 @@ public class SystemUserController {
         return R.ok(userService.createUser(req));
     }
 
-    /** PUT /system/user：更新用户 */
-    @PutMapping
-    public R<Void> update(@RequestBody UserSaveRequest req) {
+    /** PUT /system/user/{id}：更新用户（id 走路径，body 无 id 时以路径为准） */
+    @PutMapping("/{id}")
+    public R<Void> update(@PathVariable Long id, @RequestBody UserSaveRequest req) {
+        if (req.getId() == null) {
+            req.setId(id);
+        }
         userService.updateUser(req);
         return R.ok();
     }

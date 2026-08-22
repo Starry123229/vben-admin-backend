@@ -85,8 +85,8 @@ function onEdit(row: SystemDeptApi.SystemDept) {
 }
 
 function onDelete(row: SystemDeptApi.SystemDept) {
-  confirm(`确定删除部门【${row.name}】吗？`, '删除部门')
-    .then(() => deleteDept(row.id))
+  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+  deleteDept(row.id)
     .then(() => {
       message.success(`删除 ${row.name} 成功`);
       onRefresh();

@@ -61,9 +61,6 @@ const Input = defineAsyncComponent(() => import('tdesign-vue-next/es/input'));
 const InputNumber = defineAsyncComponent(
   () => import('tdesign-vue-next/es/input-number'),
 );
-// const InputPassword = defineAsyncComponent(() =>
-//   import('tdesign-vue-next/es/input').then((res) => res.InputPassword),
-// );
 // const Mentions = defineAsyncComponent(
 //   () => import('tdesign-vue-next/es/mentions'),
 // );
@@ -136,8 +133,7 @@ export type ComponentType =
   | 'IconPicker'
   | 'Input'
   | 'InputNumber'
-  // | 'InputPassword'
-  // | 'Mentions'
+  | 'InputPassword'
   | 'PrimaryButton'
   | 'Radio'
   | 'RadioGroup'
@@ -167,6 +163,7 @@ export interface ComponentPropsMap {
   IconPicker: IconPickerProps;
   Input: InputProps;
   InputNumber: InputNumberProps;
+  InputPassword: InputProps;
   PrimaryButton: ButtonProps;
   Radio: RadioProps;
   RadioGroup: RadioGroupProps;
@@ -242,8 +239,9 @@ async function initComponentAdapter() {
     InputNumber: withDefaultPlaceholder(InputNumber, 'input', {
       style: { width: '100%' },
     }),
-    // InputPassword: withDefaultPlaceholder(InputPassword, 'input'),
-    // Mentions: withDefaultPlaceholder(Mentions, 'input'),
+    InputPassword: withDefaultPlaceholder(Input, 'input', {
+      type: 'password',
+    }),
     // 自定义主要按钮
     PrimaryButton: (props, { attrs, slots }) => {
       let ghost = false;

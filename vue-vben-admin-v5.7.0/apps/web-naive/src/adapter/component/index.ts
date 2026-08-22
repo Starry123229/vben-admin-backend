@@ -129,10 +129,12 @@ export type ComponentType =
   | 'IconPicker'
   | 'Input'
   | 'InputNumber'
+  | 'InputPassword'
   | 'RadioGroup'
   | 'Select'
   | 'Space'
   | 'Switch'
+  | 'Textarea'
   | 'TimePicker'
   | 'TreeSelect'
   | 'Upload'
@@ -151,10 +153,12 @@ export interface ComponentPropsMap {
   IconPicker: IconPickerProps;
   Input: InputProps;
   InputNumber: InputNumberProps;
+  InputPassword: InputProps;
   RadioGroup: RadioGroupProps;
   Select: SelectProps;
   Space: SpaceProps;
   Switch: SwitchProps;
+  Textarea: InputProps;
   TimePicker: TimePickerProps;
   TreeSelect: TreeSelectProps;
   Upload: UploadProps;
@@ -228,6 +232,9 @@ async function initComponentAdapter() {
     InputNumber: withDefaultPlaceholder(NInputNumber, 'input', {
       style: { width: '100%' },
     }),
+    InputPassword: withDefaultPlaceholder(NInput, 'input', {
+      type: 'password',
+    }),
     RadioGroup: (props, { attrs, slots }) => {
       let defaultSlot;
       if (Reflect.has(slots, 'default')) {
@@ -253,6 +260,9 @@ async function initComponentAdapter() {
     Select: withDefaultPlaceholder(NSelect, 'select'),
     Space: NSpace,
     Switch: NSwitch,
+    Textarea: withDefaultPlaceholder(NInput, 'input', {
+      type: 'textarea',
+    }),
     TimePicker: NTimePicker,
     TreeSelect: withDefaultPlaceholder(NTreeSelect, 'select'),
     Upload: NUpload,

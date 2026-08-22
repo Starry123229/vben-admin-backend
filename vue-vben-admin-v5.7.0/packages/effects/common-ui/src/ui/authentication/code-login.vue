@@ -3,7 +3,7 @@ import type { Recordable } from '@vben/types';
 
 import type { VbenFormSchema } from '@vben-core/form-ui';
 
-import { computed, reactive } from 'vue';
+import { computed, onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { $t } from '@vben/locales';
@@ -36,9 +36,17 @@ interface Props {
    */
   submitButtonText?: string;
   /**
+   * @zh_CN 按钮文本
+   */
+  sendButtonText?: string;
+  /**
    * @zh_CN 是否显示返回按钮
    */
   showBack?: boolean;
+  /**
+   * @zh_CN 是否显示发送验证码按钮
+   */
+  showSendCode?: boolean;
 }
 
 defineOptions({
@@ -48,7 +56,9 @@ defineOptions({
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
   showBack: true,
+  showSendCode: false,
   loginPath: '/auth/login',
+  sendButtonText: '',
   submitButtonText: '',
   subTitle: '',
   title: '',
@@ -56,6 +66,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   submit: [Recordable<any>];
+  sendCode: [Recordable<any>];
 }>();
 
 const router = useRouter();
@@ -71,6 +82,28 @@ const [Form, formApi] = useVbenForm(
   }),
 );
 
+const countdown = ref(0);
+let timer: ReturnType<typeof setInterval> | null = null;
+
+function startCountdown(seconds = 60) {
+  stopCountdown();
+  countdown.value = seconds;
+  timer = setInterval(() => {
+    countdown.value -= 1;
+    if (countdown.value <= 0) {
+      stopCountdown();
+    }
+  }, 1000);
+}
+
+function stopCountdown() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    countdown.value = 0;
+  }
+}
+
 async function handleSubmit() {
   const { valid } = await formApi.validate();
   const values = await formApi.getValues();
@@ -79,12 +112,22 @@ async function handleSubmit() {
   }
 }
 
+async function handleSendCode() {
+  const values = await formApi.getValues();
+  emit('sendCode', values);
+}
+
 function goToLogin() {
   router.push(props.loginPath);
 }
 
+onUnmounted(() => {
+  stopCountdown();
+});
+
 defineExpose({
   getFormApi: () => formApi,
+  startCountdown,
 });
 </script>
 
@@ -103,6 +146,17 @@ defineExpose({
       </template>
     </Title>
     <Form />
+    <VbenButton
+      v-if="showSendCode"
+      class="mb-2 w-full"
+      :disabled="countdown > 0"
+      variant="outline"
+      @click="handleSendCode"
+    >
+      <slot name="sendButtonText">
+        {{ countdown > 0 ? $t('authentication.sendText', [countdown]) : sendButtonText || $t('authentication.sendCode') }}
+      </slot>
+    </VbenButton>
     <VbenButton
       :class="{
         'cursor-wait': loading,

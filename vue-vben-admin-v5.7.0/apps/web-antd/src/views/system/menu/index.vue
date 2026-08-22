@@ -108,8 +108,8 @@ function confirm(content: string, title: string) {
 }
 
 function onDelete(row: SystemMenuApi.SystemMenu) {
-  confirm(`确定删除菜单【${row.name}】吗？`, '删除菜单')
-    .then(() => deleteMenu(row.id))
+  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+  deleteMenu(row.id)
     .then(() => {
       message.success(`删除 ${row.name} 成功`);
       onRefresh();

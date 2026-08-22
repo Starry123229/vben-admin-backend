@@ -72,13 +72,13 @@ function onActionClick(e: OnActionClickParams<SystemDeptApi.SystemDept>) {
 
 function confirm(content: string, title: string) {
   return new Promise<boolean>((resolve, reject) => {
-    Modal.confirm({
+    dialog.warning({
       title,
       content,
-      okText: '确定',
-      cancelText: '取消',
-      onOk: () => resolve(true),
-      onCancel: () => reject(new Error('已取消')),
+      positiveText: '确定',
+      negativeText: '取消',
+      onPositiveClick: () => resolve(true),
+      onNegativeClick: () => reject(new Error('已取消')),
     });
   });
 }

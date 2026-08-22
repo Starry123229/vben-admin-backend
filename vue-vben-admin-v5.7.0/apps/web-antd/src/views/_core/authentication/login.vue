@@ -7,11 +7,25 @@ import { computed, markRaw } from 'vue';
 import { AuthenticationLogin, SliderCaptcha, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
+import { oauthCallbackApi } from '#/api/core/auth';
 import { useAuthStore } from '#/store';
 
 defineOptions({ name: 'Login' });
 
 const authStore = useAuthStore();
+
+/** 第三方登录（mock 模式后端直接签发 token；生产应跳转平台授权页） */
+async function handleOauth(
+  provider: 'github' | 'google' | 'qq' | 'wechat',
+) {
+  authStore.loginLoading = true;
+  try {
+    const { accessToken } = await oauthCallbackApi(provider);
+    await authStore.finishLogin(accessToken);
+  } finally {
+    authStore.loginLoading = false;
+  }
+}
 
 const MOCK_USER_OPTIONS: BasicOption[] = [
   {
@@ -93,6 +107,7 @@ const formSchema = computed((): VbenFormSchema[] => {
   <AuthenticationLogin
     :form-schema="formSchema"
     :loading="authStore.loginLoading"
+    @oauth="handleOauth"
     @submit="authStore.authLogin"
   />
 </template>
