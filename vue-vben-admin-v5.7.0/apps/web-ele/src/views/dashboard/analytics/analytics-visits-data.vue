@@ -1,40 +1,39 @@
 <script lang="ts" setup>
 import type { EchartsUIType } from '@vben/plugins/echarts';
 
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 import { EchartsUI, useEcharts } from '@vben/plugins/echarts';
+
+const props = defineProps<{
+  roleData?: { name: string; value: number }[];
+}>();
 
 const chartRef = ref<EchartsUIType>();
 const { renderEcharts } = useEcharts(chartRef);
 
 onMounted(() => {
+  renderChart();
+});
+
+watch(
+  () => props.roleData,
+  () => renderChart(),
+  { deep: true },
+);
+
+function renderChart() {
+  const data = props.roleData || [];
+
   renderEcharts({
     legend: {
       bottom: 0,
-      data: ['访问', '趋势'],
+      data: data.map((d) => d.name),
     },
     radar: {
-      indicator: [
-        {
-          name: '网页',
-        },
-        {
-          name: '移动端',
-        },
-        {
-          name: 'Ipad',
-        },
-        {
-          name: '客户端',
-        },
-        {
-          name: '第三方',
-        },
-        {
-          name: '其它',
-        },
-      ],
+      indicator: data.length > 0
+        ? data.map((d) => ({ name: d.name }))
+        : [{ name: '暂无数据' }],
       radius: '60%',
       splitNumber: 8,
     },
@@ -52,19 +51,11 @@ onMounted(() => {
             itemStyle: {
               color: '#b6a2de',
             },
-            name: '访问',
-            value: [90, 50, 86, 40, 50, 20],
-          },
-          {
-            itemStyle: {
-              color: '#5ab1ef',
-            },
-            name: '趋势',
-            value: [70, 75, 70, 76, 20, 85],
+            name: '角色',
+            value: data.map((d) => d.value),
           },
         ],
         itemStyle: {
-          // borderColor: '#fff',
           borderRadius: 10,
           borderWidth: 2,
         },
@@ -74,7 +65,7 @@ onMounted(() => {
     ],
     tooltip: {},
   });
-});
+}
 </script>
 
 <template>

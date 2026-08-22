@@ -3,12 +3,6 @@ import type { AboutProps, DescriptionItem } from './about';
 
 import { h } from 'vue';
 
-import {
-  VBEN_DOC_URL,
-  VBEN_GITHUB_URL,
-  VBEN_PREVIEW_URL,
-} from '@vben/constants';
-
 import { VbenRenderContent } from '@vben-core/shadcn-ui';
 
 import { Page } from '../../components';
@@ -19,10 +13,17 @@ defineOptions({
   name: 'AboutUI',
 });
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
+  authorEmail: '',
+  authorName: '',
+  authorUrl: '',
   description:
     '是一个现代化开箱即用的中后台解决方案，采用最新的技术栈，包括 Vue 3.0、Vite、TailwindCSS 和 TypeScript 等前沿技术，代码规范严谨，提供丰富的配置选项，旨在为中大型项目的开发提供现成的开箱即用解决方案及丰富的示例，同时，它也是学习和深入前端技术的一个极佳示例。',
+  docUrl: '',
+  githubUrl: '',
+  homepageUrl: '',
   name: 'Vben Admin',
+  previewUrl: '',
   title: '关于项目',
 });
 
@@ -50,17 +51,23 @@ const renderLink = (href: string, text: string) =>
   );
 
 const {
-  authorEmail,
-  authorName,
-  authorUrl,
   buildTime,
   dependencies = {},
   devDependencies = {},
-  homepage,
   license,
   version,
   // vite inject-metadata 插件注入的全局变量
 } = __VBEN_ADMIN_METADATA__ || {};
+
+const finalName = props.name;
+const finalDescription = props.description;
+const finalHomepage = props.homepageUrl;
+const finalDocUrl = props.docUrl;
+const finalPreviewUrl = props.previewUrl;
+const finalGithubUrl = props.githubUrl;
+const finalAuthorName = props.authorName;
+const finalAuthorEmail = props.authorEmail;
+const finalAuthorUrl = props.authorUrl;
 
 const vbenDescriptionItems: DescriptionItem[] = [
   {
@@ -75,30 +82,51 @@ const vbenDescriptionItems: DescriptionItem[] = [
     content: buildTime,
     title: '最后构建时间',
   },
-  {
-    content: renderLink(homepage, '点击查看'),
-    title: '主页',
-  },
-  {
-    content: renderLink(VBEN_DOC_URL, '点击查看'),
-    title: '文档地址',
-  },
-  {
-    content: renderLink(VBEN_PREVIEW_URL, '点击查看'),
-    title: '预览地址',
-  },
-  {
-    content: renderLink(VBEN_GITHUB_URL, '点击查看'),
-    title: 'Github',
-  },
-  {
-    content: h('div', [
-      renderLink(authorUrl, `${authorName}  `),
-      renderLink(`mailto:${authorEmail}`, authorEmail),
-    ]),
-    title: '作者',
-  },
 ];
+
+if (finalHomepage) {
+  vbenDescriptionItems.push({
+    content: renderLink(finalHomepage, '点击查看'),
+    title: '主页',
+  });
+}
+
+if (finalDocUrl) {
+  vbenDescriptionItems.push({
+    content: renderLink(finalDocUrl, '点击查看'),
+    title: '文档地址',
+  });
+}
+
+if (finalPreviewUrl) {
+  vbenDescriptionItems.push({
+    content: renderLink(finalPreviewUrl, '点击查看'),
+    title: '预览地址',
+  });
+}
+
+if (finalGithubUrl) {
+  vbenDescriptionItems.push({
+    content: renderLink(finalGithubUrl, '点击查看'),
+    title: 'Github',
+  });
+}
+
+if (finalAuthorName || finalAuthorEmail) {
+  const authorLinks: ReturnType<typeof h>[] = [];
+  if (finalAuthorUrl && finalAuthorName) {
+    authorLinks.push(renderLink(finalAuthorUrl, `${finalAuthorName}  `));
+  } else if (finalAuthorName) {
+    authorLinks.push(h('span', finalAuthorName));
+  }
+  if (finalAuthorEmail) {
+    authorLinks.push(renderLink(`mailto:${finalAuthorEmail}`, finalAuthorEmail));
+  }
+  vbenDescriptionItems.push({
+    content: h('div', authorLinks),
+    title: '作者',
+  });
+}
 
 const dependenciesItems = Object.keys(dependencies).map((key) => ({
   content: dependencies[key],
@@ -115,10 +143,16 @@ const devDependenciesItems = Object.keys(devDependencies).map((key) => ({
   <Page :title="title">
     <template #description>
       <p class="mt-3 text-sm/6 text-foreground">
-        <a :href="VBEN_GITHUB_URL" class="vben-link" target="_blank">
-          {{ name }}
+        <a
+          v-if="finalGithubUrl"
+          :href="finalGithubUrl"
+          class="vben-link"
+          target="_blank"
+        >
+          {{ finalName }}
         </a>
-        {{ description }}
+        <span v-else class="font-semibold">{{ finalName }}</span>
+        {{ finalDescription }}
       </p>
     </template>
     <div class="card-box p-5">
@@ -160,6 +194,7 @@ const devDependenciesItems = Object.keys(devDependencies).map((key) => ({
         </dl>
       </div>
     </div>
+
     <div class="card-box mt-6 p-5">
       <div>
         <h5 class="text-lg text-foreground">开发环境依赖</h5>

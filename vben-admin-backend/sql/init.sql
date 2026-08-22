@@ -94,6 +94,23 @@ CREATE TABLE IF NOT EXISTS `sys_refresh_token` (
     KEY `idx_user_id` (`user_id`)
 ) ENGINE = InnoDB COMMENT = '刷新令牌表';
 
+-- ------------------------------------------------------------------------------ 通知消息表
+CREATE TABLE IF NOT EXISTS `sys_notice` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '通知ID',
+    `title`       VARCHAR(128) NOT NULL COMMENT '标题',
+    `message`     TEXT         DEFAULT NULL COMMENT '消息内容',
+    `avatar`      VARCHAR(255) DEFAULT NULL COMMENT '头像URL',
+    `link`        VARCHAR(255) DEFAULT NULL COMMENT '跳转链接',
+    `is_read`     TINYINT      NOT NULL DEFAULT 0 COMMENT '是否已读:0否/1是',
+    `user_id`     BIGINT       NOT NULL COMMENT '接收用户ID',
+    `role_id`     BIGINT       DEFAULT NULL COMMENT '目标角色ID(广播用,NULL为直接发送)',
+    `type`        VARCHAR(32)  DEFAULT 'info' COMMENT '通知类型:info/warning/success/error',
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_role_id` (`role_id`)
+) ENGINE = InnoDB COMMENT = '通知消息表';
+
 -- ==============================================================================
 -- 演示数据
 -- ==============================================================================
@@ -131,3 +148,12 @@ INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
 (1,1),(1,2),(1,3),(1,20),
 (2,1),(2,2),(2,3),(2,20),
 (3,1),(3,2),(3,3),(3,20);
+
+-- 通知消息（按用户发送演示数据）
+INSERT INTO `sys_notice` (`title`, `message`, `avatar`, `link`, `is_read`, `user_id`, `type`) VALUES
+('欢迎使用系统', '您已成功登录 Vben Admin 系统，开始您的工作吧！', 'https://avatar.vercel.sh/vercel.svg?text=VB', '/workspace', 1, 1, 'info'),
+('系统维护通知', '系统将于本周末凌晨2:00-4:00进行维护升级，请提前保存工作内容。', 'https://avatar.vercel.sh/1', NULL, 0, 1, 'warning'),
+('新功能上线', '用户管理模块已上线，支持按部门筛选和状态切换。', 'https://avatar.vercel.sh/1', '/system/user', 0, 1, 'success'),
+('欢迎使用系统', '您已成功登录 Vben Admin 系统作为管理员。', 'https://avatar.vercel.sh/vercel.svg?text=VB', '/workspace', 0, 2, 'info'),
+('权限变更通知', '您的管理员权限已更新，请重新登录以刷新权限。', 'https://avatar.vercel.sh/1', NULL, 0, 2, 'warning'),
+('欢迎使用系统', '您已成功登录 Vben Admin 系统作为普通用户。', 'https://avatar.vercel.sh/vercel.svg?text=VB', '/workspace', 0, 3, 'info');
