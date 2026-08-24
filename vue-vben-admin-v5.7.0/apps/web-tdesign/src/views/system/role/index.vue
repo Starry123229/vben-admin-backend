@@ -120,7 +120,7 @@ function onCreate() {
     <FormDrawer @success="onRefresh" />
     <Grid :table-title="'角色管理'">
       <template #toolbar-tools>
-        <Button type="primary" @click="onCreate">
+        <Button theme="primary" @click="onCreate">
           <Plus class="size-5" />
           新增角色
         </Button>

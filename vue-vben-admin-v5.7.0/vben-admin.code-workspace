@@ -1,10 +1,6 @@
 {
   "folders": [
     {
-      "name": "@vben/backend-mock",
-      "path": "apps/backend-mock"
-    },
-    {
       "name": "@vben/web-antd",
       "path": "apps/web-antd"
     },
@@ -23,10 +19,6 @@
     {
       "name": "@vben/web-tdesign",
       "path": "apps/web-tdesign"
-    },
-    {
-      "name": "@vben/docs",
-      "path": "docs"
     },
     {
       "name": "@vben/commitlint-config",
@@ -167,10 +159,6 @@
     {
       "name": "@vben/utils",
       "path": "packages/utils"
-    },
-    {
-      "name": "@vben/playground",
-      "path": "playground"
     },
     {
       "name": "@vben/turbo-run",

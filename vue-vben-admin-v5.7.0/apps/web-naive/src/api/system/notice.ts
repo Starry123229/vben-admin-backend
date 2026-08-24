@@ -39,3 +39,27 @@ export async function deleteNoticeApi(id: number | string) {
 export async function clearNoticeApi() {
   return requestClient.delete('/system/notice/clear');
 }
+
+/** 发送通知给指定用户（仅 super/admin） */
+export async function sendNoticeToUserApi(data: {
+  avatar?: string;
+  link?: string;
+  message?: string;
+  title: string;
+  type?: string;
+  userId: number;
+}) {
+  return requestClient.post<void>('/system/notice/send', data);
+}
+
+/** 按角色广播通知（仅 super/admin），返回发送人数 */
+export async function broadcastNoticeToRoleApi(data: {
+  avatar?: string;
+  link?: string;
+  message?: string;
+  roleId: number;
+  title: string;
+  type?: string;
+}) {
+  return requestClient.post<number>('/system/notice/broadcast', data);
+}

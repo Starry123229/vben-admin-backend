@@ -9,7 +9,6 @@ import { Page, useVbenDrawer } from '@vben/common-ui';
 import { IconifyIcon, Plus } from '@vben/icons';
 
 import { Button, MessagePlugin as message } from 'tdesign-vue-next';
-import { DialogPlugin } from 'tdesign-vue-next';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteMenu, getMenuList } from '#/api/system/menu';
@@ -57,7 +56,8 @@ const [Grid, gridApi] = useVbenVxeGrid({
     treeConfig: {
       parentField: 'pid',
       rowField: 'id',
-      transform: false,
+      // 后端 /system/menu/list 返回扁平列表，由 vxe-table 依据 pid/id 自动组装树形层级
+      transform: true,
     },
   } as VxeTableGridOptions,
 });
@@ -95,19 +95,6 @@ function onAppend(row: SystemMenuApi.SystemMenu) {
   formDrawerApi.setData({ pid: row.id }).open();
 }
 
-function confirm(content: string, title: string) {
-  return new Promise<boolean>((resolve, reject) => {
-    DialogPlugin.confirm({
-      header: title,
-      body: content,
-      confirmBtn: '确定',
-      cancelBtn: '取消',
-      onConfirm: () => resolve(true),
-      onClose: () => reject(new Error('已取消')),
-    });
-  });
-}
-
 function onDelete(row: SystemMenuApi.SystemMenu) {
   // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
   deleteMenu(row.id)
@@ -123,7 +110,7 @@ function onDelete(row: SystemMenuApi.SystemMenu) {
     <FormDrawer @success="onRefresh" />
     <Grid :table-title="'菜单管理'">
       <template #toolbar-tools>
-        <Button type="primary" @click="onCreate">
+        <Button theme="primary" @click="onCreate">
           <Plus class="size-5" />
           新增菜单
         </Button>

@@ -7,6 +7,8 @@ import { ProfilePasswordSetting, z } from '@vben/common-ui';
 
 import { message } from 'ant-design-vue';
 
+import { requestClient } from '#/api/request';
+
 const formSchema = computed((): VbenFormSchema[] => {
   return [
     {
@@ -50,7 +52,13 @@ const formSchema = computed((): VbenFormSchema[] => {
   ];
 });
 
-function handleSubmit() {
+/** 提交修改密码（后端校验原密码与两次输入一致性） */
+async function handleSubmit(values: Record<string, any>) {
+  await requestClient.post<void>('/user/password', {
+    confirmPassword: values.confirmPassword,
+    newPassword: values.newPassword,
+    oldPassword: values.oldPassword,
+  });
   message.success('密码修改成功');
 }
 </script>

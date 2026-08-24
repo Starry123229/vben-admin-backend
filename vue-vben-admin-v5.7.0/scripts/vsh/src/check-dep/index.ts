@@ -12,7 +12,7 @@ const knipMain = require.resolve('knip');
 const knipCli = join(dirname(knipMain), '..', 'bin', 'knip.js');
 
 const DEFAULT_CONFIG = {
-  ignore: ['dist/**', 'docs/**', 'node_modules/**', 'public/**'],
+  ignore: ['dist/**', 'node_modules/**', 'public/**'],
   ignoreBinaries: [] as string[],
   ignoreDependencies: [
     '@iconify/json',

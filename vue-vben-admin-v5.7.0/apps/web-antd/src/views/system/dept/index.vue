@@ -8,10 +8,10 @@ import type { SystemDeptApi } from '#/api/system/dept';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
-import { Button, message, Modal } from 'ant-design-vue';
+import { Button, message } from 'ant-design-vue';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteDept, getDeptList, updateDept } from '#/api/system/dept';
+import { deleteDept, getDeptList } from '#/api/system/dept';
 
 import { useDeptColumns, useDeptGridFormSchema } from './data';
 import Form from './modules/form.vue';
@@ -65,19 +65,6 @@ function onActionClick(e: OnActionClickParams<SystemDeptApi.SystemDept>) {
       break;
     }
   }
-}
-
-function confirm(content: string, title: string) {
-  return new Promise<boolean>((resolve, reject) => {
-    Modal.confirm({
-      title,
-      content,
-      okText: '确定',
-      cancelText: '取消',
-      onOk: () => resolve(true),
-      onCancel: () => reject(new Error('已取消')),
-    });
-  });
 }
 
 function onEdit(row: SystemDeptApi.SystemDept) {

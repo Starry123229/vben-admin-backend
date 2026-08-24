@@ -59,7 +59,8 @@ const [Grid, gridApi] = useVbenVxeGrid({
     treeConfig: {
       parentField: 'pid',
       rowField: 'id',
-      transform: false,
+      // 后端 /system/menu/list 返回扁平列表，由 vxe-table 依据 pid/id 自动组装树形层级
+      transform: true,
     },
   } as VxeTableGridOptions,
 });

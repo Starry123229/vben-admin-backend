@@ -23,7 +23,6 @@ export async function node(): Promise<Linter.Config[]> {
               'vitest',
               'vite',
               '@vue/test-utils',
-              '@playwright/test',
             ],
           },
         ],
@@ -50,21 +49,6 @@ export async function node(): Promise<Linter.Config[]> {
         '**/*.benchmark.?([cm])[jt]s?(x)',
       ],
       rules: {
-        'n/prefer-global/process': 'off',
-      },
-    },
-    {
-      files: ['apps/backend-mock/**/**', 'docs/**/**'],
-      rules: {
-        'n/no-extraneous-import': 'off',
-        'n/prefer-global/buffer': 'off',
-        'n/prefer-global/process': 'off',
-      },
-    },
-    {
-      files: ['**/**/playwright.config.ts'],
-      rules: {
-        'n/prefer-global/buffer': 'off',
         'n/prefer-global/process': 'off',
       },
     },

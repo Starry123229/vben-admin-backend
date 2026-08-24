@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { Recordable } from '@vben/types';
+
 import type { SystemMenuApi } from '#/api/system/menu';
 
 import { computed, nextTick, ref } from 'vue';

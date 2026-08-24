@@ -14,8 +14,6 @@ export default defineConfig({
     '.nvmrc',
     'coverage',
     'CODEOWNERS',
-    '.nitro',
-    '.output',
     '**/*.svg',
     '**/*.sh',
     'public',

@@ -6,6 +6,20 @@ spring:
   profiles:
     # 生产环境用 --spring.profiles.active=prod 覆盖
     active: dev
+  # 邮件服务（邮箱验证码/通知邮件）：vben.auth.email-mock=true 时不依赖此项；
+  # 生产改为真实 SMTP 后将 email-mock 置 false，并通过 V_BEN_MAIL_* 环境变量注入凭证。
+  mail:
+    host: ${V_BEN_MAIL_HOST:smtp.example.com}
+    port: ${V_BEN_MAIL_PORT:465}
+    username: ${V_BEN_MAIL_USERNAME:}
+    password: ${V_BEN_MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
 
 server:
   # 与前端 vite 代理目标一致：/api/** → http://localhost:8080/api/**
@@ -35,9 +49,45 @@ vben:
     cookie-secure: false
     cookie-same-site: Lax
     # 登录辅助功能：开发期 mock 可全流程联通（短信/邮箱验证码接口回显验证码）；
-    # 生产配置外部服务后改为 false 并接入真实短信/邮件/OAuth 凭证即可
-    sms-mock: true
-    email-mock: true
+    # 生产配置外部服务后改为 false 并接入真实短信/邮件/OAuth 凭证即可。
+    # 敏感凭证优先级：环境变量 > 本文件占位符；也可用 application-local.yml（已 gitignore）覆盖。
+    sms-mock: ${V_BEN_SMS_MOCK:true}
+    email-mock: ${V_BEN_EMAIL_MOCK:true}
+
+    # ------------------------------------------------------------------
+    # 第三方 OAuth 登录（qq / wechat / github / google）
+    # client-id/secret 留空时该 provider 走本地 mock 流程（前端可点通演示）；
+    # 配置真实凭证后授权跳转官方页。enabled=false 时前端应隐藏对应图标。
+    # 凭证获取：
+    #   qq     -> https://connect.qq.com（QQ互联，需备案域名）
+    #   wechat -> https://open.weixin.qq.com（微信开放平台，网站应用需企业资质）
+    #   github -> https://github.com/settings/developers（OAuth Apps，个人即可）
+    #   google -> https://console.cloud.google.com/apis/credentials（OAuth 客户端 ID）
+    # 回调地址须与平台后台登记的一致：{redirect-uri}
+    # ------------------------------------------------------------------
+    oauth:
+      qq:
+        enabled: true
+        client-id: ${V_BEN_OAUTH_QQ_CLIENT_ID:}
+        client-secret: ${V_BEN_OAUTH_QQ_CLIENT_SECRET:}
+        redirect-uri: ${V_BEN_OAUTH_QQ_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/qq}
+      wechat:
+        enabled: true
+        client-id: ${V_BEN_OAUTH_WECHAT_CLIENT_ID:}
+        client-secret: ${V_BEN_OAUTH_WECHAT_CLIENT_SECRET:}
+        redirect-uri: ${V_BEN_OAUTH_WECHAT_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/wechat}
+      github:
+        enabled: true
+        client-id: ${V_BEN_OAUTH_GITHUB_CLIENT_ID:}
+        client-secret: ${V_BEN_OAUTH_GITHUB_CLIENT_SECRET:}
+        redirect-uri: ${V_BEN_OAUTH_GITHUB_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/github}
+      google:
+        enabled: true
+        client-id: ${V_BEN_OAUTH_GOOGLE_CLIENT_ID:}
+        client-secret: ${V_BEN_OAUTH_GOOGLE_CLIENT_SECRET:}
+        redirect-uri: ${V_BEN_OAUTH_GOOGLE_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/google}
+    # 验证码邮件发件人（显示为发件地址，一般与 spring.mail.username 相同）
+    mail-from: ${V_BEN_MAIL_FROM:}
 
 # API 文档：knife4j-next（基于 springdoc-openapi 3），入口 /api/doc.html；生产环境建议关闭
 springdoc:

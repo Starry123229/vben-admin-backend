@@ -49,6 +49,9 @@ public class SysUser {
     /** 备注 */
     private String remark;
 
+    /** 个人简介 */
+    private String intro;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;

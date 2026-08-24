@@ -3,13 +3,17 @@ package com.vben.backend.module.auth.service;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.vben.backend.common.result.ServiceException;
+import com.vben.backend.config.OAuthProperties;
 import com.vben.backend.module.system.entity.SysUser;
 import com.vben.backend.module.system.entity.SysUserRole;
 import com.vben.backend.module.system.mapper.SysUserMapper;
 import com.vben.backend.module.system.mapper.SysUserRoleMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,12 +42,20 @@ public class AuthExtService {
     private final AuthService authService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final CodeStore codeStore;
+    /** 第三方 OAuth 配置（application.yml -> vben.auth.oauth.*） */
+    private final OAuthProperties oauthProperties;
+    /** 邮件发送器：spring-boot-starter-mail 自动装配；未配置 SMTP 时也不影响启动 */
+    private final ObjectProvider<JavaMailSender> mailSenderProvider;
 
     @Value("${vben.auth.sms-mock:true}")
     private boolean smsMock;
 
     @Value("${vben.auth.email-mock:true}")
     private boolean emailMock;
+
+    /** 验证码邮件发件人（一般与 spring.mail.username 相同） */
+    @Value("${vben.auth.mail-from:}")
+    private String mailFrom;
 
     /** 手机号正则（中国大陆） */
     private static final java.util.regex.Pattern PHONE_PATTERN =
@@ -172,8 +184,37 @@ public class AuthExtService {
             throw ServiceException.badRequest("该邮箱未注册");
         }
         String code = codeStore.put("reset:" + email);
-        // TODO 生产：接入 SMTP 邮件服务发送后 return null
-        return emailMock ? code : null;
+        if (emailMock) {
+            // 开发期 mock：直接回显验证码便于联调
+            return code;
+        }
+        // 真实模式：通过 spring.mail 配置的 SMTP 发送，接口不回显验证码
+        sendResetCodeEmail(email, code);
+        return null;
+    }
+
+    /** 通过 SMTP 发送重置密码验证码邮件（email-mock=false 时启用；验证码 5 分钟有效）。 */
+    private void sendResetCodeEmail(String email, String code) {
+        JavaMailSender sender = mailSenderProvider.getIfAvailable();
+        if (sender == null || !StringUtils.hasText(mailFrom)) {
+            throw new ServiceException(
+                    org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
+                    "邮件服务未配置：请检查 application.yml 的 spring.mail 与 vben.auth.mail-from");
+        }
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(mailFrom);
+            message.setTo(email);
+            message.setSubject("Vben Admin 重置密码验证码");
+            message.setText("您的验证码是：" + code + "，5 分钟内有效。若非本人操作，请忽略本邮件。");
+            sender.send(message);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceException(
+                    org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
+                    "验证码邮件发送失败：" + e.getMessage());
+        }
     }
 
     /** 校验验证码并重置密码。 */
@@ -222,7 +263,7 @@ public class AuthExtService {
             // TODO 生产：用 code 调平台接口换用户信息，绑定本地账号
             throw ServiceException.badRequest("生产 OAuth 需配置真实平台凭证后实现");
         }
-        // mock：二维码登录演示。构造/复用 provider 绑定用户
+        // mock：未配置真实凭证时的演示流程。构造/复用 provider 绑定用户
         String bindKey = "oauth_" + provider;
         SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getUsername, bindKey));
@@ -249,11 +290,19 @@ public class AuthExtService {
         userRoleMapper.insert(ur);
     }
 
+    /** 从 vben.auth.oauth.{provider}.client-id 读取；未配置返回 null（走本地 mock 流程）。 */
     private String oauthClientId(String provider) {
-        return System.getenv("V_BEN_OAUTH_" + provider.toUpperCase() + "_CLIENT_ID");
+        OAuthProperties.Provider p = oauthProperties.of(provider);
+        return p != null && StringUtils.hasText(p.getClientId())
+                ? p.getClientId()
+                : null;
     }
 
+    /** 回调地址：优先取 yml 中 vben.auth.oauth.{provider}.redirect-uri，缺省用本地地址。 */
     private String oauthRedirectUri(String provider) {
-        return "http://localhost:8080/api/auth/oauth/callback/" + provider;
+        OAuthProperties.Provider p = oauthProperties.of(provider);
+        return p != null && StringUtils.hasText(p.getRedirectUri())
+                ? p.getRedirectUri()
+                : "http://localhost:8080/api/auth/oauth/callback/" + provider;
     }
 }

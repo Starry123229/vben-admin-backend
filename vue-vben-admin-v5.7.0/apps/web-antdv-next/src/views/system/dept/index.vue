@@ -8,7 +8,7 @@ import type { SystemDeptApi } from '#/api/system/dept';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
-import { Button, message, Modal } from 'antdv-next';
+import { Button, message } from 'antdv-next';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteDept, getDeptList } from '#/api/system/dept';
@@ -65,19 +65,6 @@ function onActionClick(e: OnActionClickParams<SystemDeptApi.SystemDept>) {
       break;
     }
   }
-}
-
-function confirm(content: string, title: string) {
-  return new Promise<boolean>((resolve, reject) => {
-    Modal.confirm({
-      title,
-      content,
-      okText: '确定',
-      cancelText: '取消',
-      onOk: () => resolve(true),
-      onCancel: () => reject(new Error('已取消')),
-    });
-  });
 }
 
 function onEdit(row: SystemDeptApi.SystemDept) {

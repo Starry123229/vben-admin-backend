@@ -84,7 +84,10 @@ setupVbenVxeTable({
             { color: 'error', label: $t('common.disabled'), value: 0 },
           ];
         const tagItem = tagOptions.find((item) => item.value === value);
-        const themeMap: Record<string, string> = {
+        const themeMap: Record<
+          string,
+          'danger' | 'default' | 'primary' | 'success' | 'warning'
+        > = {
           success: 'success',
           error: 'danger',
           warning: 'warning',

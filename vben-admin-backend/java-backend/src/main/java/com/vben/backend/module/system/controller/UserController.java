@@ -3,11 +3,13 @@ package com.vben.backend.module.system.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import com.vben.backend.common.result.R;
 import com.vben.backend.module.system.dto.ChangePasswordRequest;
+import com.vben.backend.module.system.dto.ProfileUpdateRequest;
 import com.vben.backend.module.system.entity.SysUser;
 import com.vben.backend.module.system.service.SysUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,6 +37,7 @@ public class UserController {
         data.put("username", user.getUsername());
         data.put("realName", user.getRealName());
         data.put("avatar", user.getAvatar());
+        data.put("intro", user.getIntro());
         data.put("roles", userService.getRoleCodes(userId));
         data.put("homePath", user.getHomePath());
         return R.ok(data);
@@ -44,6 +47,13 @@ public class UserController {
     @PostMapping("/user/password")
     public R<Void> changePassword(@RequestBody ChangePasswordRequest req) {
         userService.changePassword(req);
+        return R.ok();
+    }
+
+    /** PUT /user/profile：当前登录用户更新基本资料（姓名/个人简介） */
+    @PutMapping("/user/profile")
+    public R<Void> updateProfile(@RequestBody ProfileUpdateRequest req) {
+        userService.updateProfile(req);
         return R.ok();
     }
 }

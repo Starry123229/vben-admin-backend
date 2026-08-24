@@ -20,7 +20,7 @@ Please delete options that are not relevant.
 
 > ℹ️ Check all checkboxes - this will indicate that you have done everything in accordance with the rules in [CONTRIBUTING](contributing.md).
 
-- [ ] If you introduce new functionality, document it. You can run documentation with `pnpm run docs:dev` command.
+- [ ] If you introduce new functionality, document it.
 - [ ] Run the tests with `pnpm test`.
 - [ ] Changes in changelog are generated from PR name. Please, make sure that it explains your changes in an understandable manner. Please, prefix changeset messages with `feat:`, `fix:`, `perf:`, `docs:`, or `chore:`.
 - [ ] My code follows the style guidelines of this project

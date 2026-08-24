@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import type { NotificationItem } from '@vben/layouts';
 
-import { computed, onMounted, ref, watch } from 'vue';
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 import { useRouter } from 'vue-router';
 
-import { AuthenticationLoginExpiredModal } from '@vben/common-ui';
+import { AuthenticationLoginExpiredModal, useVbenModal } from '@vben/common-ui';
 import { useWatermark } from '@vben/hooks';
-import { CircleHelp, SvgGithubIcon } from '@vben/icons';
 import {
   BasicLayout,
   LockScreen,
@@ -15,7 +20,6 @@ import {
 } from '@vben/layouts';
 import { preferences, usePreferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
-import { openWindow } from '@vben/utils';
 
 import { $t } from '#/locales';
 import {
@@ -48,22 +52,6 @@ const menus = computed(() => [
     icon: 'lucide:user',
     text: $t('page.auth.profile'),
   },
-  {
-    handler: () => {
-      openWindow('https://github.com/vbenjs/vue-vben-admin', {
-        target: '_blank',
-      });
-    },
-    icon: SvgGithubIcon,
-    text: 'GitHub',
-  },
-  {
-    handler: () => {
-      router.push({ name: 'VbenAbout' });
-    },
-    icon: CircleHelp,
-    text: '关于',
-  },
 ]);
 
 const avatar = computed(() => {
@@ -74,14 +62,34 @@ async function handleLogout() {
   await authStore.logout(false);
 }
 
-/** 加载通知列表 */
+/** 轮询间隔(ms):登录期间检测新到达的通知并自动弹窗提醒 */
+const NOTICE_POLL_INTERVAL = 30 * 1000;
+let noticePollTimer: ReturnType<typeof setInterval> | undefined;
+/** 首次加载完成标记:首次加载不触发自动弹窗 */
+let noticesInitialized = false;
+
+/** 加载/刷新通知列表 */
 async function loadNotifications() {
   try {
     const list = await getNoticeListApi();
-    notifications.value = list.map((item) => ({
+    const previousIds = new Set(notifications.value.map((item) => item.id));
+    const mapped = list.map((item) => ({
       ...item,
+      avatar: item.avatar || preferences.app.defaultAvatar,
       isRead: !!item.isRead,
     })) as NotificationItem[];
+    notifications.value = mapped;
+
+    // 登录期间新到达的未读消息：自动弹出详情提醒（打开即标记已读）
+    if (noticesInitialized) {
+      const fresh = mapped.find(
+        (item) => !item.isRead && !previousIds.has(item.id),
+      );
+      if (fresh) {
+        openDetail(fresh);
+      }
+    }
+    noticesInitialized = true;
   } catch (error) {
     console.error('加载通知失败:', error);
     notifications.value = [];
@@ -133,12 +141,33 @@ async function handleMakeAll() {
   }
 }
 
-const viewAll = () => {};
+/** 消息详情弹窗（打开即视为已读） */
+const [DetailModal, detailModalApi] = useVbenModal({ footer: false });
 
-const handleClick = (item: NotificationItem) => {
-  if (item.link) {
-    navigateTo(item.link, item.query, item.state);
+/** 全部消息列表弹窗 */
+const [ListModal, listModalApi] = useVbenModal({ footer: false });
+
+/** 当前查看的消息 */
+const activeNotice = ref<NotificationItem>();
+
+/** 打开消息详情弹窗，并标记为已读 */
+function openDetail(item: NotificationItem) {
+  activeNotice.value = item;
+  detailModalApi.setState({ title: item.title });
+  detailModalApi.open();
+  if (!item.isRead && item.id != null) {
+    markRead(item.id);
   }
+}
+
+/** 点击铃铛下拉中的单条消息：弹出详情 */
+const handleClick = (item: NotificationItem) => {
+  openDetail(item);
+};
+
+/** 「查看所有」：打开全部消息列表 */
+const viewAll = () => {
+  listModalApi.open();
 };
 
 function navigateTo(
@@ -159,6 +188,15 @@ function navigateTo(
 
 onMounted(() => {
   loadNotifications();
+  noticePollTimer = setInterval(() => {
+    loadNotifications();
+  }, NOTICE_POLL_INTERVAL);
+});
+
+onBeforeUnmount(() => {
+  if (noticePollTimer) {
+    clearInterval(noticePollTimer);
+  }
 });
 
 watch(
@@ -222,7 +260,7 @@ watch(
         @read="(item) => item.id && markRead(item.id)"
         @remove="(item) => item.id && remove(item.id)"
         @make-all="handleMakeAll"
-        @on-click="handleClick"
+        @click="handleClick"
         @view-all="viewAll"
       />
     </template>
@@ -233,6 +271,80 @@ watch(
       >
         <LoginForm />
       </AuthenticationLoginExpiredModal>
+
+      <!-- 消息详情弹窗 -->
+      <DetailModal class="w-[480px]" title="消息详情">
+        <div v-if="activeNotice" class="flex flex-col gap-3">
+          <div class="flex items-center gap-3">
+            <img
+              :src="activeNotice.avatar"
+              alt=""
+              class="size-10 rounded-full object-cover"
+            />
+            <div>
+              <p class="font-semibold">{{ activeNotice.title }}</p>
+              <p class="text-muted-foreground text-xs">
+                {{ activeNotice.date }}
+              </p>
+            </div>
+          </div>
+          <p class="whitespace-pre-wrap text-sm leading-6">
+            {{ activeNotice.message }}
+          </p>
+          <div v-if="activeNotice.link" class="text-right">
+            <a
+              class="text-primary cursor-pointer text-sm"
+              @click="
+                () => {
+                  detailModalApi.close();
+                  navigateTo(
+                    activeNotice?.link ?? '',
+                    activeNotice?.query,
+                    activeNotice?.state,
+                  );
+                }
+              "
+            >
+              前往查看 →
+            </a>
+          </div>
+        </div>
+      </DetailModal>
+
+      <!-- 全部通知消息列表弹窗 -->
+      <ListModal class="w-[520px]" title="全部通知消息">
+        <ul class="flex max-h-[400px] flex-col overflow-y-auto">
+          <li
+            v-for="item in notifications"
+            :key="item.id ?? item.title"
+            class="hover:bg-accent border-border relative flex cursor-pointer items-start gap-3 border-b p-3 last:border-b-0"
+            @click="openDetail(item)"
+          >
+            <span
+              v-if="!item.isRead"
+              class="bg-primary absolute top-2 right-2 size-2 rounded-sm"
+            ></span>
+            <img
+              :src="item.avatar"
+              alt=""
+              class="size-9 shrink-0 rounded-full object-cover"
+            />
+            <div class="min-w-0 flex-1">
+              <p class="truncate font-semibold">{{ item.title }}</p>
+              <p class="text-muted-foreground my-1 line-clamp-2 text-xs">
+                {{ item.message }}
+              </p>
+              <p class="text-muted-foreground text-xs">{{ item.date }}</p>
+            </div>
+          </li>
+          <li
+            v-if="notifications.length === 0"
+            class="text-muted-foreground p-6 text-center text-sm"
+          >
+            暂无通知消息
+          </li>
+        </ul>
+      </ListModal>
     </template>
     <template #lock-screen>
       <LockScreen :avatar @to-login="handleLogout" />

@@ -15,13 +15,18 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
     `real_name`     VARCHAR(64)  DEFAULT NULL COMMENT '真实姓名',
     `avatar`        VARCHAR(255) DEFAULT NULL COMMENT '头像URL',
     `home_path`     VARCHAR(255) DEFAULT NULL COMMENT '登录后首页路径',
+    `phone`         VARCHAR(32)  DEFAULT NULL COMMENT '手机号(手机号登录用)',
+    `email`         VARCHAR(128) DEFAULT NULL COMMENT '邮箱(忘记密码用)',
     `dept_id`       BIGINT       DEFAULT NULL COMMENT '部门ID',
     `status`        TINYINT      NOT NULL DEFAULT 1 COMMENT '状态:0停用/1启用',
     `remark`        VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `intro`         VARCHAR(500) DEFAULT NULL COMMENT '个人简介',
     `create_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_username` (`username`)
+    UNIQUE KEY `uk_username` (`username`),
+    UNIQUE KEY `uk_phone` (`phone`),
+    UNIQUE KEY `uk_email` (`email`)
 ) ENGINE = InnoDB COMMENT = '用户表';
 
 -- ------------------------------------------------------------------------------ 角色表
@@ -130,24 +135,32 @@ INSERT INTO `sys_user` (`id`, `username`, `password_hash`, `real_name`, `home_pa
 INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 (1, 1), (2, 2), (3, 3);
 
--- 菜单（与前端实际视图对齐：仅保留各 app 通用存在的 Dashboard / About。
--- 原 Vben 完整模板的 Demos/Access 权限演示页在轻量版 apps/* 中不存在对应 .vue，会被前端回退成 404，故移除）
+-- 菜单（与前端实际视图对齐：各 app 通用的 Dashboard / About + 系统管理目录
+-- （用户/角色/部门/菜单管理）+ 通知管理。组件路径对应 src/views/**/index.vue）
 INSERT INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `redirect`, `status`, `sort`, `meta`) VALUES
-(1,  0,  'Dashboard',               'catalog', '/dashboard',                NULL,                          '/analytics',                 1, 0, '{"order":-1,"title":"page.dashboard.title"}'),
-(2,  1,  'Analytics',               'menu',    '/analytics',                '/dashboard/analytics/index',  NULL,                         1, 0, '{"affixTab":true,"title":"page.dashboard.analytics"}'),
-(3,  1,  'Workspace',               'menu',    '/workspace',                '/dashboard/workspace/index',  NULL,                         1, 1, '{"title":"page.dashboard.workspace"}'),
-(20, 0,  'About',                   'menu',    '/about',                    '_core/about/index',           NULL,                         1, 2, '{"icon":"lucide:copyright","order":9999,"title":"demos.vben.about"}');
+(1,   0,   'Dashboard',               'catalog', '/dashboard',                NULL,                          '/analytics',                 1, 0, '{"order":-1,"title":"page.dashboard.title"}'),
+(2,   1,   'Analytics',               'menu',    '/analytics',                '/dashboard/analytics/index',  NULL,                         1, 0, '{"affixTab":true,"title":"page.dashboard.analytics"}'),
+(3,   1,   'Workspace',               'menu',    '/workspace',                '/dashboard/workspace/index',  NULL,                         1, 1, '{"title":"page.dashboard.workspace"}'),
+(20,  0,   'About',                   'menu',    '/about',                    '_core/about/index',           NULL,                         1, 2, '{"icon":"lucide:copyright","order":9999,"title":"demos.vben.about"}'),
+(100, 0,   'System',                  'catalog', '/system',                   NULL,                          NULL,                         1, 1, '{"icon":"lucide:settings","order":1,"title":"系统管理"}'),
+(101, 100, 'SystemUser',              'menu',    '/user',                     '/system/user/index',          NULL,                         1, 0, '{"icon":"lucide:user","order":0,"title":"用户管理"}'),
+(102, 100, 'SystemRole',              'menu',    '/role',                     '/system/role/index',          NULL,                         1, 1, '{"icon":"lucide:users","order":1,"title":"角色管理"}'),
+(103, 100, 'SystemDept',              'menu',    '/dept',                     '/system/dept/index',          NULL,                         1, 2, '{"icon":"lucide:building-2","order":2,"title":"部门管理"}'),
+(104, 100, 'SystemMenu',              'menu',    '/menu',                     '/system/menu/index',          NULL,                         1, 3, '{"icon":"lucide:menu","order":3,"title":"菜单管理"}'),
+(105, 100, 'Notice',                  'menu',    '/notice',                   '/system/notice/index',        NULL,                         1, 10, '{"icon":"lucide:bell","order":10,"title":"通知管理"}');
 
--- button 型权限码节点：原 Access 演示按钮（pid=12 的演示页）已随 Demos 一并移除；
--- 业务按钮权限码请在自己的后台管理（/system/menu）中维护，对应 GET /auth/codes。
+-- button 型权限码节点：业务按钮权限码请在自己的后台管理（/system/menu）中维护，对应 GET /auth/codes。
 
 -- 授权关系（super: 全部权限码；admin: AC_100010/20/30；user: AC_1000001/02，对齐 mock）
--- 14 号「菜单可见但 403」演示节点授权给全部角色：mock 对三角色均返回，由前端 authority:['no-body'] 过滤
+-- 系统管理与通知管理仅授权给超级管理员(1)与管理员(2)；普通用户(3)不授权（接口层另有角色校验双保险）
 INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
 -- 公共菜单：三角色一致（Dashboard 目录 + Analytics + Workspace + About）
 (1,1),(1,2),(1,3),(1,20),
 (2,1),(2,2),(2,3),(2,20),
-(3,1),(3,2),(3,3),(3,20);
+(3,1),(3,2),(3,3),(3,20),
+-- 系统管理 + 通知管理：super / admin
+(1,100),(1,101),(1,102),(1,103),(1,104),(1,105),
+(2,100),(2,101),(2,102),(2,103),(2,104),(2,105);
 
 -- 通知消息（按用户发送演示数据）
 INSERT INTO `sys_notice` (`title`, `message`, `avatar`, `link`, `is_read`, `user_id`, `type`) VALUES

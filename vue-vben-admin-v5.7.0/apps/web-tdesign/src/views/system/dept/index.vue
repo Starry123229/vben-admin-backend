@@ -9,7 +9,6 @@ import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
 import { Button, MessagePlugin as message } from 'tdesign-vue-next';
-import { DialogPlugin } from 'tdesign-vue-next';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteDept, getDeptList } from '#/api/system/dept';
@@ -68,19 +67,6 @@ function onActionClick(e: OnActionClickParams<SystemDeptApi.SystemDept>) {
   }
 }
 
-function confirm(content: string, title: string) {
-  return new Promise<boolean>((resolve, reject) => {
-    DialogPlugin.confirm({
-      header: title,
-      body: content,
-      confirmBtn: '确定',
-      cancelBtn: '取消',
-      onConfirm: () => resolve(true),
-      onClose: () => reject(new Error('已取消')),
-    });
-  });
-}
-
 function onEdit(row: SystemDeptApi.SystemDept) {
   formDrawerApi.setData(row).open();
 }
@@ -108,7 +94,7 @@ function onCreate() {
     <FormDrawer @success="onRefresh" />
     <Grid :table-title="'部门管理'">
       <template #toolbar-tools>
-        <Button type="primary" @click="onCreate">
+        <Button theme="primary" @click="onCreate">
           <Plus class="size-5" />
           新增部门
         </Button>

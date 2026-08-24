@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vben.backend.common.result.PageResult;
 import com.vben.backend.common.result.ServiceException;
 import com.vben.backend.module.system.dto.ChangePasswordRequest;
+import com.vben.backend.module.system.dto.ProfileUpdateRequest;
 import com.vben.backend.module.system.dto.UserItemVO;
 import com.vben.backend.module.system.dto.UserSaveRequest;
 import com.vben.backend.module.system.entity.SysRole;
@@ -155,6 +156,22 @@ public class SysUserService {
         }
         userRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, id));
         userMapper.deleteById(id);
+    }
+
+    /** 当前用户更新自己的资料（个人中心-基本设置：姓名/简介） */
+    public void updateProfile(ProfileUpdateRequest req) {
+        long loginId = StpUtil.getLoginIdAsLong();
+        SysUser user = userMapper.selectById(loginId);
+        if (user == null) {
+            throw ServiceException.badRequest("用户不存在");
+        }
+        if (StringUtils.hasText(req.getRealName())) {
+            user.setRealName(req.getRealName());
+        }
+        // intro 允许清空（传空串视为清空）
+        user.setIntro(req.getIntro());
+        user.setUpdateTime(LocalDateTime.now());
+        userMapper.updateById(user);
     }
 
     /** 当前用户修改自己的密码 */

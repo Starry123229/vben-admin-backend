@@ -8,7 +8,7 @@ import type { SystemMenuApi } from '#/api/system/menu';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { IconifyIcon, Plus } from '@vben/icons';
 
-import { Button, message, Modal } from 'antdv-next';
+import { Button, message } from 'antdv-next';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteMenu, getMenuList } from '#/api/system/menu';
@@ -56,7 +56,8 @@ const [Grid, gridApi] = useVbenVxeGrid({
     treeConfig: {
       parentField: 'pid',
       rowField: 'id',
-      transform: false,
+      // 后端 /system/menu/list 返回扁平列表，由 vxe-table 依据 pid/id 自动组装树形层级
+      transform: true,
     },
   } as VxeTableGridOptions,
 });
@@ -92,19 +93,6 @@ function onCreate() {
 }
 function onAppend(row: SystemMenuApi.SystemMenu) {
   formDrawerApi.setData({ pid: row.id }).open();
-}
-
-function confirm(content: string, title: string) {
-  return new Promise<boolean>((resolve, reject) => {
-    Modal.confirm({
-      title,
-      content,
-      okText: '确定',
-      cancelText: '取消',
-      onOk: () => resolve(true),
-      onCancel: () => reject(new Error('已取消')),
-    });
-  });
 }
 
 function onDelete(row: SystemMenuApi.SystemMenu) {

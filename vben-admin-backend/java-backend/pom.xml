@@ -44,6 +44,12 @@
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
 
+    <!-- 邮件服务（邮箱验证码发送，配置见 application.yml spring.mail） -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+
     <!-- MyBatis-Plus（Boot 4 专用 starter，3.5.13 起官方提供） -->
     <dependency>
       <groupId>com.baomidou</groupId>

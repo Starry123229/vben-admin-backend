@@ -29,12 +29,11 @@
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=8192 turbo build",
     "build:analyze": "turbo build:analyze",
     "build:antd": "pnpm run build --filter=@vben/web-antd",
+    "build:antdv-next": "pnpm run build --filter=@vben/web-antdv-next",
     "build:docker": "./scripts/deploy/build-local-docker-image.sh",
-    "build:docs": "pnpm run build --filter=@vben/docs",
     "build:ele": "pnpm run build --filter=@vben/web-ele",
     "build:naive": "pnpm run build --filter=@vben/web-naive",
     "build:tdesign": "pnpm run build --filter=@vben/web-tdesign",
-    "build:play": "pnpm run build --filter=@vben/playground",
     "changeset": "pnpm exec changeset",
     "check": "pnpm run check:circular && pnpm run check:dep && pnpm run check:type && pnpm check:cspell",
     "check:circular": "vsh check-circular",
@@ -46,11 +45,9 @@
     "dev": "turbo-run dev",
     "dev:antd": "pnpm -F @vben/web-antd run dev",
     "dev:antdv-next": "pnpm -F @vben/web-antdv-next run dev",
-    "dev:docs": "pnpm -F @vben/docs run dev",
     "dev:ele": "pnpm -F @vben/web-ele run dev",
     "dev:naive": "pnpm -F @vben/web-naive run dev",
     "dev:tdesign": "pnpm -F @vben/web-tdesign run dev",
-    "dev:play": "pnpm -F @vben/playground run dev",
     "format": "vsh lint --format",
     "lint": "vsh lint",
     "postinstall": "pnpm -r run stub --if-present",
@@ -90,7 +87,6 @@
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
-    "playwright": "catalog:",
     "rimraf": "catalog:",
     "tailwindcss": "catalog:",
     "tsdown": "catalog:",
@@ -105,5 +101,5 @@
     "node": "^22.18.0 || ^24.0.0",
     "pnpm": ">=10.0.0"
   },
-  "packageManager": "pnpm@10.33.4"
+  "packageManager": "pnpm@11.23.0+sha512.f00082e5b283a199b74e079da28d155c008fe232f44c8a06ea7ddfa014ecf719fc362f790ecc67b28106ddac2afb24c49a9a079159da560b2ce7d1e98efd11af"
 }

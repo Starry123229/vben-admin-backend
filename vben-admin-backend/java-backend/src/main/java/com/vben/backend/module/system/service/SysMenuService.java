@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.vben.backend.common.result.ServiceException;
 import com.vben.backend.module.system.dto.MenuSaveRequest;
 import com.vben.backend.module.system.entity.SysMenu;
+import com.vben.backend.module.system.entity.SysRole;
 import com.vben.backend.module.system.entity.SysRoleMenu;
 import com.vben.backend.module.system.entity.SysUserRole;
 import com.vben.backend.module.system.mapper.SysMenuMapper;
+import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysRoleMenuMapper;
 import com.vben.backend.module.system.mapper.SysUserRoleMapper;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class SysMenuService {
     private final SysMenuMapper menuMapper;
     private final SysUserRoleMapper userRoleMapper;
     private final SysRoleMenuMapper roleMenuMapper;
+    private final SysRoleMapper roleMapper;
     private final ObjectMapper objectMapper;
 
     /**
@@ -47,6 +50,16 @@ public class SysMenuService {
                 .map(SysUserRole::getRoleId).toList();
         if (roleIds.isEmpty()) {
             return List.of();
+        }
+        // 超级管理员拥有全部权限：直接返回所有启用的非 button 菜单（契约 §3.6）
+        List<SysRole> roles = roleMapper.selectList(new LambdaQueryWrapper<SysRole>()
+                .in(SysRole::getId, roleIds)
+                .eq(SysRole::getStatus, 1));
+        boolean isSuper = roles.stream().anyMatch(r -> "super".equals(r.getCode()));
+        if (isSuper) {
+            return buildTree(0L, menuMapper.selectList(new LambdaQueryWrapper<SysMenu>()
+                    .ne(SysMenu::getType, "button")
+                    .eq(SysMenu::getStatus, 1)));
         }
         List<Long> menuIds = roleMenuMapper.selectList(new LambdaQueryWrapper<SysRoleMenu>()
                         .in(SysRoleMenu::getRoleId, roleIds)).stream()

@@ -181,7 +181,7 @@ onMounted(async () => {
       <div class="w-5/6 pl-4">
         <Grid :table-title="'用户管理'">
           <template #toolbar-tools>
-            <Button type="primary" @click="onCreate">
+            <Button theme="primary" @click="onCreate">
               <Plus class="size-5" />
               新增用户
             </Button>

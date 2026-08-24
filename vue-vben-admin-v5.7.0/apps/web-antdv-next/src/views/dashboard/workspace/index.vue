@@ -159,15 +159,15 @@ onMounted(async () => {
       .filter((n) => !n.isRead)
       .map((n) => ({
         completed: false,
-        content: n.message,
-        date: n.date,
+        content: n.message ?? '',
+        date: n.date ?? '',
         title: n.title,
       }));
     // 所有通知 → 最新动态
     trendItems.value = notices.map((n) => ({
       avatar: n.avatar || 'svg:avatar-1',
-      content: n.message,
-      date: n.date,
+      content: n.message ?? '',
+      date: n.date ?? '',
       title: n.title,
     }));
   } catch (error) {
