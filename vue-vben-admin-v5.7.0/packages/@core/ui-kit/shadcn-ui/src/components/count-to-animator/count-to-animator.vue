@@ -50,14 +50,27 @@ const emit = defineEmits<{
   started: [];
 }>();
 
-const source = ref(props.startVal);
+const source = ref(Number(props.startVal) || 0);
 const disabled = ref(false);
-let outputValue = useTransition(source);
 
-const value = computed(() => formatNumber(unref(outputValue)));
+const outputValue = useTransition(source, {
+  disabled,
+  duration: computed(() => props.duration),
+  onFinished: () => {
+    emit('finished');
+    emit('onFinished');
+  },
+  onStarted: () => {
+    emit('started');
+    emit('onStarted');
+  },
+  transition: TransitionPresets[props.transition],
+});
+
+const value = computed(() => formatNumber(unref(outputValue) as number));
 
 watchEffect(() => {
-  source.value = props.startVal;
+  source.value = Number(props.startVal) || 0;
 });
 
 watch([() => props.startVal, () => props.endVal], () => {
@@ -71,31 +84,12 @@ onMounted(() => {
 });
 
 function start() {
-  run();
-  source.value = props.endVal;
+  source.value = Number(props.endVal) || 0;
 }
 
 function reset() {
-  source.value = props.startVal;
-  run();
-}
-
-function run() {
-  outputValue = useTransition(source, {
-    disabled,
-    duration: props.duration,
-    onFinished: () => {
-      emit('finished');
-      emit('onFinished');
-    },
-    onStarted: () => {
-      emit('started');
-      emit('onStarted');
-    },
-    ...(props.useEasing
-      ? { transition: TransitionPresets[props.transition] }
-      : {}),
-  });
+  source.value = Number(props.startVal) || 0;
+  source.value = Number(props.endVal) || 0;
 }
 
 function formatNumber(num: number | string) {

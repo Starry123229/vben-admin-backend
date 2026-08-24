@@ -66,7 +66,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
         }
       }
       await nextTick();
-      if (data) {
+      if (data?.id) {
         formApi.setValues(data);
         try {
           const menus = await getRoleMenus(data.id);

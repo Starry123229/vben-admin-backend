@@ -47,7 +47,7 @@ const showDot = computed(() =>
 const menus = computed(() => [
   {
     handler: () => {
-      router.push({ name: 'Profile' });
+      router.push('/profile');
     },
     icon: 'lucide:user',
     text: $t('page.auth.profile'),
