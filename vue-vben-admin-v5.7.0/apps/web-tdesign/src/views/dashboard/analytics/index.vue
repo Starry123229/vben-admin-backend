@@ -92,35 +92,44 @@ onMounted(async () => {
         icon: SvgCardIcon,
         title: '用户量',
         totalTitle: '总用户量',
-        totalValue: overview.totalUsers,
-        value: overview.activeUsers,
+        totalValue: Number(overview.totalUsers) || 0,
+        value: Number(overview.activeUsers) || 0,
       },
       {
         icon: SvgCakeIcon,
         title: '访问量',
         totalTitle: '总角色数',
-        totalValue: overview.totalRoles,
-        value: overview.totalRoles,
+        totalValue: Number(overview.totalRoles) || 0,
+        value: Number(overview.totalRoles) || 0,
       },
       {
         icon: SvgDownloadIcon,
         title: '部门数',
         totalTitle: '总部门数',
-        totalValue: overview.totalDepts,
-        value: overview.totalDepts,
+        totalValue: Number(overview.totalDepts) || 0,
+        value: Number(overview.totalDepts) || 0,
       },
       {
         icon: SvgBellIcon,
         title: '菜单数',
         totalTitle: '总菜单数',
-        totalValue: overview.totalMenus,
-        value: overview.totalMenus,
+        totalValue: Number(overview.totalMenus) || 0,
+        value: Number(overview.totalMenus) || 0,
       },
     ];
 
-    trendData.value = trends;
-    roleData.value = roles;
-    deptData.value = depts;
+    trendData.value = trends.map((item) => ({
+      month: item.month,
+      count: Number(item.count) || 0,
+    }));
+    roleData.value = roles.map((item) => ({
+      name: item.name,
+      value: Number(item.value) || 0,
+    }));
+    deptData.value = depts.map((item) => ({
+      name: item.name,
+      value: Number(item.value) || 0,
+    }));
   } catch (error) {
     console.error('加载仪表盘数据失败:', error);
   }

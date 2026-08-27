@@ -142,22 +142,23 @@ INSERT INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `redir
 (2,   1,   'Analytics',               'menu',    '/analytics',                '/dashboard/analytics/index',  NULL,                         1, 0, '{"affixTab":true,"title":"page.dashboard.analytics"}'),
 (3,   1,   'Workspace',               'menu',    '/workspace',                '/dashboard/workspace/index',  NULL,                         1, 1, '{"title":"page.dashboard.workspace"}'),
 (20,  0,   'About',                   'menu',    '/about',                    '_core/about/index',           NULL,                         1, 2, '{"icon":"lucide:copyright","order":9999,"title":"demos.vben.about"}'),
-(100, 0,   'System',                  'catalog', '/system',                   NULL,                          NULL,                         1, 1, '{"icon":"lucide:settings","order":1,"title":"系统管理"}'),
-(101, 100, 'SystemUser',              'menu',    '/user',                     '/system/user/index',          NULL,                         1, 0, '{"icon":"lucide:user","order":0,"title":"用户管理"}'),
-(102, 100, 'SystemRole',              'menu',    '/role',                     '/system/role/index',          NULL,                         1, 1, '{"icon":"lucide:users","order":1,"title":"角色管理"}'),
-(103, 100, 'SystemDept',              'menu',    '/dept',                     '/system/dept/index',          NULL,                         1, 2, '{"icon":"lucide:building-2","order":2,"title":"部门管理"}'),
-(104, 100, 'SystemMenu',              'menu',    '/menu',                     '/system/menu/index',          NULL,                         1, 3, '{"icon":"lucide:menu","order":3,"title":"菜单管理"}'),
-(105, 100, 'Notice',                  'menu',    '/notice',                   '/system/notice/index',        NULL,                         1, 10, '{"icon":"lucide:bell","order":10,"title":"通知管理"}');
+(21,  0,   'Profile',                 'menu',    '/profile',                  '_core/profile/index',          NULL,                         1, 3, '{"hideInMenu":true,"icon":"lucide:user","title":"page.auth.profile"}'),
+(100, 0,   'System',                  'catalog', '/system',                   NULL,                          '/system/user',               1, 1, '{"icon":"lucide:settings","order":1,"title":"系统管理"}'),
+(101, 100, 'SystemUser',              'menu',    'user',                      '/system/user/index',          NULL,                         1, 0, '{"icon":"lucide:user","order":0,"title":"用户管理"}'),
+(102, 100, 'SystemRole',              'menu',    'role',                      '/system/role/index',          NULL,                         1, 1, '{"icon":"lucide:users","order":1,"title":"角色管理"}'),
+(103, 100, 'SystemDept',              'menu',    'dept',                      '/system/dept/index',          NULL,                         1, 2, '{"icon":"lucide:building-2","order":2,"title":"部门管理"}'),
+(104, 100, 'SystemMenu',              'menu',    'menu',                      '/system/menu/index',          NULL,                         1, 3, '{"icon":"lucide:menu","order":3,"title":"菜单管理"}'),
+(105, 100, 'Notice',                  'menu',    'notice',                    '/system/notice/index',        NULL,                         1, 10, '{"icon":"lucide:bell","order":10,"title":"通知管理"}');
 
 -- button 型权限码节点：业务按钮权限码请在自己的后台管理（/system/menu）中维护，对应 GET /auth/codes。
 
 -- 授权关系（super: 全部权限码；admin: AC_100010/20/30；user: AC_1000001/02，对齐 mock）
 -- 系统管理与通知管理仅授权给超级管理员(1)与管理员(2)；普通用户(3)不授权（接口层另有角色校验双保险）
 INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
--- 公共菜单：三角色一致（Dashboard 目录 + Analytics + Workspace + About）
-(1,1),(1,2),(1,3),(1,20),
-(2,1),(2,2),(2,3),(2,20),
-(3,1),(3,2),(3,3),(3,20),
+-- 公共菜单：三角色一致（Dashboard 目录 + Analytics + Workspace + About + Profile）
+(1,1),(1,2),(1,3),(1,20),(1,21),
+(2,1),(2,2),(2,3),(2,20),(2,21),
+(3,1),(3,2),(3,3),(3,20),(3,21),
 -- 系统管理 + 通知管理：super / admin
 (1,100),(1,101),(1,102),(1,103),(1,104),(1,105),
 (2,100),(2,101),(2,102),(2,103),(2,104),(2,105);

@@ -21,7 +21,7 @@ import { preferences } from '@vben/preferences';
 import { useUserStore } from '@vben/stores';
 import { openWindow } from '@vben/utils';
 
-import { getWorkspaceApi } from '#/api/system/dashboard';
+import { getDeptDistributionApi, getWorkspaceApi } from '#/api/system/dashboard';
 import { getNoticeListApi } from '#/api/system/notice';
 
 import AnalyticsVisitsSource from '../analytics/analytics-visits-source.vue';
@@ -105,7 +105,13 @@ function navTo(nav: WorkbenchProjectItem | WorkbenchQuickNavItem) {
 
 onMounted(async () => {
   try {
-    const data = await getWorkspaceApi();
+    const rawData = await getWorkspaceApi();
+    const data = {
+      totalUsers: Number(rawData.totalUsers) || 0,
+      totalRoles: Number(rawData.totalRoles) || 0,
+      totalDepts: Number(rawData.totalDepts) || 0,
+      totalMenus: Number(rawData.totalMenus) || 0,
+    };
     workspaceStats.value = data;
 
     // 使用统计数据构建项目卡片
@@ -149,6 +155,17 @@ onMounted(async () => {
     ];
   } catch (error) {
     console.error('加载工作台数据失败:', error);
+  }
+
+  // 加载部门用户分布数据
+  try {
+    const raw = await getDeptDistributionApi();
+    deptData.value = raw.map((item) => ({
+      name: item.name,
+      value: Number(item.value) || 0,
+    }));
+  } catch (error) {
+    console.error('加载部门分布数据失败:', error);
   }
 
   // 加载通知消息作为待办和动态
