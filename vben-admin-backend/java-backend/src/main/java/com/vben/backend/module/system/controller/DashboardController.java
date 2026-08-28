@@ -43,10 +43,4 @@ public class DashboardController {
     public R<java.util.List<java.util.Map<String, Object>>> deptDistribution() {
         return R.ok(dashboardService.deptDistribution());
     }
-
-    /** GET /dashboard/workspace：工作台数据 */
-    @GetMapping("/workspace")
-    public R<java.util.Map<String, Object>> workspace() {
-        return R.ok(dashboardService.workspace());
-    }
 }

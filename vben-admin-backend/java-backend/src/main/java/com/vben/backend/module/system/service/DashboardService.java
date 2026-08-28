@@ -108,19 +108,4 @@ public class DashboardService {
             return item;
         }).toList();
     }
-
-    /**
-     * 工作台数据：当前用户信息 + 快捷导航 + 待办事项 + 最新动态。
-     */
-    public Map<String, Object> workspace() {
-        Map<String, Object> data = new HashMap<>();
-
-        // 统计数据
-        data.put("totalUsers", userMapper.selectCount(null));
-        data.put("totalRoles", roleMapper.selectCount(null));
-        data.put("totalDepts", deptMapper.selectCount(null));
-        data.put("totalMenus", menuMapper.selectCount(null));
-
-        return data;
-    }
 }

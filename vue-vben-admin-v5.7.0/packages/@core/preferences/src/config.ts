@@ -15,11 +15,10 @@ const defaultPreferences: Preferences = {
     contentPaddingLeft: 0,
     contentPaddingRight: 0,
     contentPaddingTop: 0,
-    defaultAvatar:
-      'https://unpkg.com/@vbenjs/static-source@0.1.7/source/avatar-v1.webp',
+    defaultAvatar: '',
     defaultHomePath: '/analytics',
     dynamicTitle: true,
-    enableCheckUpdates: true,
+    enableCheckUpdates: false,
     enableCopyPreferences: true,
     enablePreferences: true,
     enableRefreshToken: false,
@@ -67,7 +66,7 @@ const defaultPreferences: Preferences = {
   logo: {
     enable: true,
     fit: 'contain',
-    source: 'https://unpkg.com/@vbenjs/static-source@0.1.7/source/logo-v1.webp',
+    source: '',
   },
   navigation: {
     accordion: true,

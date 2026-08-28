@@ -19,13 +19,6 @@ export namespace DashboardApi {
     name: string;
     value: number;
   }
-
-  export interface WorkspaceData {
-    totalUsers: number;
-    totalRoles: number;
-    totalDepts: number;
-    totalMenus: number;
-  }
 }
 
 /** 概览统计 */
@@ -50,9 +43,4 @@ export async function getDeptDistributionApi() {
   return requestClient.get<DashboardApi.DistributionItem[]>(
     '/dashboard/dept-distribution',
   );
-}
-
-/** 工作台数据 */
-export async function getWorkspaceApi() {
-  return requestClient.get<DashboardApi.WorkspaceData>('/dashboard/workspace');
 }
