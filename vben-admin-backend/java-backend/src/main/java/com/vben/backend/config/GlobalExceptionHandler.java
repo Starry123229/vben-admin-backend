@@ -1,6 +1,8 @@
 package com.vben.backend.config;
 
 import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotPermissionException;
+import cn.dev33.satoken.exception.NotRoleException;
 import com.vben.backend.common.result.R;
 import com.vben.backend.common.result.ServiceException;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotLoginException.class)
     public ResponseEntity<R<Void>> handleNotLogin(NotLoginException e) {
         return ResponseEntity.status(401).body(R.fail("Unauthorized Exception"));
+    }
+
+    /** Sa-Token 无角色：403 */
+    @ExceptionHandler(NotRoleException.class)
+    public ResponseEntity<R<Void>> handleNotRole(NotRoleException e) {
+        return ResponseEntity.status(403).body(R.fail("无权限执行此操作"));
+    }
+
+    /** Sa-Token 无权限点：403 */
+    @ExceptionHandler(NotPermissionException.class)
+    public ResponseEntity<R<Void>> handleNotPermission(NotPermissionException e) {
+        return ResponseEntity.status(403).body(R.fail("无权限执行此操作"));
     }
 
     /** 参数校验失败：400 + 首条校验消息 */
