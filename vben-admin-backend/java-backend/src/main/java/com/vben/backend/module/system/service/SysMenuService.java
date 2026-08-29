@@ -95,6 +95,7 @@ public class SysMenuService {
         if (!StringUtils.hasText(req.getType())) {
             throw ServiceException.badRequest("菜单类型不能为空");
         }
+        checkUnique(req.getName(), req.getPath(), null);
         SysMenu menu = toEntity(req, null);
         menu.setCreateTime(LocalDateTime.now());
         menu.setUpdateTime(LocalDateTime.now());
@@ -112,7 +113,18 @@ public class SysMenuService {
         if (menu == null) {
             throw ServiceException.badRequest("菜单不存在");
         }
+        checkUnique(req.getName(), req.getPath(), req.getId());
         menuMapper.updateById(toEntity(req, menu));
+    }
+
+    /** 路由名/路径唯一性前置校验：把数据库唯一键冲突转成可读的业务提示 */
+    private void checkUnique(String name, String path, Long excludeId) {
+        if (StringUtils.hasText(name) && nameExists(name, excludeId)) {
+            throw ServiceException.badRequest("菜单名称(路由名)已存在：" + name);
+        }
+        if (StringUtils.hasText(path) && pathExists(path, excludeId)) {
+            throw ServiceException.badRequest("路由路径已存在：" + path);
+        }
     }
 
     /** 删除菜单：有子节点则拒绝 */

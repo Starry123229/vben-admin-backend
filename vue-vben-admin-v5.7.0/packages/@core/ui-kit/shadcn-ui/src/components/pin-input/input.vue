@@ -12,7 +12,10 @@ defineOptions({
 
 const {
   codeLength = 6,
-  createText = async () => {},
+  // 默认按钮文案：countdown>0 显示剩余秒数，否则显示“发送验证码”。
+  // 不能用 async 函数作默认值——其返回 Promise 会被模板渲染成 “[object Promise]”。
+  createText = (countdown: number) =>
+    countdown > 0 ? `${countdown}s后重发` : '发送验证码',
   disabled = false,
   handleSendCode = async () => {},
   loading = false,

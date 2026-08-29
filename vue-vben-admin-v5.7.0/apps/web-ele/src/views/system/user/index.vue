@@ -108,8 +108,13 @@ function onEdit(row: SystemUserApi.SystemUser) {
   formDrawerApi.setData(row).open();
 }
 
-function onDelete(row: SystemUserApi.SystemUser) {
-  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+async function onDelete(row: SystemUserApi.SystemUser) {
+  // ElPopconfirm 无法在 vxe 单元格内渲染，删除确认改由页面层 ElMessageBox 完成
+  try {
+    await confirm(`确定删除 ${row.username} 吗？`, '删除确认');
+  } catch {
+    return; // 用户取消
+  }
   deleteUser(row.id)
     .then(() => {
       message.success(`删除 ${row.username} 成功`);

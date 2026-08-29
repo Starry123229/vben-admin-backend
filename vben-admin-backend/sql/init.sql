@@ -126,11 +126,11 @@ INSERT INTO `sys_role` (`id`, `name`, `code`, `status`) VALUES
 (2, '管理员',     'admin', 1),
 (3, '普通用户',   'user',  1);
 
--- 用户（password_hash = BCrypt('123456')）
-INSERT INTO `sys_user` (`id`, `username`, `password_hash`, `real_name`, `home_path`, `status`) VALUES
-(1, 'vben',  '$2a$10$pz916cL5nZa7hoSQ7/tadeI.i9wSELV9knz6n3NiKLetpw6k8Uun2', 'Vben',  NULL,         1),
-(2, 'admin', '$2a$10$pz916cL5nZa7hoSQ7/tadeI.i9wSELV9knz6n3NiKLetpw6k8Uun2', 'Admin', '/workspace', 1),
-(3, 'jack',  '$2a$10$pz916cL5nZa7hoSQ7/tadeI.i9wSELV9knz6n3NiKLetpw6k8Uun2', 'Jack',  '/analytics', 1);
+-- 用户（password_hash = BCrypt('123456')；email/phone 供忘记密码、手机号登录演示）
+INSERT INTO `sys_user` (`id`, `username`, `password_hash`, `real_name`, `home_path`, `email`, `phone`, `avatar`, `status`) VALUES
+(1, 'vben',  '$2a$10$pz916cL5nZa7hoSQ7/tadeI.i9wSELV9knz6n3NiKLetpw6k8Uun2', 'Vben',  NULL,         'vben@vben-demo.com',  '13800000001', '/api/avatar/vben.svg',  1),
+(2, 'admin', '$2a$10$pz916cL5nZa7hoSQ7/tadeI.i9wSELV9knz6n3NiKLetpw6k8Uun2', 'Admin', '/workspace', 'admin@vben-demo.com', '13800000002', '/api/avatar/admin.svg', 1),
+(3, 'jack',  '$2a$10$pz916cL5nZa7hoSQ7/tadeI.i9wSELV9knz6n3NiKLetpw6k8Uun2', 'Jack',  '/analytics', 'jack@vben-demo.com',  '13800000003', '/api/avatar/jack.svg',  1);
 
 INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 (1, 1), (2, 2), (3, 3);
@@ -160,8 +160,9 @@ INSERT INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `redir
 -- 系统管理与通知管理仅授权给超级管理员(1)与管理员(2)；普通用户(3)不授权（接口层另有角色校验双保险）
 INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
 -- 公共菜单：三角色一致（Dashboard 目录 + Analytics + Profile）
-(1,1),(1,2),(1,21),
-(2,1),(2,2),(2,21),
+-- 注意：admin 的 home_path 为 /workspace，故 admin 角色必须包含菜单 3（工作台），否则登录后 404
+(1,1),(1,2),(1,3),(1,21),
+(2,1),(2,2),(2,3),(2,21),
 (3,1),(3,2),(3,21),
 -- 系统管理 + 通知管理：super / admin
 (1,100),(1,101),(1,102),(1,103),(1,104),(1,105),

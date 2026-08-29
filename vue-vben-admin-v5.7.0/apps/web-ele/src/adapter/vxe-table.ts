@@ -111,6 +111,9 @@ setupVbenVxeTable({
         const finallyProps = {
           activeValue: 1,
           inactiveValue: 0,
+          // inline-prompt：文案内嵌到开关内部，只展示当前状态对应的文案。
+          // 否则“已禁用”常驻显示在开关左侧、且“已启用”会被列宽裁剪，视觉上像全部被禁用
+          inlinePrompt: true,
           activeText: $t('common.enabled'),
           inactiveText: $t('common.disabled'),
           ...props,

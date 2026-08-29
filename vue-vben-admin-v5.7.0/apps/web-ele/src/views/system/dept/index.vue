@@ -8,7 +8,7 @@ import type { SystemDeptApi } from '#/api/system/dept';
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
-import { ElButton as Button, ElMessage as message } from 'element-plus';
+import { ElButton as Button, ElMessage as message, ElMessageBox } from 'element-plus';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteDept, getDeptList } from '#/api/system/dept';
@@ -71,8 +71,21 @@ function onEdit(row: SystemDeptApi.SystemDept) {
   formDrawerApi.setData(row).open();
 }
 
-function onDelete(row: SystemDeptApi.SystemDept) {
-  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+function confirm(content: string, title: string) {
+  return ElMessageBox.confirm(content, title, {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  });
+}
+
+async function onDelete(row: SystemDeptApi.SystemDept) {
+  // ElPopconfirm 无法在 vxe 单元格内渲染，删除确认改由页面层 ElMessageBox 完成
+  try {
+    await confirm(`确定删除 ${row.name} 吗？`, '删除确认');
+  } catch {
+    return; // 用户取消
+  }
   deleteDept(row.id)
     .then(() => {
       message.success(`删除 ${row.name} 成功`);

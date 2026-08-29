@@ -36,6 +36,18 @@ const formSchema = computed((): VbenFormSchema[] => {
       componentProps: {
         codeLength: CODE_LENGTH,
         placeholder: '验证码',
+        // 验证码输入框内嵌发送按钮：文案随倒计时变化，点击校验邮箱后发送
+        createText: (countdown: number) =>
+          countdown > 0 ? `${countdown}秒后重发` : '获取验证码',
+        handleSendCode: async () => {
+          const api = forgetRef.value?.getFormApi();
+          const values: Recordable<any> | undefined = await api?.getValues();
+          if (!values?.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+            message.warning('请先输入有效的邮箱地址');
+            throw new Error('invalid email');
+          }
+          await sendCode(values);
+        },
       },
       fieldName: 'code',
       label: '验证码',
@@ -59,7 +71,7 @@ const formSchema = computed((): VbenFormSchema[] => {
 async function sendCode(values: Recordable<any>) {
   try {
     const res = await sendResetCodeApi(values.email);
-    forgetRef.value?.startCountdown(60);
+    // 倒计时由 PinInput 内嵌发送按钮的 handleSend 自行管理
     if (res.mockCode) {
       await forgetRef.value?.getFormApi()?.setFieldValue('code', res.mockCode);
       ElMessage.info(`开发模式验证码已自动填入 (${values.email})`);
@@ -92,8 +104,6 @@ async function handleSubmit(value: Recordable<any>) {
     ref="forgetRef"
     :form-schema="formSchema"
     :loading="loading"
-    :show-send-code="true"
-    @send-code="sendCode"
     @submit="handleSubmit"
   />
 </template>

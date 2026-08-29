@@ -43,7 +43,13 @@ const imageStyle = computed<CSSProperties>(() => {
 });
 
 const text = computed(() => {
-  return props.alt.slice(-2).toUpperCase();
+  const alt = props.alt.trim();
+  if (!alt) return '';
+  // ASCII 名（如 Vben/Jack）取首 2 字符；中文等取名末 2 字符，避免出现 "EN" 这类误读缩写
+  const ascii = alt.replace(/[^\x00-\x7F]/g, '');
+  if (ascii.length >= 2) return ascii.slice(0, 2).toUpperCase();
+  if (ascii.length === 1) return ascii.toUpperCase();
+  return alt.slice(-2);
 });
 
 const rootStyle = computed(() => {

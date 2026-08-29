@@ -6,6 +6,7 @@ import type { SystemMenuApi } from '#/api/system/menu';
 import { computed, nextTick, ref } from 'vue';
 
 import { Tree, useVbenDrawer, useVbenForm } from '@vben/common-ui';
+import { $t } from '@vben/locales';
 
 import { createMenu, getMenuTree, updateMenu } from '#/api/system/menu';
 import { useMenuFormSchema } from '../data';
@@ -14,6 +15,26 @@ const emits = defineEmits(['success']);
 const formData = ref<SystemMenuApi.SystemMenu>();
 const id = ref<number>();
 const menuTree = ref<any[]>([]);
+/** 编辑前的原始 meta：保存时合并，避免丢失 affixTab 等表单未展示的字段 */
+const editingMeta = ref<Recordable<any>>({});
+
+/** 上级菜单树的标题若为 i18n key（如 page.dashboard.title）则翻译为当前语言展示 */
+function translateTitles(nodes: any[]): any[] {
+  return nodes.map((node) => {
+    const next = { ...node };
+    const title = next?.meta?.title;
+    if (typeof title === 'string' && /^[\w-]+(\.[\w-]+)+$/.test(title)) {
+      const translated = $t(title);
+      if (translated && translated !== title) {
+        next.meta = { ...next.meta, title: translated };
+      }
+    }
+    if (next.children?.length) {
+      next.children = translateTitles(next.children);
+    }
+    return next;
+  });
+}
 
 const [Form, formApi] = useVbenForm({
   schema: useMenuFormSchema(),
@@ -26,12 +47,14 @@ const [Drawer, drawerApi] = useVbenDrawer({
     const { valid } = await formApi.validate();
     if (!valid) return;
     const values = await formApi.getValues();
-    const meta: Recordable<any> = {};
+    const meta: Recordable<any> = { ...(editingMeta.value || {}) };
     if (values.title) {
       meta.title = values.title;
     }
     if (values.icon) {
       meta.icon = values.icon;
+    } else {
+      delete meta.icon;
     }
     const payload: Recordable<any> = {
       type: values.type,
@@ -66,10 +89,11 @@ const [Drawer, drawerApi] = useVbenDrawer({
       } else {
         formData.value = undefined;
         id.value = undefined;
+        editingMeta.value = {};
       }
       if (menuTree.value.length === 0) {
         try {
-          menuTree.value = await getMenuTree();
+          menuTree.value = translateTitles(await getMenuTree());
         } catch (error) {
           console.error('加载菜单树失败:', error);
         }
@@ -86,6 +110,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
         } else if (data.meta) {
           parsed = data.meta;
         }
+        editingMeta.value = parsed;
         formApi.setValues({
           type: data.type,
           name: data.name,
