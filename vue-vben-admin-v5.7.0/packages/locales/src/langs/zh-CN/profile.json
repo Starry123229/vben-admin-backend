@@ -1,4 +1,7 @@
 {
   "updatePassword": "更新密码",
-  "updateBasicProfile": "更新基本信息"
+  "updateBasicProfile": "更新基本信息",
+  "changeAvatar": "上传头像",
+  "avatarUploading": "上传中…",
+  "avatarUploadFailed": "头像上传失败"
 }

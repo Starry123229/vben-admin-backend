@@ -117,6 +117,11 @@ export function useRoleColumns(
           nameTitle: '角色名称',
           onClick: onActionClick,
         },
+        // 按钮级权限：查看角色码只开放页面；增删改统一归「编辑角色」码
+        options: [
+          { code: 'edit', accessCode: 'AC_1000002' },
+          { code: 'delete', accessCode: 'AC_1000002' },
+        ],
       },
     },
   ];

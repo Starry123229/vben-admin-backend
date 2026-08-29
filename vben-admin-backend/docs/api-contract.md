@@ -223,6 +223,33 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 - `roles`：角色编码数组，用于前端路由 `meta.authority` 匹配。
 - `homePath`：可选，登录成功后的跳转目标；缺省时前端用全局默认首页。
 - 前端 `UserInfo`（`packages/types/src/user.ts`）还声明了 `avatar`、`userId`、`desc`、`token` 字段，均可选，建议返回 `avatar`。
+- Java 实现额外返回 `avatar`、`email`、`phone`、`intro`：email/phone 用于头像菜单与「安全设置」展示，avatar 为上传文件地址或种子 SVG。
+
+### 3.5.1 POST `/user/avatar`（头像上传，Java 已实现）
+
+**鉴权**：Bearer。`multipart/form-data`，字段名 `file`；仅 jpg/jpeg/png/webp/gif，≤5MB。
+
+- 成功：`{ code: 0, data: { avatar: "/api/avatar/file/u{uid}-{ts}.png" } }`，并更新 `sys_user.avatar`。
+- 文件落盘 `{vben.auth.upload-dir}/avatar/`，经公开端点 `GET /avatar/file/{filename}`（无鉴权，文件名白名单防目录穿越）提供 `<img>` 访问；URL 必须带 `/api` 前缀以走前端代理。
+- 失败：缺文件部件/非图片/超大 → 400。
+
+### 3.5.2 按钮级权限码（前后端同源）
+
+`GET /auth/codes` 返回的码来自 `sys_menu(type='button').auth_code`，同时驱动：
+
+- **前端按钮显隐**：vxe-table `CellOperation` 的 `options[].accessCode`、页面按钮 `hasAccessByCodes([...])`；
+- **后端接口校验**：写接口 `@SaCheckPermission`（如用户管理 list=`AC_1000000`、create=`AC_100010`、update=`AC_100020`、delete=`AC_100030`；角色管理 list=`AC_1000001`、其余=`AC_1000002`）。
+
+Node 端实现时应对应校验同一套码（建议中间件读同一 `sys_menu` 表）。
+
+### 3.5.3 登录辅助安全开关（默认全关）
+
+| 配置 | 默认 | 行为 |
+|------|------|------|
+| `vben.auth.phone-auto-register` | false | 手机号首次登录是否自动建号；关闭时未注册手机号报「该手机号未注册，请使用账号密码登录」 |
+| `vben.auth.oauth-auto-register` | false | OAuth mock 首次登录是否自动建号（`oauth_{provider}`）；关闭时报「该第三方账号未绑定系统用户」 |
+
+开发联调在 `application-dev.yml` 中打开；生产保持默认，否则任意手机号/第三方身份都能获得账号。
 
 ### 3.6 GET `/menu/all`
 

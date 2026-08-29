@@ -156,6 +156,11 @@ export function useUserColumns(
           nameTitle: '登录账号',
           onClick: onActionClick,
         },
+        // 按钮级权限：与后端 @SaCheckPermission 同一套码
+        options: [
+          { code: 'edit', accessCode: 'AC_100020' },
+          { code: 'delete', accessCode: 'AC_100030' },
+        ],
       },
     },
   ];

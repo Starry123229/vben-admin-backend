@@ -41,7 +41,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
                         "/auth/qr/create", "/auth/qr/poll",
                         "/auth/forgot/**",
                         "/auth/oauth/**",
-                        "/avatar/*.svg",
+                        "/avatar/*.svg", "/avatar/file/**",
                         "/doc.html", "/webjars/**", "/v3/api-docs/**", "/knife4j/**",
                         "/swagger-ui/**", "/swagger-resources/**", "/favicon.ico");
     }

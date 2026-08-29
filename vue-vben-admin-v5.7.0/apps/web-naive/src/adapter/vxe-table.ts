@@ -170,7 +170,15 @@ setupVbenVxeTable({
               return { ...defaultProps, ...presets[opt.code], ...opt };
             }
           })
-          .filter((opt) => opt.show !== false);
+          .filter((opt) => {
+          if (opt.show === false) return false;
+          // 按钮级权限码：sys_menu(type=button).auth_code，与后端 @SaCheckPermission 同源
+          if (opt.accessCode) {
+            const { hasAccessByCodes } = useAccess();
+            return hasAccessByCodes([opt.accessCode]);
+          }
+          return true;
+        });
 
         function renderBtn(opt: Recordable<any>, listen = true) {
           return h(

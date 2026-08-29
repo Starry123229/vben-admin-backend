@@ -17,13 +17,22 @@ import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysUserMapper;
 import com.vben.backend.module.system.mapper.SysUserRoleMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * 用户领域服务：用户查询、CRUD 与密码管理。
@@ -38,6 +47,13 @@ public class SysUserService {
     private final SysRoleMapper roleMapper;
     private final SysUserRoleMapper userRoleMapper;
     private final BCryptPasswordEncoder passwordEncoder;
+
+    /** 头像等上传文件的存储根目录（默认 ./uploads，可用 V_BEN_UPLOAD_DIR 覆盖） */
+    @Value("${vben.auth.upload-dir:./uploads}")
+    private String uploadDir;
+
+    private static final long AVATAR_MAX_SIZE = 5 * 1024 * 1024L;
+    private static final Set<String> AVATAR_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".webp", ".gif");
 
     /** 按ID查询用户 */
     public SysUser getById(long userId) {
@@ -170,6 +186,51 @@ public class SysUserService {
         }
         // intro 允许清空（传空串视为清空）
         user.setIntro(req.getIntro());
+        user.setUpdateTime(LocalDateTime.now());
+        userMapper.updateById(user);
+    }
+
+    /**
+     * 当前用户上传头像：校验类型与大小，落盘到 {upload-dir}/avatar/，
+     * 更新 sys_user.avatar 并返回可公开访问的 URL（/avatar/file/{filename}）。
+     */
+    public String saveAvatar(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw ServiceException.badRequest("请选择头像文件");
+        }
+        if (file.getSize() > AVATAR_MAX_SIZE) {
+            throw ServiceException.badRequest("头像文件不能超过 5MB");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw ServiceException.badRequest("仅支持图片文件");
+        }
+        String original = file.getOriginalFilename();
+        String ext = original == null ? "" : original.substring(original.lastIndexOf('.')).toLowerCase(Locale.ROOT);
+        if (!AVATAR_EXTENSIONS.contains(ext)) {
+            throw ServiceException.badRequest("仅支持 jpg/png/webp/gif 格式");
+        }
+        long loginId = StpUtil.getLoginIdAsLong();
+        String filename = "u" + loginId + "-" + System.currentTimeMillis() + ext;
+        try {
+            Path dir = Paths.get(uploadDir, "avatar").toAbsolutePath().normalize();
+            Files.createDirectories(dir);
+            file.transferTo(dir.resolve(filename).toFile());
+        } catch (IOException e) {
+            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "头像保存失败");
+        }
+        String url = "/api/avatar/file/" + filename;
+        applyAvatar(loginId, url);
+        return url;
+    }
+
+    /** 更新用户头像字段 */
+    private void applyAvatar(long userId, String avatarUrl) {
+        SysUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw ServiceException.badRequest("用户不存在");
+        }
+        user.setAvatar(avatarUrl);
         user.setUpdateTime(LocalDateTime.now());
         userMapper.updateById(user);
     }

@@ -1,4 +1,7 @@
 {
   "updatePassword": "Update Password",
-  "updateBasicProfile": "Update Basic Profile"
+  "updateBasicProfile": "Update Basic Profile",
+  "changeAvatar": "Upload Avatar",
+  "avatarUploading": "Uploading…",
+  "avatarUploadFailed": "Avatar upload failed"
 }

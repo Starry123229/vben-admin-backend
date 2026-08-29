@@ -11,6 +11,7 @@ import { Plus } from '@vben/icons';
 import { Button, MessagePlugin as message } from 'tdesign-vue-next';
 import { DialogPlugin } from 'tdesign-vue-next';
 
+import { useAccess } from '@vben/access';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteRole, getRoleList, updateRole } from '#/api/system/role';
 
@@ -21,6 +22,8 @@ const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
   destroyOnClose: true,
 });
+
+const { hasAccessByCodes } = useAccess();
 
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
@@ -120,7 +123,7 @@ function onCreate() {
     <FormDrawer @success="onRefresh" />
     <Grid :table-title="'角色管理'">
       <template #toolbar-tools>
-        <Button theme="primary" @click="onCreate">
+        <Button v-if="hasAccessByCodes(['AC_1000002'])" theme="primary" @click="onCreate">
           <Plus class="size-5" />
           新增角色
         </Button>

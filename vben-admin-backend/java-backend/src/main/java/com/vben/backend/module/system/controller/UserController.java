@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +39,8 @@ public class UserController {
         data.put("username", user.getUsername());
         data.put("realName", user.getRealName());
         data.put("avatar", user.getAvatar());
+        data.put("email", user.getEmail());
+        data.put("phone", user.getPhone());
         data.put("intro", user.getIntro());
         data.put("roles", userService.getRoleCodes(userId));
         data.put("homePath", user.getHomePath());
@@ -55,5 +59,14 @@ public class UserController {
     public R<Void> updateProfile(@RequestBody ProfileUpdateRequest req) {
         userService.updateProfile(req);
         return R.ok();
+    }
+
+    /** POST /user/avatar：当前登录用户上传头像（multipart，≤5MB 图片），返回新头像 URL */
+    @PostMapping("/user/avatar")
+    public R<Map<String, Object>> uploadAvatar(@RequestParam("file") MultipartFile file) {
+        String url = userService.saveAvatar(file);
+        Map<String, Object> data = new HashMap<>();
+        data.put("avatar", url);
+        return R.ok(data);
     }
 }

@@ -3,6 +3,8 @@ import { ref } from 'vue';
 
 import { Profile } from '@vben/common-ui';
 import { useUserStore } from '@vben/stores';
+import { message } from 'antdv-next';
+import { uploadAvatarApi } from '#/api/core';
 
 import ProfileBase from './base-setting.vue';
 import ProfileNotificationSetting from './notification-setting.vue';
@@ -31,6 +33,20 @@ const tabs = ref([
     value: 'notice',
   },
 ]);
+
+/** 点击头像选择图片后上传，成功即刷新全局用户信息（右上角头像同步生效） */
+async function handleAvatarChange(file: File) {
+  try {
+    const { avatar } = await uploadAvatarApi(file);
+    if (userStore.userInfo) {
+      userStore.setUserInfo({ ...userStore.userInfo, avatar });
+    }
+    message.success('头像已更新');
+  } catch {
+    // 错误提示由请求拦截器统一处理
+  }
+}
+
 </script>
 <template>
   <Profile
@@ -38,6 +54,7 @@ const tabs = ref([
     title="个人中心"
     :user-info="userStore.userInfo"
     :tabs="tabs"
+      @avatar-change="handleAvatarChange"
   >
     <template #content>
       <ProfileBase v-if="tabsValue === 'basic'" />

@@ -53,6 +53,20 @@ public class AuthExtService {
     @Value("${vben.auth.email-mock:true}")
     private boolean emailMock;
 
+    /**
+     * 手机号首次登录是否自动注册。默认关闭：生产环境任意手机号都能建号登录是开放后门；
+     * 开发期可在 application-dev.yml 或 V_BEN_PHONE_AUTO_REGISTER=true 打开以便联调。
+     */
+    @Value("${vben.auth.phone-auto-register:false}")
+    private boolean phoneAutoRegister;
+
+    /**
+     * 第三方 OAuth 首次登录是否自动建号（mock 流程 oauth_{provider}）。
+     * 默认关闭；开启后前端 OAuth 图标可直接登录演示。
+     */
+    @Value("${vben.auth.oauth-auto-register:false}")
+    private boolean oauthAutoRegister;
+
     /** 验证码邮件发件人（一般与 spring.mail.username 相同） */
     @Value("${vben.auth.mail-from:}")
     private String mailFrom;
@@ -118,6 +132,9 @@ public class AuthExtService {
         }
         SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getPhone, phone));
+        if (user == null && !phoneAutoRegister) {
+            throw ServiceException.badRequest("该手机号未注册，请使用账号密码登录");
+        }
         if (user == null) {
             user = new SysUser();
             user.setUsername("u" + phone);
@@ -267,6 +284,9 @@ public class AuthExtService {
         String bindKey = "oauth_" + provider;
         SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getUsername, bindKey));
+        if (user == null && !oauthAutoRegister) {
+            throw ServiceException.badRequest("该第三方账号未绑定系统用户，请联系管理员");
+        }
         if (user == null) {
             user = new SysUser();
             user.setUsername(bindKey);

@@ -4,8 +4,8 @@
 -- 演示账号: vben / admin / jack，密码均为 123456。
 -- ==============================================================================
 
-CREATE DATABASE IF NOT EXISTS `admin_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE `admin_db`;
+CREATE DATABASE IF NOT EXISTS `vben_admin` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `vben_admin`;
 
 -- ------------------------------------------------------------------------------ 用户表
 CREATE TABLE IF NOT EXISTS `sys_user` (
@@ -151,26 +151,34 @@ INSERT INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `redir
 (1001,101, 'SystemUserCreate',        'button',  NULL,                        NULL,                          NULL,                         1, 0, 'AC_100010', '{"title":"新增用户"}'),
 (1002,101, 'SystemUserUpdate',        'button',  NULL,                        NULL,                          NULL,                         1, 1, 'AC_100020', '{"title":"编辑用户"}'),
 (1003,101, 'SystemUserDelete',        'button',  NULL,                        NULL,                          NULL,                         1, 2, 'AC_100030', '{"title":"删除用户"}'),
+(1006,101, 'SystemUserView',          'button',  NULL,                        NULL,                          NULL,                         1, 3, 'AC_1000000', '{"title":"查看用户"}'),
 (1004,102, 'SystemRoleView',          'button',  NULL,                        NULL,                          NULL,                         1, 0, 'AC_1000001', '{"title":"查看角色"}'),
 (1005,102, 'SystemRoleEdit',          'button',  NULL,                        NULL,                          NULL,                         1, 1, 'AC_1000002', '{"title":"编辑角色"}');
 
 -- button 型权限码节点：业务按钮权限码请在自己的后台管理（/system/menu）中维护，对应 GET /auth/codes。
+-- 前端按钮显隐（CellOperation accessCode / hasAccessByCodes）与后端 @SaCheckPermission 共用同一套码。
 
--- 授权关系（super: 全部权限码；admin: 用户管理 CRUD + 角色查看/编辑；user: 角色查看/编辑，对齐 mock）
--- 系统管理与通知管理仅授权给超级管理员(1)与管理员(2)；普通用户(3)不授权（接口层另有角色校验双保险）
+-- 授权关系（super/admin: 全部码；user: 用户管理只读 + 角色管理可编辑——用于演示按钮级权限）
+-- user 角色持有「系统管理目录 + 用户管理页 + 查看用户码」：页面可见，但新增/编辑/删除按钮隐藏、对应接口 403；
+-- 同时持有「角色管理页 + 查看/编辑角色码」：页面可见且按钮齐全。
 INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
 -- 公共菜单：三角色一致（Dashboard 目录 + Analytics + Profile）
 -- 注意：admin 的 home_path 为 /workspace，故 admin 角色必须包含菜单 3（工作台），否则登录后 404
 (1,1),(1,2),(1,3),(1,21),
 (2,1),(2,2),(2,3),(2,21),
 (3,1),(3,2),(3,21),
--- 系统管理 + 通知管理：super / admin
+-- 系统管理 + 通知管理：super / admin 全部页面；user 仅系统管理目录 + 用户/角色管理页
 (1,100),(1,101),(1,102),(1,103),(1,104),(1,105),
 (2,100),(2,101),(2,102),(2,103),(2,104),(2,105),
--- 按钮权限：super 全部；admin 用户管理 CRUD；user 角色查看/编辑（对齐 mock 演示数据）
-(1,1001),(1,1002),(1,1003),(1,1004),(1,1005),
-(2,1001),(2,1002),(2,1003),(2,1004),(2,1005),
-(3,1004),(3,1005);
+(3,100),(3,101),(3,102),
+-- 按钮权限：super/admin 全部；user = 用户只读(1006) + 角色查看/编辑(1004,1005)，无用户增删改码
+(1,1001),(1,1002),(1,1003),(1,1006),(1,1004),(1,1005),
+(2,1001),(2,1002),(2,1003),(2,1006),(2,1004),(2,1005),
+(3,1006),(3,1004),(3,1005);
+
+-- 部门（用户管理页左侧部门树过滤器）
+INSERT INTO `sys_dept` (`id`, `pid`, `name`, `status`, `remark`) VALUES
+(1, 0, '总公司', 1, '顶级部门');
 
 -- 通知消息（按用户发送演示数据）
 INSERT INTO `sys_notice` (`title`, `message`, `avatar`, `link`, `is_read`, `user_id`, `type`) VALUES

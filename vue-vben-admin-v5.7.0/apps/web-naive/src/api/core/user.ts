@@ -15,3 +15,14 @@ export async function getUserInfoApi() {
 export async function updateProfileApi(data: { intro?: string; realName?: string }) {
   return requestClient.put<void>('/user/profile', data);
 }
+
+/**
+ * 上传当前用户头像（multipart），返回新头像 URL
+ */
+export async function uploadAvatarApi(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return requestClient.post<{ avatar: string }>('/user/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}

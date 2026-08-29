@@ -14,12 +14,15 @@ import { Plus } from '@vben/icons';
 
 import { Button, message, Modal } from 'antdv-next';
 
+import { useAccess } from '@vben/access';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteUser, getUserList, updateUser } from '#/api/system/user';
 import { getDeptList } from '#/api/system/dept';
 
 import { useUserColumns, useUserGridFormSchema } from './data';
 import Form from './modules/form.vue';
+
+const { hasAccessByCodes } = useAccess();
 
 const deptList = ref<Recordable<any>[]>([]);
 const selectedDeptId = ref<string>('');
@@ -185,7 +188,7 @@ onMounted(async () => {
       <div class="w-5/6 pl-4">
         <Grid :table-title="'用户管理'">
           <template #toolbar-tools>
-            <Button type="primary" @click="onCreate">
+            <Button v-if="hasAccessByCodes(['AC_100010'])" type="primary" @click="onCreate">
               <Plus class="size-5" />
               新增用户
             </Button>

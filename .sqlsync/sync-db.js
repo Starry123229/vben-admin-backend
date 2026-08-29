@@ -63,8 +63,9 @@ async function main() {
     sys_user: 3,
     sys_role: 3,
     sys_user_role: 3,
-    sys_menu: 10,
-    sys_role_menu: 24,
+    sys_dept: 1,
+    sys_menu: 16, // 10 个菜单 + 6 个按钮权限节点
+    sys_role_menu: 41,
     sys_notice: 6,
   };
   let ok = true;

@@ -41,6 +41,7 @@ function handleChange(fieldName: string, value: boolean) {
             </div>
             <FormControl>
               <Switch
+                :disabled="item.disabled ?? false"
                 :model-value="item.value"
                 @update:model-value="handleChange(item.fieldName, $event)"
               />

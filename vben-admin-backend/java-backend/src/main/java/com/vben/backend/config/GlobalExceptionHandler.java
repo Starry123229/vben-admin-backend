@@ -8,8 +8,10 @@ import com.vben.backend.common.result.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -53,6 +55,18 @@ public class GlobalExceptionHandler {
                 .map(fe -> fe.getField() + " " + fe.getDefaultMessage())
                 .orElse("参数校验失败");
         return ResponseEntity.badRequest().body(R.fail(msg));
+    }
+
+    /** 缺少必填请求参数：400（原先落到兜底 500，语义不对） */
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<R<Void>> handleMissingParam(MissingServletRequestParameterException e) {
+        return ResponseEntity.badRequest().body(R.fail("缺少请求参数: " + e.getParameterName()));
+    }
+
+    /** multipart 请求缺少指定文件部件：400 */
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<R<Void>> handleMissingPart(MissingServletRequestPartException e) {
+        return ResponseEntity.badRequest().body(R.fail("缺少上传文件: " + e.getRequestPartName()));
     }
 
     /** 静态资源 404 */

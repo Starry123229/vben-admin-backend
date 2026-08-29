@@ -6,13 +6,18 @@ spring:
   profiles:
     # 生产环境用 --spring.profiles.active=prod 覆盖
     active: dev
+  # 头像等上传文件的 multipart 上限（业务上限 5MB 在代码内校验）
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   # 邮件服务（邮箱验证码/通知邮件）：vben.auth.email-mock=true 时不依赖此项；
-  # 生产改为真实 SMTP 后将 email-mock 置 false，并通过 V_BEN_MAIL_* 环境变量注入凭证。
+  # 生产改为真实 SMTP 后将 email-mock 置 false，并通过 SPRING_MAIL_* 环境变量注入凭证。
   mail:
-    host: ${V_BEN_MAIL_HOST:smtp.example.com}
-    port: ${V_BEN_MAIL_PORT:465}
-    username: ${V_BEN_MAIL_USERNAME:}
-    password: ${V_BEN_MAIL_PASSWORD:}
+    host: ${SPRING_MAIL_HOST:smtp.example.com}
+    port: ${SPRING_MAIL_PORT:465}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
     default-encoding: UTF-8
     properties:
       mail.smtp.auth: true
@@ -51,8 +56,15 @@ vben:
     # 登录辅助功能：开发期 mock 可全流程联通（短信/邮箱验证码接口回显验证码）；
     # 生产配置外部服务后改为 false 并接入真实短信/邮件/OAuth 凭证即可。
     # 敏感凭证优先级：环境变量 > 本文件占位符；也可用 application-local.yml（已 gitignore）覆盖。
-    sms-mock: ${V_BEN_SMS_MOCK:true}
-    email-mock: ${V_BEN_EMAIL_MOCK:true}
+    sms-mock: ${VBEN_AUTH_SMS_MOCK:true}
+    email-mock: ${VBEN_AUTH_EMAIL_MOCK:true}
+    # 安全开关（默认全关，防生产后门）：手机号/OAuth 首次登录是否自动建号。
+    # 关闭时报「该手机号未注册」/「该第三方账号未绑定系统用户」；
+    # 开发联调在 application-dev.yml 中打开（VBEN_AUTH_PHONE_AUTO_REGISTER / VBEN_AUTH_OAUTH_AUTO_REGISTER）。
+    phone-auto-register: ${VBEN_AUTH_PHONE_AUTO_REGISTER:false}
+    oauth-auto-register: ${VBEN_AUTH_OAUTH_AUTO_REGISTER:false}
+    # 头像等上传文件的存储根目录（相对路径基于后端进程工作目录，可用 VBEN_AUTH_UPLOAD_DIR 覆盖）
+    upload-dir: ${VBEN_AUTH_UPLOAD_DIR:./uploads}
 
     # ------------------------------------------------------------------
     # 第三方 OAuth 登录（qq / wechat / github / google）
@@ -68,26 +80,26 @@ vben:
     oauth:
       qq:
         enabled: true
-        client-id: ${V_BEN_OAUTH_QQ_CLIENT_ID:}
-        client-secret: ${V_BEN_OAUTH_QQ_CLIENT_SECRET:}
-        redirect-uri: ${V_BEN_OAUTH_QQ_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/qq}
+        client-id: ${VBEN_AUTH_OAUTH_QQ_CLIENT_ID:}
+        client-secret: ${VBEN_AUTH_OAUTH_QQ_CLIENT_SECRET:}
+        redirect-uri: ${VBEN_AUTH_OAUTH_QQ_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/qq}
       wechat:
         enabled: true
-        client-id: ${V_BEN_OAUTH_WECHAT_CLIENT_ID:}
-        client-secret: ${V_BEN_OAUTH_WECHAT_CLIENT_SECRET:}
-        redirect-uri: ${V_BEN_OAUTH_WECHAT_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/wechat}
+        client-id: ${VBEN_AUTH_OAUTH_WECHAT_CLIENT_ID:}
+        client-secret: ${VBEN_AUTH_OAUTH_WECHAT_CLIENT_SECRET:}
+        redirect-uri: ${VBEN_AUTH_OAUTH_WECHAT_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/wechat}
       github:
         enabled: true
-        client-id: ${V_BEN_OAUTH_GITHUB_CLIENT_ID:}
-        client-secret: ${V_BEN_OAUTH_GITHUB_CLIENT_SECRET:}
-        redirect-uri: ${V_BEN_OAUTH_GITHUB_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/github}
+        client-id: ${VBEN_AUTH_OAUTH_GITHUB_CLIENT_ID:}
+        client-secret: ${VBEN_AUTH_OAUTH_GITHUB_CLIENT_SECRET:}
+        redirect-uri: ${VBEN_AUTH_OAUTH_GITHUB_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/github}
       google:
         enabled: true
-        client-id: ${V_BEN_OAUTH_GOOGLE_CLIENT_ID:}
-        client-secret: ${V_BEN_OAUTH_GOOGLE_CLIENT_SECRET:}
-        redirect-uri: ${V_BEN_OAUTH_GOOGLE_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/google}
+        client-id: ${VBEN_AUTH_OAUTH_GOOGLE_CLIENT_ID:}
+        client-secret: ${VBEN_AUTH_OAUTH_GOOGLE_CLIENT_SECRET:}
+        redirect-uri: ${VBEN_AUTH_OAUTH_GOOGLE_REDIRECT_URI:http://localhost:8080/api/auth/oauth/callback/google}
     # 验证码邮件发件人（显示为发件地址，一般与 spring.mail.username 相同）
-    mail-from: ${V_BEN_MAIL_FROM:}
+    mail-from: ${VBEN_AUTH_MAIL_FROM:}
 
 # API 文档：knife4j-next（基于 springdoc-openapi 3），入口 /api/doc.html；生产环境建议关闭
 springdoc:
