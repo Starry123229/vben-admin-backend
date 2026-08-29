@@ -78,8 +78,9 @@ async function sendCode(values: Recordable<any>) {
     } else {
       ElMessage.success('重置验证码已发送');
     }
-  } catch {
-    // 错误提示由请求拦截器统一处理
+  } catch (error) {
+    // 错误提示由请求拦截器统一处理；继续抛出让 PinInput 不启动倒计时
+    throw error;
   }
 }
 

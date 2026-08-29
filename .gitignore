@@ -38,3 +38,6 @@ uploads/
 .codebuddy/
 
 .test-shots/
+
+# sqlsync 同步脚本生成的临时备份
+vben-admin-backend/sql/.backup-*.json

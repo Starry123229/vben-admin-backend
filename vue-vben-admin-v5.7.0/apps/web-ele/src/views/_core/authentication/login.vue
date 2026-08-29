@@ -8,9 +8,19 @@ import { AuthenticationLogin, SliderCaptcha, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
 import { oauthCallbackApi } from '#/api/core/auth';
+import { ElMessage as message } from 'element-plus';
 import { useAuthStore } from '#/store';
 
 defineOptions({ name: 'Login' });
+
+/** 提交前校验滑块验证（schema 不再承担该校验，避免语言切换误触发提示） */
+function handleLoginSubmit(values: Recordable<string>) {
+  if (!values.captcha) {
+    message.error($t('authentication.verifyRequiredTip'));
+    return;
+  }
+  authStore.authLogin(values);
+}
 
 const authStore = useAuthStore();
 
@@ -95,9 +105,8 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: markRaw(SliderCaptcha),
       fieldName: 'captcha',
-      rules: z.boolean().refine((value) => value, {
-        message: $t('authentication.verifyRequiredTip'),
-      }),
+      // 滑块验证不在 schema 里做 zod 校验：切换语言会重建 schema 触发 vee-validate
+      // 重校验，导致未提交就显示「请先完成验证」。改在 handleLoginSubmit 提交时校验。
     },
   ];
 });
@@ -108,6 +117,6 @@ const formSchema = computed((): VbenFormSchema[] => {
     :form-schema="formSchema"
     :loading="authStore.loginLoading"
     @oauth="handleOauth"
-    @submit="authStore.authLogin"
+    @submit="handleLoginSubmit"
   />
 </template>

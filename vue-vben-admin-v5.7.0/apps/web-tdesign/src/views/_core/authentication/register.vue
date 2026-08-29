@@ -8,6 +8,7 @@ import { AuthenticationRegister, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
 import { registerApi } from '#/api/core/auth';
+import { DialogPlugin } from 'tdesign-vue-next';
 import { useAuthStore } from '#/store';
 
 defineOptions({ name: 'Register' });
@@ -71,8 +72,13 @@ const formSchema = computed((): VbenFormSchema[] => {
             h(
               'a',
               {
-                class: 'vben-link ml-1 ',
-                href: '',
+                class: 'vben-link ml-1',
+                href: 'javascript:void(0)',
+                onClick: (e: Event) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  showTerms();
+                },
               },
               `${$t('authentication.privacyPolicy')} & ${$t('authentication.terms')}`,
             ),
@@ -84,6 +90,14 @@ const formSchema = computed((): VbenFormSchema[] => {
     },
   ];
 });
+
+function showTerms() {
+  DialogPlugin.alert({
+    header: '隐私政策 & 条款',
+    body: '本系统为演示项目：注册即表示同意仅将本系统用于学习与测试，请勿提交任何真实敏感数据。',
+    confirmBtn: '知道了',
+  });
+}
 
 async function handleSubmit(value: Recordable<any>) {
   loading.value = true;
