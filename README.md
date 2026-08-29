@@ -1,6 +1,6 @@
 # vben-admin-backend
 
-[vue-vben-admin](https://vben.pro) v5.7.0 配套后端服务，提供 **Java / Node.js 双实现**，共用同一套数据库 Schema 与 API 契约。
+后台管理系统，提供 **Java / Node.js 双实现**后端服务，共用同一套数据库 Schema 与 API 契约。
 
 ## 目录结构
 
@@ -9,7 +9,7 @@
 │   ├── docs/api-contract.md     # 前后端 API 契约（双端实现依据）
 │   ├── java-backend/            # Java 实现（Spring Boot 4.1）
 │   └── sql/                     # 共享数据库脚本（schema + 演示数据）
-└── vue-vben-admin-v5.7.0/       # 前端（官方 v5.7.0，独立仓库）
+└── vue-vben-admin-v5.7.0/       # 前端（5 套 UI 框架应用，独立仓库）
 ```
 
 ## 技术栈（Java 端）

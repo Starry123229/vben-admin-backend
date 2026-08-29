@@ -27,6 +27,7 @@ export function useUserFormSchema(): VbenFormSchema[] {
       component: 'ApiSelect',
       fieldName: 'deptId',
       label: '部门',
+      modelPropName: 'value',
       componentProps: {
         allowClear: true,
         labelField: 'name',
@@ -38,6 +39,7 @@ export function useUserFormSchema(): VbenFormSchema[] {
       component: 'ApiSelect',
       fieldName: 'roleIds',
       label: '角色',
+      modelPropName: 'value',
       componentProps: {
         multiple: true,
         allowClear: true,
@@ -93,6 +95,7 @@ export function useUserGridFormSchema(): VbenFormSchema[] {
 export function useUserColumns(
   onActionClick: OnActionClickFn<SystemUserApi.SystemUser>,
   onStatusChange?: (newStatus: any, row: SystemUserApi.SystemUser) => PromiseLike<boolean | undefined>,
+  getDeptName?: (deptId: any) => string,
 ): VxeTableGridColumns<SystemUserApi.SystemUser> {
   return [
     {
@@ -115,6 +118,10 @@ export function useUserColumns(
       field: 'deptId',
       title: '部门',
       width: 120,
+      formatter: ({ row }) => {
+        if (row.deptId == null) return '-';
+        return getDeptName?.(row.deptId) || String(row.deptId);
+      },
     },
     {
       field: 'status',

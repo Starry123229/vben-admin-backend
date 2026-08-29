@@ -5,10 +5,12 @@ import com.vben.backend.module.system.entity.SysDept;
 import com.vben.backend.module.system.entity.SysMenu;
 import com.vben.backend.module.system.entity.SysRole;
 import com.vben.backend.module.system.entity.SysUser;
+import com.vben.backend.module.system.entity.SysUserRole;
 import com.vben.backend.module.system.mapper.SysDeptMapper;
 import com.vben.backend.module.system.mapper.SysMenuMapper;
 import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysUserMapper;
+import com.vben.backend.module.system.mapper.SysUserRoleMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import java.util.Map;
 public class DashboardService {
 
     private final SysUserMapper userMapper;
+    private final SysUserRoleMapper userRoleMapper;
     private final SysRoleMapper roleMapper;
     private final SysDeptMapper deptMapper;
     private final SysMenuMapper menuMapper;
@@ -47,12 +50,12 @@ public class DashboardService {
         long totalDepts = deptMapper.selectCount(null);
         long totalMenus = menuMapper.selectCount(null);
 
-        data.put("totalUsers", totalUsers);
-        data.put("activeUsers", activeUsers);
-        data.put("disabledUsers", disabledUsers);
-        data.put("totalRoles", totalRoles);
-        data.put("totalDepts", totalDepts);
-        data.put("totalMenus", totalMenus);
+        data.put("totalUsers", (int) totalUsers);
+        data.put("activeUsers", (int) activeUsers);
+        data.put("disabledUsers", (int) disabledUsers);
+        data.put("totalRoles", (int) totalRoles);
+        data.put("totalDepts", (int) totalDepts);
+        data.put("totalMenus", (int) totalMenus);
         return data;
     }
 
@@ -75,7 +78,7 @@ public class DashboardService {
                 .map(e -> {
                     Map<String, Object> item = new HashMap<>();
                     item.put("month", e.getKey());
-                    item.put("count", e.getValue());
+                    item.put("count", e.getValue().intValue());
                     return item;
                 })
                 .toList();
@@ -89,7 +92,9 @@ public class DashboardService {
         return roles.stream().map(role -> {
             Map<String, Object> item = new HashMap<>();
             item.put("name", role.getName());
-            item.put("value", role.getId());
+            long count = userRoleMapper.selectCount(new LambdaQueryWrapper<SysUserRole>()
+                    .eq(SysUserRole::getRoleId, role.getId()));
+            item.put("value", (int) count);
             return item;
         }).toList();
     }

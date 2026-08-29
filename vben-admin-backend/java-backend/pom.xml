@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Vben Admin Java 后端：Spring Boot 4.1 + JDK 25 + Sa-Token + MyBatis-Plus + MySQL 8.4 -->
+<!-- 后台管理 Java 后端：Spring Boot 4.1 + JDK 25 + Sa-Token + MyBatis-Plus + MySQL 8.4 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -17,7 +17,7 @@
   <artifactId>vben-backend</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>vben-backend</name>
-  <description>Vben Admin 后端服务（Java 实现）：适配 vue-vben-admin v5.7.0 前端契约</description>
+  <description>后台管理后端服务（Java 实现）</description>
 
   <properties>
     <java.version>25</java.version>

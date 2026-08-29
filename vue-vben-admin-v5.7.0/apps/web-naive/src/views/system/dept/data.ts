@@ -16,6 +16,7 @@ export function useDeptFormSchema(): VbenFormSchema[] {
       fieldName: 'pid',
       label: '上级部门',
       help: '留空表示顶级部门',
+      modelPropName: 'value',
       componentProps: {
         allowClear: true,
         labelField: 'name',

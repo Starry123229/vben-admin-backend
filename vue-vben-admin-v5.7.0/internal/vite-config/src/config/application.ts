@@ -41,9 +41,7 @@ function defineApplicationConfig(userConfigPromise?: DefineApplicationOptions) {
       license: true,
       mode,
       print: !isBuild,
-      printInfoMap: {
-        'Vben Admin Docs': 'https://doc.vben.pro',
-      },
+      printInfoMap: {},
       pwa: true,
       pwaOptions: getDefaultPwaOptions(appTitle),
       vxeTableLazyImport: true,

@@ -57,6 +57,7 @@ export function useRoleGridFormSchema(): VbenFormSchema[] {
       component: 'Select',
       fieldName: 'status',
       label: '状态',
+      modelPropName: 'value',
       componentProps: {
         allowClear: true,
         options: [

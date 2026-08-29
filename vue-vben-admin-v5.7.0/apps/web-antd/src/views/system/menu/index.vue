@@ -7,6 +7,7 @@ import type { SystemMenuApi } from '#/api/system/menu';
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { IconifyIcon, Plus } from '@vben/icons';
+import { $t } from '@vben/locales';
 
 import { Button, message } from 'ant-design-vue';
 
@@ -40,6 +41,11 @@ const [Grid, gridApi] = useVbenVxeGrid({
               }
             } else if (m.meta == null) {
               m.meta = {};
+            }
+            // vxe-table 树形转换要求 id/pid 为同一类型（数字）
+            m.id = Number(m.id);
+            if (m.pid != null) {
+              m.pid = Number(m.pid);
             }
           });
           return { items: res, total: res.length };
@@ -122,7 +128,7 @@ function onDelete(row: SystemMenuApi.SystemMenu) {
             :icon="row.meta.icon"
             class="size-4"
           />
-          <span>{{ row.meta?.title || row.name }}</span>
+          <span>{{ row.meta?.title ? $t(row.meta.title as any) : row.name }}</span>
         </div>
       </template>
     </Grid>

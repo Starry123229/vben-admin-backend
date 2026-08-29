@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
   docUrl: '',
   githubUrl: '',
   homepageUrl: '',
-  name: 'Vben Admin',
+  name: 'Admin Pro',
   previewUrl: '',
   title: '关于项目',
 });

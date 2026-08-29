@@ -27,6 +27,7 @@ export function useUserFormSchema(): VbenFormSchema[] {
       component: 'ApiSelect',
       fieldName: 'deptId',
       label: '部门',
+      modelPropName: 'value',
       componentProps: {
         allowClear: true,
         labelField: 'name',
@@ -38,6 +39,7 @@ export function useUserFormSchema(): VbenFormSchema[] {
       component: 'ApiSelect',
       fieldName: 'roleIds',
       label: '角色',
+      modelPropName: 'value',
       componentProps: {
         multiple: true,
         allowClear: true,
@@ -117,7 +119,7 @@ export function useUserColumns(
       title: '部门',
       width: 120,
       formatter: ({ row }) => {
-        if (row.deptId == null || row.deptId === '') return '-';
+        if (row.deptId == null) return '-';
         return getDeptName?.(row.deptId) || String(row.deptId);
       },
     },

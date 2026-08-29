@@ -28,7 +28,7 @@ function renderChart() {
   renderEcharts({
     legend: {
       bottom: 0,
-      data: data.map((d) => d.name),
+      data: data.length > 0 ? ['角色'] : [],
     },
     radar: {
       indicator: data.length > 0

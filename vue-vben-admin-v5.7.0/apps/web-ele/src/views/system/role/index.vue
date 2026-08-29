@@ -97,8 +97,8 @@ function onEdit(row: SystemRoleApi.SystemRole) {
 }
 
 function onDelete(row: SystemRoleApi.SystemRole) {
-  confirm(`确定删除角色【${row.name}】吗？`, '删除角色')
-    .then(() => deleteRole(row.id))
+  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+  deleteRole(row.id)
     .then(() => {
       message.success(`删除 ${row.name} 成功`);
       onRefresh();

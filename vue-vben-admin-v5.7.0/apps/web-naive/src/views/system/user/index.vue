@@ -38,7 +38,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
     submitOnChange: true,
   },
   gridOptions: {
-    columns: useUserColumns(onActionClick, onStatusChange),
+    columns: useUserColumns(onActionClick, onStatusChange, getDeptName),
     height: 'auto',
     keepSource: true,
     proxyConfig: {
@@ -112,8 +112,8 @@ function onEdit(row: SystemUserApi.SystemUser) {
 }
 
 function onDelete(row: SystemUserApi.SystemUser) {
-  confirm(`确定删除用户【${row.username}】吗？`, '删除用户')
-    .then(() => deleteUser(row.id))
+  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+  deleteUser(row.id)
     .then(() => {
       message.success(`删除 ${row.username} 成功`);
       onRefresh();
@@ -145,6 +145,11 @@ function buildDeptTree(list: Recordable<any>[]) {
 }
 
 const deptTree = computed(() => buildDeptTree(deptList.value));
+
+function getDeptName(deptId: any): string {
+  const dept = deptList.value.find((d) => String(d.id) === String(deptId));
+  return dept?.name || '';
+}
 
 function selectDept(item: any) {
   const id = item?.value?.id ?? item?.id;

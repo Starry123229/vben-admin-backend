@@ -1,8 +1,8 @@
-# Vben Admin Java 后端 - 主配置（环境相关配置放 application-{profile}.yml）
+# 后台管理 Java 后端 - 主配置（环境相关配置放 application-{profile}.yml）
 
 spring:
   application:
-    name: vben-backend
+    name: admin-backend
   profiles:
     # 生产环境用 --spring.profiles.active=prod 覆盖
     active: dev

@@ -7,9 +7,9 @@ import type { SystemMenuApi } from '#/api/system/menu';
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
 import { IconifyIcon, Plus } from '@vben/icons';
+import { $t } from '@vben/locales';
 
 import { ElButton as Button, ElMessage as message } from 'element-plus';
-import { ElMessageBox } from 'element-plus';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteMenu, getMenuList } from '#/api/system/menu';
@@ -41,6 +41,11 @@ const [Grid, gridApi] = useVbenVxeGrid({
               }
             } else if (m.meta == null) {
               m.meta = {};
+            }
+            // vxe-table 树形转换要求 id/pid 为同一类型（数字）
+            m.id = Number(m.id);
+            if (m.pid != null) {
+              m.pid = Number(m.pid);
             }
           });
           return { items: res, total: res.length };
@@ -96,21 +101,9 @@ function onAppend(row: SystemMenuApi.SystemMenu) {
   formDrawerApi.setData({ pid: row.id }).open();
 }
 
-function confirm(content: string, title: string) {
-  return ElMessageBox.confirm(content, title, {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(() => true)
-    .catch(() => {
-      throw new Error('已取消');
-    });
-}
-
 function onDelete(row: SystemMenuApi.SystemMenu) {
-  confirm(`确定删除菜单【${row.name}】吗？`, '删除菜单')
-    .then(() => deleteMenu(row.id))
+  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+  deleteMenu(row.id)
     .then(() => {
       message.success(`删除 ${row.name} 成功`);
       onRefresh();
@@ -135,7 +128,7 @@ function onDelete(row: SystemMenuApi.SystemMenu) {
             :icon="row.meta.icon"
             class="size-4"
           />
-          <span>{{ row.meta?.title || row.name }}</span>
+          <span>{{ row.meta?.title ? $t(row.meta.title as any) : row.name }}</span>
         </div>
       </template>
     </Grid>

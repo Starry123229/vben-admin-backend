@@ -36,7 +36,7 @@ const [Grid, gridApi] = useVbenVxeGrid({
     submitOnChange: true,
   },
   gridOptions: {
-    columns: useUserColumns(onActionClick, onStatusChange),
+    columns: useUserColumns(onActionClick, onStatusChange, getDeptName),
     height: 'auto',
     keepSource: true,
     proxyConfig: {
@@ -143,6 +143,11 @@ function buildDeptTree(list: Recordable<any>[]) {
 }
 
 const deptTree = computed(() => buildDeptTree(deptList.value));
+
+function getDeptName(deptId: any): string {
+  const dept = deptList.value.find((d) => String(d.id) === String(deptId));
+  return dept?.name || '';
+}
 
 function selectDept(item: any) {
   const id = item?.value?.id ?? item?.id;

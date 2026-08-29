@@ -20,7 +20,7 @@ public class OpenApiConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Vben Admin Java 后端")
+                        .title("后台管理 API")
                         .description("适配 vue-vben-admin v5.7.0 前端契约，详见 docs/api-contract.md")
                         .version("0.0.1-SNAPSHOT"))
                 // 全局 Bearer 鉴权：文档页右上角 Authorize 填 accessToken

@@ -205,7 +205,7 @@ public class AuthExtService {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(mailFrom);
             message.setTo(email);
-            message.setSubject("Vben Admin 重置密码验证码");
+            message.setSubject("重置密码验证码");
             message.setText("您的验证码是：" + code + "，5 分钟内有效。若非本人操作，请忽略本邮件。");
             sender.send(message);
         } catch (ServiceException e) {

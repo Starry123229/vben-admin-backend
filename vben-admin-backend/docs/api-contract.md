@@ -1,6 +1,5 @@
-# Vben Admin v5.7.0 后端 API 契约
+# 后端 API 契约
 
-> 提取自 `vue-vben-admin v5.7.0` 的 `apps/backend-mock`（Nitro 实现）及前端 `apps/web-antd` 的实际消费代码。
 > 本文档是 Java 后端与 Node 后端的**共同实现规范**，两端必须产出完全一致的 HTTP 行为。
 
 ---

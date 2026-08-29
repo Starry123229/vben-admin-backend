@@ -14,7 +14,7 @@ import {
   SvgDownloadIcon,
 } from '@vben/icons';
 
-import { onMounted, ref } from 'vue';
+import { markRaw, onMounted, ref } from 'vue';
 
 import {
   getDeptDistributionApi,
@@ -31,28 +31,28 @@ import AnalyticsVisits from './analytics-visits.vue';
 
 const overviewItems = ref<AnalysisOverviewItem[]>([
   {
-    icon: SvgCardIcon,
+    icon: markRaw(SvgCardIcon),
     title: '用户量',
     totalTitle: '总用户量',
     totalValue: 0,
     value: 0,
   },
   {
-    icon: SvgCakeIcon,
+    icon: markRaw(SvgCakeIcon),
     title: '角色数',
     totalTitle: '总角色数',
     totalValue: 0,
     value: 0,
   },
   {
-    icon: SvgDownloadIcon,
+    icon: markRaw(SvgDownloadIcon),
     title: '部门数',
     totalTitle: '总部门数',
     totalValue: 0,
     value: 0,
   },
   {
-    icon: SvgBellIcon,
+    icon: markRaw(SvgBellIcon),
     title: '菜单数',
     totalTitle: '总菜单数',
     totalValue: 0,
@@ -89,28 +89,28 @@ onMounted(async () => {
 
     overviewItems.value = [
       {
-        icon: SvgCardIcon,
+        icon: markRaw(SvgCardIcon),
         title: '用户量',
         totalTitle: '总用户量',
         totalValue: Number(overview.totalUsers) || 0,
         value: Number(overview.activeUsers) || 0,
       },
       {
-        icon: SvgCakeIcon,
-        title: '访问量',
+        icon: markRaw(SvgCakeIcon),
+        title: '角色数',
         totalTitle: '总角色数',
         totalValue: Number(overview.totalRoles) || 0,
         value: Number(overview.totalRoles) || 0,
       },
       {
-        icon: SvgDownloadIcon,
+        icon: markRaw(SvgDownloadIcon),
         title: '部门数',
         totalTitle: '总部门数',
         totalValue: Number(overview.totalDepts) || 0,
         value: Number(overview.totalDepts) || 0,
       },
       {
-        icon: SvgBellIcon,
+        icon: markRaw(SvgBellIcon),
         title: '菜单数',
         totalTitle: '总菜单数',
         totalValue: Number(overview.totalMenus) || 0,

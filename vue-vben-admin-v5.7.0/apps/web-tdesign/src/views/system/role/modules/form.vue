@@ -4,6 +4,7 @@ import type { SystemRoleApi } from '#/api/system/role';
 import { computed, nextTick, ref } from 'vue';
 
 import { Tree, useVbenDrawer, useVbenForm } from '@vben/common-ui';
+import { $t } from '@vben/locales';
 
 import {
   assignRoleMenus,
@@ -18,6 +19,24 @@ const emits = defineEmits(['success']);
 const formData = ref<SystemRoleApi.SystemRole>();
 const id = ref<number>();
 const menuTree = ref<any[]>([]);
+
+function translateMenuTree(nodes: any[]): any[] {
+  return nodes.map((node) => {
+    const translated = {
+      ...node,
+      label:
+        node.meta?.title && typeof node.meta.title === 'string'
+          ? $t(node.meta.title as any)
+          : node.name,
+    };
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      translated.children = translateMenuTree(node.children);
+    }
+    return translated;
+  });
+}
+
+const labeledMenuTree = computed(() => translateMenuTree(menuTree.value));
 
 const [Form, formApi] = useVbenForm({
   schema: useRoleFormSchema(),
@@ -88,9 +107,9 @@ const title = computed(() => (id.value ? '编辑角色' : '新增角色'));
         <Tree
           v-bind="slotProps"
           multiple
-          :tree-data="menuTree"
+          :tree-data="labeledMenuTree"
           value-field="id"
-          label-field="meta.title"
+          label-field="label"
           children-field="children"
           :default-expanded-level="2"
         />

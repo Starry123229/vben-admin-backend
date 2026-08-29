@@ -9,7 +9,7 @@ import { Page, useVbenDrawer } from '@vben/common-ui';
 import { Plus } from '@vben/icons';
 
 import { NButton as Button } from 'naive-ui';
-import { useDialog, useMessage } from 'naive-ui';
+import { useMessage } from 'naive-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteDept, getDeptList } from '#/api/system/dept';
@@ -17,7 +17,6 @@ import { deleteDept, getDeptList } from '#/api/system/dept';
 import { useDeptColumns, useDeptGridFormSchema } from './data';
 import Form from './modules/form.vue';
 const message = useMessage();
-const dialog = useDialog();
 
 const [FormDrawer, formDrawerApi] = useVbenDrawer({
   connectedComponent: Form,
@@ -70,26 +69,13 @@ function onActionClick(e: OnActionClickParams<SystemDeptApi.SystemDept>) {
   }
 }
 
-function confirm(content: string, title: string) {
-  return new Promise<boolean>((resolve, reject) => {
-    dialog.warning({
-      title,
-      content,
-      positiveText: '确定',
-      negativeText: '取消',
-      onPositiveClick: () => resolve(true),
-      onNegativeClick: () => reject(new Error('已取消')),
-    });
-  });
-}
-
 function onEdit(row: SystemDeptApi.SystemDept) {
   formDrawerApi.setData(row).open();
 }
 
 function onDelete(row: SystemDeptApi.SystemDept) {
-  confirm(`确定删除部门【${row.name}】吗？`, '删除部门')
-    .then(() => deleteDept(row.id))
+  // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
+  deleteDept(row.id)
     .then(() => {
       message.success(`删除 ${row.name} 成功`);
       onRefresh();

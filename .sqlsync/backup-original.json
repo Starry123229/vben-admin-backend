@@ -226,7 +226,7 @@
     {
       "id": 6,
       "title": "欢迎使用系统",
-      "message": "您已成功登录 Vben Admin 系统作为普通用户。",
+      "message": "您已成功登录系统（普通用户）。",
       "avatar": "https://avatar.vercel.sh/vercel.svg?text=VB",
       "link": "/workspace",
       "is_read": 0,
@@ -1831,7 +1831,7 @@
       "avatar": null,
       "home_path": "/workspace",
       "phone": null,
-      "email": "admin@vben.dev",
+      "email": "admin@example.com",
       "dept_id": null,
       "status": 1,
       "remark": null,
