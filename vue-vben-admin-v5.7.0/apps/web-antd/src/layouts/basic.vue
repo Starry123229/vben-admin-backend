@@ -246,7 +246,7 @@ watch(
         :avatar
         :menus
         :text="userStore.userInfo?.realName"
-        description="admin@vben-demo.com"
+        :description="userStore.userInfo?.email ?? ''"
         tag-text="Pro"
         @logout="handleLogout"
         @clear-preferences-and-logout="handleLogout"
