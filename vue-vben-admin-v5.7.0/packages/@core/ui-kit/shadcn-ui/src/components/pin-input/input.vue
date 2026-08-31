@@ -17,7 +17,8 @@ const {
   createText = (countdown: number) =>
     countdown > 0 ? `${countdown}s后重发` : '发送验证码',
   disabled = false,
-  handleSendCode = async () => {},
+  // 未显式传入发送逻辑时不渲染内嵌发送按钮（防止"只倒计时不发送"的死按钮）
+  handleSendCode = undefined,
   loading = false,
   maxTime = 60,
 } = defineProps<PinInputProps>();
@@ -111,6 +112,7 @@ const pinType = 'text' as const;
         />
       </PinInputGroup>
       <VbenButton
+        v-if="handleSendCode"
         :disabled="disabled"
         :loading="btnLoading"
         class="grow"

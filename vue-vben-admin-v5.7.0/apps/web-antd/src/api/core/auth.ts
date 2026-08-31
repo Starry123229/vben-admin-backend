@@ -76,6 +76,17 @@ export async function phoneLoginApi(phone: string, code: string) {
   });
 }
 
+/** 获取登录方式开关（公开接口，登录页据此显隐手机/扫码/注册/第三方入口） */
+export async function getAuthConfigApi() {
+  return requestClient.get<{
+    account: boolean;
+    oauth: boolean;
+    phone: boolean;
+    qrcode: boolean;
+    register: boolean;
+  }>('/auth/config');
+}
+
 /** 生成二维码登录 ticket */
 export async function createQrApi() {
   return requestClient.get<{ ticket: string; status: string }>('/auth/qr/create');

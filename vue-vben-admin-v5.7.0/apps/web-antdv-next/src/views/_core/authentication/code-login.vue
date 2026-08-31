@@ -52,6 +52,12 @@ const formSchema = computed((): VbenFormSchema[] => {
 
 /** 发送短信验证码（开发期 mock 直接回填验证码方便联调） */
 async function sendCode(values: Recordable<any>) {
+  // 前置校验手机号：未填/格式错时不发请求、不启动倒计时
+  const phone: string = values?.phoneNumber ?? '';
+  if (!/^1\d{10}$/.test(phone)) {
+    message.warning('请先输入正确的 11 位手机号');
+    return;
+  }
   try {
     const res = await sendSmsApi(values.phoneNumber);
     codeLoginRef.value?.startCountdown(60);

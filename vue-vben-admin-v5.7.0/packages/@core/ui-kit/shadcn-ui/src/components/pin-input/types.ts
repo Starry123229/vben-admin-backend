@@ -13,8 +13,9 @@ interface PinInputProps {
    */
   disabled?: boolean;
   /**
-   * 自定义验证码发送逻辑
-   * @returns
+   * 自定义验证码发送逻辑。
+   * 仅在显式传入时才渲染内嵌「发送验证码」按钮；不传则不渲染，
+   * 避免出现"点击只倒计时不发送"的死按钮（发送逻辑由外部自行实现）。
    */
   handleSendCode?: () => Promise<void>;
   /**

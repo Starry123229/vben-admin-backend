@@ -2,13 +2,14 @@
 import type { VbenFormSchema } from '@vben/common-ui';
 import type { BasicOption } from '@vben/types';
 
-import { computed, markRaw } from 'vue';
+import { computed, markRaw, onMounted, ref } from 'vue';
 
 import { AuthenticationLogin, SliderCaptcha, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
 import { oauthCallbackApi } from '#/api/core/auth';
 import { useMessage } from 'naive-ui';
+import { getAuthConfigApi } from '#/api/core/auth';
 import { useAuthStore } from '#/store';
 
 defineOptions({ name: 'Login' });
@@ -25,6 +26,23 @@ function handleLoginSubmit(values: Recordable<string>) {
 }
 
 const authStore = useAuthStore();
+
+/** 登录方式开关：来自后端 GET /auth/config（vben.auth.login-methods.*），拉取失败保持默认全开 */
+const loginMethods = ref({ oauth: true, phone: true, qrcode: true, register: true });
+
+onMounted(async () => {
+  try {
+    const config = await getAuthConfigApi();
+    loginMethods.value = {
+      oauth: !!config.oauth,
+      phone: !!config.phone,
+      qrcode: !!config.qrcode,
+      register: !!config.register,
+    };
+  } catch {
+    // 配置接口不可用时保持默认，避免登录页不可用
+  }
+});
 
 /** 第三方登录（mock 模式后端直接签发 token；生产应跳转平台授权页） */
 async function handleOauth(
@@ -116,6 +134,10 @@ const formSchema = computed((): VbenFormSchema[] => {
 
 <template>
   <AuthenticationLogin
+    :show-code-login="loginMethods.phone"
+    :show-qrcode-login="loginMethods.qrcode"
+    :show-register="loginMethods.register"
+    :show-third-party-login="loginMethods.oauth"
     :form-schema="formSchema"
     :loading="authStore.loginLoading"
     @oauth="handleOauth"
