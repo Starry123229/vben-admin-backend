@@ -63,6 +63,15 @@ vben:
     # 开发联调在 application-dev.yml 中打开（VBEN_AUTH_PHONE_AUTO_REGISTER / VBEN_AUTH_OAUTH_AUTO_REGISTER）。
     phone-auto-register: ${VBEN_AUTH_PHONE_AUTO_REGISTER:false}
     oauth-auto-register: ${VBEN_AUTH_OAUTH_AUTO_REGISTER:false}
+
+    # 登录方式开关（开箱即用的唯一入口）：经 GET /auth/config 下发给前端控制登录页显隐，
+    # 后端各辅助接口同步校验。第三方登录默认关闭；需要演示时改为 true 或配 env VBEN_AUTH_LOGIN_METHODS_OAUTH=true。
+    login-methods:
+      account: true       # 账号密码登录
+      phone: true         # 手机验证码登录
+      qrcode: true        # 扫码登录（另一台已登录设备扫码确认）
+      register: true      # 注册入口
+      oauth: false        # 第三方 OAuth（qq/wechat/github/google 总开关）
     # 头像等上传文件的存储根目录（相对路径基于后端进程工作目录，可用 VBEN_AUTH_UPLOAD_DIR 覆盖）
     upload-dir: ${VBEN_AUTH_UPLOAD_DIR:./uploads}
 

@@ -2,6 +2,7 @@ package com.vben.backend.module.auth.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.vben.backend.common.result.R;
+import com.vben.backend.config.LoginMethodsProperties;
 import com.vben.backend.module.auth.dto.LoginRequest;
 import com.vben.backend.module.auth.dto.LoginResult;
 import com.vben.backend.module.auth.service.AuthService;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 认证接口（契约 §3）。
@@ -26,6 +29,19 @@ import java.util.List;
 public class AuthController {
 
     private final AuthService authService;
+    private final LoginMethodsProperties loginMethods;
+
+    /** GET /auth/config：登录方式开关（公开，登录页据此显隐手机/扫码/注册/第三方入口） */
+    @GetMapping("/auth/config")
+    public R<Map<String, Object>> config() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("account", loginMethods.isAccount());
+        data.put("phone", loginMethods.isPhone());
+        data.put("qrcode", loginMethods.isQrcode());
+        data.put("register", loginMethods.isRegister());
+        data.put("oauth", loginMethods.isOauth());
+        return R.ok(data);
+    }
 
     /** POST /auth/login：登录成功返回 accessToken（refreshToken 走 Cookie） */
     @PostMapping("/auth/login")

@@ -36,6 +36,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
                 // 登录前可访问的白名单：核心认证 + 登录辅助功能（注册/手机号/二维码/忘记密码/第三方OAuth）
                 // 注：/auth/qr/scan 需登录态（扫码确认设备），故不列入白名单
                 .excludePathPatterns("/auth/login", "/auth/refresh", "/auth/logout",
+                        "/auth/config",
                         "/auth/register",
                         "/auth/sms/send", "/auth/phone-login",
                         "/auth/qr/create", "/auth/qr/poll",

@@ -3,6 +3,7 @@ package com.vben.backend.module.auth.service;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.vben.backend.common.result.ServiceException;
+import com.vben.backend.config.LoginMethodsProperties;
 import com.vben.backend.config.OAuthProperties;
 import com.vben.backend.module.system.entity.SysUser;
 import com.vben.backend.module.system.entity.SysUserRole;
@@ -44,6 +45,8 @@ public class AuthExtService {
     private final CodeStore codeStore;
     /** 第三方 OAuth 配置（application.yml -> vben.auth.oauth.*） */
     private final OAuthProperties oauthProperties;
+    /** 登录方式开关（application.yml -> vben.auth.login-methods.*，与 /auth/config 下发同源） */
+    private final LoginMethodsProperties loginMethods;
     /** 邮件发送器：spring-boot-starter-mail 自动装配；未配置 SMTP 时也不影响启动 */
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
 
@@ -81,6 +84,9 @@ public class AuthExtService {
     @Transactional
     public String register(String username, String password, String realName,
                            String phone, String email, HttpServletResponse response) {
+        if (!loginMethods.isRegister()) {
+            throw ServiceException.forbidden("注册功能已关闭");
+        }
         if (!StringUtils.hasText(username) || !StringUtils.hasText(password)) {
             throw ServiceException.badRequest("用户名和密码不能为空");
         }
@@ -116,6 +122,9 @@ public class AuthExtService {
 
     /** 发送短信验证码。开发期 mock 直返回验证码，生产接入短信服务后返回 null。 */
     public String sendSmsCode(String phone) {
+        if (!loginMethods.isPhone()) {
+            throw ServiceException.forbidden("手机号登录已关闭");
+        }
         if (!StringUtils.hasText(phone) || !PHONE_PATTERN.matcher(phone).matches()) {
             throw ServiceException.badRequest("手机号格式不正确");
         }
@@ -124,9 +133,12 @@ public class AuthExtService {
         return smsMock ? code : null;
     }
 
-    /** 手机号 + 验证码登录；用户不存在则自动注册。 */
+    /** 手机号 + 验证码登录；用户不存在则按 phone-auto-register 开关决定是否注册。 */
     @Transactional
     public String loginByPhone(String phone, String code, HttpServletResponse response) {
+        if (!loginMethods.isPhone()) {
+            throw ServiceException.forbidden("手机号登录已关闭");
+        }
         if (!codeStore.verify("sms:" + phone, code)) {
             throw ServiceException.badRequest("验证码错误或已过期");
         }
@@ -157,6 +169,9 @@ public class AuthExtService {
      * 登录态闭环：另一台"已登录"设备扫码成功后，本机轮询到 confirmed 即取得 accessToken。
      */
     public QrSession createQr() {
+        if (!loginMethods.isQrcode()) {
+            throw ServiceException.forbidden("扫码登录已关闭");
+        }
         String ticket = UUID.randomUUID().toString().replace("-", "");
         QrSession session = new QrSession(ticket);
         QrSession.SESSIONS.put(ticket, session);
@@ -257,6 +272,9 @@ public class AuthExtService {
 
     /** 生成第三方授权跳转 URL（mock 模式返回本地演示地址；配置真实 appid 后跳官方授权）。 */
     public String oauthUrl(String provider) {
+        if (!loginMethods.isOauth()) {
+            throw ServiceException.forbidden("第三方登录已关闭");
+        }
         String clientId = oauthClientId(provider);
         String redirectUri = oauthRedirectUri(provider);
         String authBase = switch (provider) {
@@ -276,6 +294,9 @@ public class AuthExtService {
     /** 第三方授权回调：mock 模式用 provider 名构造临时账号登录；生产应在收到 code 后向平台换 token。 */
     @Transactional
     public String oauthCallback(String provider, String code, HttpServletResponse response) {
+        if (!loginMethods.isOauth()) {
+            throw ServiceException.forbidden("第三方登录已关闭");
+        }
         if (StringUtils.hasText(oauthClientId(provider))) {
             // TODO 生产：用 code 调平台接口换用户信息，绑定本地账号
             throw ServiceException.badRequest("生产 OAuth 需配置真实平台凭证后实现");

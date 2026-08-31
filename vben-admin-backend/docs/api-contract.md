@@ -242,7 +242,27 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 Node 端实现时应对应校验同一套码（建议中间件读同一 `sys_menu` 表）。
 
-### 3.5.3 登录辅助安全开关（默认全关）
+### 3.5.3 登录方式开关（前后端同源，默认第三方关）
+
+`application.yml -> vben.auth.login-methods.*` 是登录方式的唯一配置入口：
+
+```yaml
+vben:
+  auth:
+    login-methods:
+      account: true    # 账号密码登录
+      phone: true      # 手机验证码登录
+      qrcode: true     # 扫码登录
+      register: true   # 注册入口
+      oauth: false     # 第三方 OAuth 总开关（默认关）
+```
+
+- **下发**：`GET /auth/config`（公开，免鉴权）返回上述五个布尔值；登录页据此显隐「手机号登录/扫码登录/创建账号/第三方图标」。
+- **后端强制**：`phone=false` 时 `/auth/sms/send`、`/auth/phone-login` 返回 403「手机号登录已关闭」；`qrcode=false` 时 `/auth/qr/*` 拒绝；`register=false` 时 `/auth/register` 拒绝；`oauth=false` 时 `/auth/oauth/*` 返回 403「第三方登录已关闭」。
+- 前端登录页在 `onMounted` 拉取该配置，拉取失败时保持默认全开，避免登录页不可用。
+- Node 端实现时需提供同语义的 `/auth/config` 并在各辅助接口做相同校验。
+
+### 3.5.4 登录辅助安全开关（默认全关）
 
 | 配置 | 默认 | 行为 |
 |------|------|------|
