@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaMode;
 import com.vben.backend.common.result.R;
+import com.vben.backend.module.system.annotation.Log;
 import com.vben.backend.module.system.dto.DeptSaveRequest;
 import com.vben.backend.module.system.service.SysDeptService;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,7 @@ public class SystemDeptController {
 
     /** POST /system/dept：新建部门（仅 super/admin） */
     @SaCheckRole(value = {"super", "admin"}, mode = SaMode.OR)
+    @Log(module = "部门管理", description = "新增部门")
     @PostMapping
     public R<Long> create(@RequestBody DeptSaveRequest req) {
         return R.ok(deptService.create(req));
@@ -48,6 +50,7 @@ public class SystemDeptController {
 
     /** PUT /system/dept/{id}：更新部门（仅 super/admin） */
     @SaCheckRole(value = {"super", "admin"}, mode = SaMode.OR)
+    @Log(module = "部门管理", description = "编辑部门")
     @PutMapping("/{id}")
     public R<Void> update(@PathVariable Long id, @RequestBody DeptSaveRequest req) {
         if (req.getId() == null) {
@@ -59,6 +62,7 @@ public class SystemDeptController {
 
     /** DELETE /system/dept/{id}：删除部门（仅 super/admin） */
     @SaCheckRole(value = {"super", "admin"}, mode = SaMode.OR)
+    @Log(module = "部门管理", description = "删除部门")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {
         deptService.remove(id);

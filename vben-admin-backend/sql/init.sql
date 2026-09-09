@@ -116,6 +116,100 @@ CREATE TABLE IF NOT EXISTS `sys_notice` (
     KEY `idx_role_id` (`role_id`)
 ) ENGINE = InnoDB COMMENT = '通知消息表';
 
+-- ------------------------------------------------------------------------------ 系统参数配置表
+CREATE TABLE IF NOT EXISTS `sys_config` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+    `name`        VARCHAR(100) NOT NULL COMMENT '参数名称',
+    `key`         VARCHAR(100) NOT NULL COMMENT '参数键',
+    `value`       TEXT         NOT NULL COMMENT '参数值',
+    `type`        VARCHAR(20)  DEFAULT 'string' COMMENT '类型:string/number/boolean/json',
+    `remark`      VARCHAR(500) DEFAULT NULL,
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_key` (`key`)
+) ENGINE = InnoDB COMMENT = '系统参数配置表';
+
+-- ------------------------------------------------------------------------------ 定时任务表
+CREATE TABLE IF NOT EXISTS `sys_job` (
+    `id`           BIGINT       NOT NULL AUTO_INCREMENT,
+    `name`         VARCHAR(100) NOT NULL COMMENT '任务名称',
+    `group_name`   VARCHAR(50)  DEFAULT 'DEFAULT' COMMENT '任务分组',
+    `invoke_target` VARCHAR(255) NOT NULL COMMENT '调用目标(Bean.方法)',
+    `cron`         VARCHAR(100) NOT NULL COMMENT 'cron表达式',
+    `status`       TINYINT      NOT NULL DEFAULT 0 COMMENT '0暂停/1运行',
+    `remark`       VARCHAR(500) DEFAULT NULL,
+    `create_time`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE = InnoDB COMMENT = '定时任务表';
+
+-- ------------------------------------------------------------------------------ 数据字典类型表
+CREATE TABLE IF NOT EXISTS `sys_dict_type` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '字典ID',
+    `name`        VARCHAR(100) NOT NULL COMMENT '字典名称',
+    `code`        VARCHAR(100) NOT NULL COMMENT '字典编码',
+    `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '状态:0停用/1启用',
+    `remark`      VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_code` (`code`)
+) ENGINE = InnoDB COMMENT = '字典类型表';
+
+-- ------------------------------------------------------------------------------ 数据字典数据表
+CREATE TABLE IF NOT EXISTS `sys_dict_data` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '数据ID',
+    `type_id`     BIGINT       NOT NULL COMMENT '字典类型ID',
+    `label`       VARCHAR(100) NOT NULL COMMENT '字典标签',
+    `value`       VARCHAR(100) NOT NULL COMMENT '字典值',
+    `sort`        INT          NOT NULL DEFAULT 0 COMMENT '排序(小在前)',
+    `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '状态:0停用/1启用',
+    `css_class`   VARCHAR(100) DEFAULT NULL COMMENT 'CSS样式',
+    `remark`      VARCHAR(500) DEFAULT NULL COMMENT '备注',
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_type_id` (`type_id`)
+) ENGINE = InnoDB COMMENT = '字典数据表';
+
+-- ------------------------------------------------------------------------------ 操作日志表
+CREATE TABLE IF NOT EXISTS `sys_operation_log` (
+    `id`             BIGINT       NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+    `user_id`        BIGINT       DEFAULT NULL COMMENT '操作用户ID',
+    `username`       VARCHAR(64)  DEFAULT NULL COMMENT '操作用户名',
+    `module`         VARCHAR(64)  DEFAULT NULL COMMENT '操作模块',
+    `description`    VARCHAR(255) DEFAULT NULL COMMENT '操作描述',
+    `method`         VARCHAR(255) DEFAULT NULL COMMENT '请求方法',
+    `request_url`    VARCHAR(255) DEFAULT NULL COMMENT '请求URL',
+    `request_method` VARCHAR(16)  DEFAULT NULL COMMENT 'HTTP方法',
+    `request_params` TEXT         DEFAULT NULL COMMENT '请求参数',
+    `ip`             VARCHAR(64)  DEFAULT NULL COMMENT 'IP地址',
+    `status`         TINYINT      NOT NULL DEFAULT 1 COMMENT '状态:0失败/1成功',
+    `error_msg`      TEXT         DEFAULT NULL COMMENT '错误信息',
+    `cost_time`      BIGINT       DEFAULT NULL COMMENT '耗时(ms)',
+    `create_time`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE = InnoDB COMMENT = '操作日志表';
+
+-- ------------------------------------------------------------------------------ 登录日志表
+CREATE TABLE IF NOT EXISTS `sys_login_log` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+    `user_id`     BIGINT       DEFAULT NULL COMMENT '登录用户ID',
+    `username`    VARCHAR(64)  DEFAULT NULL COMMENT '登录用户名',
+    `ip`          VARCHAR(64)  DEFAULT NULL COMMENT 'IP地址',
+    `location`    VARCHAR(255) DEFAULT NULL COMMENT '登录地点',
+    `browser`     VARCHAR(128) DEFAULT NULL COMMENT '浏览器',
+    `os`          VARCHAR(128) DEFAULT NULL COMMENT '操作系统',
+    `status`      TINYINT      NOT NULL DEFAULT 1 COMMENT '状态:0失败/1成功',
+    `message`     VARCHAR(255) DEFAULT NULL COMMENT '提示消息',
+    `login_type`  VARCHAR(32)  DEFAULT NULL COMMENT '登录方式:account/phone/qrcode/oauth',
+    `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE = InnoDB COMMENT = '登录日志表';
+
 -- ==============================================================================
 -- 演示数据
 -- ==============================================================================
@@ -142,12 +236,16 @@ INSERT INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `redir
 (2,   1,   'Analytics',               'menu',    '/analytics',                '/dashboard/analytics/index',  NULL,                         1, 0, NULL,        '{"affixTab":true,"title":"page.dashboard.analytics"}'),
 (3,   1,   'Workspace',               'menu',    '/workspace',                '/dashboard/workspace/index',  NULL,                         1, 1, NULL,        '{"title":"page.dashboard.workspace"}'),
 (21,  0,   'Profile',                 'menu',    '/profile',                  '_core/profile/index',          NULL,                         1, 3, NULL,        '{"hideInMenu":true,"icon":"lucide:user","title":"page.auth.profile"}'),
-(100, 0,   'System',                  'catalog', '/system',                   NULL,                          '/system/user',               1, 1, NULL,        '{"icon":"lucide:settings","order":1,"title":"系统管理"}'),
-(101, 100, 'SystemUser',              'menu',    'user',                      '/system/user/index',          NULL,                         1, 0, NULL,        '{"icon":"lucide:user","order":0,"title":"用户管理"}'),
-(102, 100, 'SystemRole',              'menu',    'role',                      '/system/role/index',          NULL,                         1, 1, NULL,        '{"icon":"lucide:users","order":1,"title":"角色管理"}'),
-(103, 100, 'SystemDept',              'menu',    'dept',                      '/system/dept/index',          NULL,                         1, 2, NULL,        '{"icon":"lucide:building-2","order":2,"title":"部门管理"}'),
-(104, 100, 'SystemMenu',              'menu',    'menu',                      '/system/menu/index',          NULL,                         1, 3, NULL,        '{"icon":"lucide:menu","order":3,"title":"菜单管理"}'),
-(105, 100, 'Notice',                  'menu',    'notice',                    '/system/notice/index',        NULL,                         1, 10, NULL,       '{"icon":"lucide:bell","order":10,"title":"通知管理"}'),
+(100, 0,   'System',                  'catalog', '/system',                   NULL,                          '/system/user',               1, 1, NULL,        '{"icon":"lucide:settings","order":1,"title":"page.system.title"}'),
+(101, 100, 'SystemUser',              'menu',    'user',                      '/system/user/index',          NULL,                         1, 0, NULL,        '{"icon":"lucide:user","order":0,"title":"page.system.user"}'),
+(102, 100, 'SystemRole',              'menu',    'role',                      '/system/role/index',          NULL,                         1, 1, NULL,        '{"icon":"lucide:users","order":1,"title":"page.system.role"}'),
+(103, 100, 'SystemDept',              'menu',    'dept',                      '/system/dept/index',          NULL,                         1, 2, NULL,        '{"icon":"lucide:building-2","order":2,"title":"page.system.dept"}'),
+(104, 100, 'SystemMenu',              'menu',    'menu',                      '/system/menu/index',          NULL,                         1, 3, NULL,        '{"icon":"lucide:menu","order":3,"title":"page.system.menu"}'),
+(105, 100, 'Notice',                  'menu',    'notice',                    '/system/notice/index',        NULL,                         1, 10, NULL,       '{"icon":"lucide:bell","order":10,"title":"page.system.notice"}'),
+(106, 100, 'OperationLog',             'menu',    'operation-log',              '/system/operation-log/index', NULL,                        1, 4, NULL,        '{"icon":"lucide:file-text","order":4,"title":"page.system.operationLog"}'),
+(107, 100, 'LoginLog',                 'menu',    'login-log',                  '/system/login-log/index',     NULL,                        1, 5, NULL,        '{"icon":"lucide:log-in","order":5,"title":"page.system.loginLog"}'),
+(108, 100, 'Dict',                     'menu',    'dict',                       '/system/dict/index',           NULL,                        1, 6, NULL,        '{"icon":"lucide:book-open","order":6,"title":"page.system.dict"}'),
+(109, 108, 'DictData',                 'menu',    'data/:typeId',               '/system/dict/data',            NULL,                        1, 0, NULL,        '{"hideInMenu":true,"title":"字典数据"}'),
 (1001,101, 'SystemUserCreate',        'button',  NULL,                        NULL,                          NULL,                         1, 0, 'AC_100010', '{"title":"新增用户"}'),
 (1002,101, 'SystemUserUpdate',        'button',  NULL,                        NULL,                          NULL,                         1, 1, 'AC_100020', '{"title":"编辑用户"}'),
 (1003,101, 'SystemUserDelete',        'button',  NULL,                        NULL,                          NULL,                         1, 2, 'AC_100030', '{"title":"删除用户"}'),
@@ -168,8 +266,8 @@ INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
 (2,1),(2,2),(2,3),(2,21),
 (3,1),(3,2),(3,21),
 -- 系统管理 + 通知管理：super / admin 全部页面；user 仅系统管理目录 + 用户/角色管理页
-(1,100),(1,101),(1,102),(1,103),(1,104),(1,105),
-(2,100),(2,101),(2,102),(2,103),(2,104),(2,105),
+(1,100),(1,101),(1,102),(1,103),(1,104),(1,105),(1,106),(1,107),(1,108),(1,109),
+(2,100),(2,101),(2,102),(2,103),(2,104),(2,105),(2,106),(2,107),(2,108),(2,109),
 (3,100),(3,101),(3,102),
 -- 按钮权限：super/admin 全部；user = 用户只读(1006) + 角色查看/编辑(1004,1005)，无用户增删改码
 (1,1001),(1,1002),(1,1003),(1,1006),(1,1004),(1,1005),
@@ -188,3 +286,34 @@ INSERT INTO `sys_notice` (`title`, `message`, `avatar`, `link`, `is_read`, `user
 ('欢迎使用系统', '您已成功登录系统（管理员）。', 'https://avatar.vercel.sh/vercel.svg?text=VB', '/analytics', 0, 2, 'info'),
 ('权限变更通知', '您的管理员权限已更新，请重新登录以刷新权限。', 'https://avatar.vercel.sh/1', NULL, 0, 2, 'warning'),
 ('欢迎使用系统', '您已成功登录系统（普通用户）。', 'https://avatar.vercel.sh/vercel.svg?text=VB', '/analytics', 0, 3, 'info');
+
+-- 系统参数配置
+INSERT INTO `sys_config` (`name`, `key`, `value`, `type`, `remark`) VALUES
+('系统名称', 'sys.name', 'Vben Admin', 'string', '系统显示名称'),
+('默认密码', 'sys.default-password', '123456', 'string', '新增用户/重置密码时的默认密码'),
+('登录失败次数', 'sys.login.max-fail-count', '5', 'number', '连续登录失败次数限制'),
+('账号锁定时长(分钟)', 'sys.login.lock-minutes', '30', 'number', '账号锁定时长'),
+('Token有效期(秒)', 'sys.token.timeout', '7200', 'number', 'accessToken有效期');
+
+-- 定时任务
+INSERT INTO `sys_job` (`name`, `group_name`, `invoke_target`, `cron`, `status`, `remark`) VALUES
+('系统状态检查', 'SYSTEM', 'systemMonitorTask.checkStatus', '0 0 * * * ?', 0, '每小时检查系统状态'),
+('清理过期Token', 'SYSTEM', 'authCleanupTask.cleanExpiredTokens', '0 30 * * * ?', 0, '每小时清理过期Token');
+
+-- 数据字典类型
+INSERT INTO `sys_dict_type` (`id`, `name`, `code`, `status`, `remark`) VALUES
+(1, '用户性别', 'sys_user_gender', 1, '用户性别列表'),
+(2, '菜单状态', 'sys_menu_status', 1, '菜单状态列表'),
+(3, '通知类型', 'sys_notice_type', 1, '通知类型列表');
+
+-- 数据字典数据
+INSERT INTO `sys_dict_data` (`type_id`, `label`, `value`, `sort`, `status`, `css_class`) VALUES
+(1, '男', '1', 1, 1, 'primary'),
+(1, '女', '0', 2, 1, 'danger'),
+(1, '未知', '2', 3, 1, 'info'),
+(2, '启用', '1', 1, 1, 'success'),
+(2, '停用', '0', 2, 1, 'error'),
+(3, '通知', 'info', 1, 1, 'primary'),
+(3, '成功', 'success', 2, 1, 'success'),
+(3, '警告', 'warning', 3, 1, 'warning'),
+(3, '错误', 'error', 4, 1, 'danger');

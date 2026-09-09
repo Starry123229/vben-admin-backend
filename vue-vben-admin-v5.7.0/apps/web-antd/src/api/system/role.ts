@@ -44,10 +44,22 @@ async function assignRoleMenus(id: number, data: { menuIds: number[] }) {
   return requestClient.post(`/system/role/${id}/menus`, data);
 }
 
+/** 导出角色列表 Excel */
+async function exportRoleList(params?: Recordable<any>) {
+  const blob = await requestClient.download<Blob>('/system/role/export', { params });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '角色列表.xlsx';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export {
   assignRoleMenus,
   createRole,
   deleteRole,
+  exportRoleList,
   getRoleList,
   getRoleMenus,
   updateRole,

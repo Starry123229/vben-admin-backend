@@ -6,13 +6,13 @@ import type {
 import type { SystemRoleApi } from '#/api/system/role';
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
-import { Plus } from '@vben/icons';
+import { Download, Plus } from '@vben/icons';
 
 import { Button, message, Modal } from 'ant-design-vue';
 
 import { useAccess } from '@vben/access';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteRole, getRoleList, updateRole } from '#/api/system/role';
+import { deleteRole, exportRoleList, getRoleList, updateRole } from '#/api/system/role';
 
 import { useRoleColumns, useRoleGridFormSchema } from './data';
 import Form from './modules/form.vue';
@@ -116,6 +116,15 @@ function onRefresh() {
 function onCreate() {
   formDrawerApi.setData({}).open();
 }
+
+async function onExport() {
+  try {
+    await exportRoleList();
+    message.success('导出成功');
+  } catch {
+    message.error('导出失败');
+  }
+}
 </script>
 <template>
   <Page auto-content-height>
@@ -125,6 +134,10 @@ function onCreate() {
         <Button v-if="hasAccessByCodes(['AC_1000002'])" type="primary" @click="onCreate">
           <Plus class="size-5" />
           新增角色
+        </Button>
+        <Button v-if="hasAccessByCodes(['AC_1000001'])" @click="onExport">
+          <Download class="size-5" />
+          导出Excel
         </Button>
       </template>
     </Grid>

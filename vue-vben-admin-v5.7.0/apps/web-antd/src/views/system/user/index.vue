@@ -10,13 +10,13 @@ import type { SystemUserApi } from '#/api/system/user';
 import { computed, onMounted, ref } from 'vue';
 
 import { Page, Tree, useVbenDrawer } from '@vben/common-ui';
-import { Plus } from '@vben/icons';
+import { Download, Plus } from '@vben/icons';
 
 import { Button, message, Modal } from 'ant-design-vue';
 
 import { useAccess } from '@vben/access';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteUser, getUserList, updateUser } from '#/api/system/user';
+import { deleteUser, exportUserList, getUserList, updateUser } from '#/api/system/user';
 import { getDeptList } from '#/api/system/dept';
 
 import { useUserColumns, useUserGridFormSchema } from './data';
@@ -129,6 +129,20 @@ function onCreate() {
   formDrawerApi.setData({}).open();
 }
 
+async function onExport() {
+  try {
+    const gridData = gridApi.grid?.data || [];
+    const params: Recordable<any> = {};
+    if (selectedDeptId.value) {
+      params.deptId = Number(selectedDeptId.value);
+    }
+    await exportUserList(params);
+    message.success('导出成功');
+  } catch {
+    message.error('导出失败');
+  }
+}
+
 function buildDeptTree(list: Recordable<any>[]) {
   const map = new Map<number, any>();
   const roots: any[] = [];
@@ -191,6 +205,10 @@ onMounted(async () => {
             <Button v-if="hasAccessByCodes(['AC_100010'])" type="primary" @click="onCreate">
               <Plus class="size-5" />
               新增用户
+            </Button>
+            <Button v-if="hasAccessByCodes(['AC_1000000'])" @click="onExport">
+              <Download class="size-5" />
+              导出Excel
             </Button>
           </template>
         </Grid>

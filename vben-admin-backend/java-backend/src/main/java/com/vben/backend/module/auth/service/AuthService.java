@@ -10,6 +10,8 @@ import com.vben.backend.module.system.entity.SysRole;
 import com.vben.backend.module.system.entity.SysRoleMenu;
 import com.vben.backend.module.system.entity.SysUser;
 import com.vben.backend.module.system.entity.SysUserRole;
+import com.vben.backend.module.system.entity.SysLoginLog;
+import com.vben.backend.module.system.mapper.SysLoginLogMapper;
 import com.vben.backend.module.system.mapper.SysMenuMapper;
 import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysRoleMenuMapper;
@@ -51,6 +53,7 @@ public class AuthService {
     private final SysRoleMenuMapper roleMenuMapper;
     private final SysMenuMapper menuMapper;
     private final SysRefreshTokenMapper refreshTokenMapper;
+    private final SysLoginLogMapper loginLogMapper;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Value("${vben.auth.refresh-token-days:7}")
@@ -70,6 +73,7 @@ public class AuthService {
         SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getUsername, username));
         if (user == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
+            recordLoginLog(user != null ? user.getId() : null, username, null, "account", 0, "用户名或密码错误");
             throw ServiceException.forbidden("Username or password is incorrect.");
         }
         return loginByUserId(user.getId(), response);
@@ -86,6 +90,7 @@ public class AuthService {
         }
         StpUtil.login(userId);
         issueRefreshToken(userId, response);
+        recordLoginLog(userId, user.getUsername(), null, "account", 1, "登录成功");
         return StpUtil.getTokenValue();
     }
 
@@ -167,6 +172,24 @@ public class AuthService {
     }
 
     // ---------------------------------------------------------------------------- 私有方法
+
+    /** 记录登录日志 */
+    private void recordLoginLog(Long userId, String username, String ip,
+                                String loginType, int status, String message) {
+        try {
+            SysLoginLog log = new SysLoginLog();
+            log.setUserId(userId);
+            log.setUsername(username);
+            log.setIp(ip);
+            log.setStatus(status);
+            log.setMessage(message);
+            log.setLoginType(loginType);
+            log.setCreateTime(LocalDateTime.now());
+            loginLogMapper.insert(log);
+        } catch (Exception e) {
+            // 日志记录失败不影响主流程
+        }
+    }
 
     /** 生成随机 refreshToken，SHA-256 入库，并写入 HttpOnly Cookie */
     private void issueRefreshToken(long userId, HttpServletResponse response) {

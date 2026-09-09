@@ -16,10 +16,10 @@ public class PageResult<T> {
     private List<T> items;
 
     /** 总条数 */
-    private long total;
+    private int total;
 
     public PageResult(List<T> items, long total) {
         this.items = items;
-        this.total = total;
+        this.total = (int) total;
     }
 }

@@ -3,6 +3,7 @@ package com.vben.backend.module.system.controller;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaMode;
 import com.vben.backend.common.result.R;
+import com.vben.backend.module.system.annotation.Log;
 import com.vben.backend.module.system.dto.MenuSaveRequest;
 import com.vben.backend.module.system.service.SysMenuService;
 import lombok.RequiredArgsConstructor;
@@ -45,12 +46,14 @@ public class SystemMenuController {
     }
 
     /** POST /system/menu：新建菜单 */
+    @Log(module = "菜单管理", description = "新增菜单")
     @PostMapping
     public R<Long> create(@RequestBody MenuSaveRequest req) {
         return R.ok(menuService.create(req));
     }
 
     /** PUT /system/menu/{id}：更新菜单（id 走路径，body 无 id 时以路径为准） */
+    @Log(module = "菜单管理", description = "编辑菜单")
     @PutMapping("/{id}")
     public R<Void> update(@PathVariable Long id, @RequestBody MenuSaveRequest req) {
         if (req.getId() == null) {
@@ -61,6 +64,7 @@ public class SystemMenuController {
     }
 
     /** DELETE /system/menu/{id}：删除菜单 */
+    @Log(module = "菜单管理", description = "删除菜单")
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {
         menuService.remove(id);
