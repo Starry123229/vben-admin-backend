@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { h, onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
 import { useAccessStore } from '@vben/stores';
 import {
@@ -24,7 +24,14 @@ const columns = [
   { title: '用户名', key: 'username', width: 120 },
   { title: 'Token', key: 'token', ellipsis: { tooltip: true }, width: 250 },
   { title: '登录时间', key: 'loginTime', width: 180 },
-  { title: '操作', key: 'actions', width: 100, fixed: 'right' },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 100,
+    fixed: 'right',
+    render: (row: any) =>
+      h(Button, { type: 'error', text: true, size: 'small', onClick: () => handleForceLogout(row) }, { default: () => '强制下线' }),
+  },
 ];
 
 async function loadData() {
@@ -64,9 +71,6 @@ onMounted(() => loadData());
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="800"
         :pagination="false" :row-key="(row: any) => row.token" size="small">
-        <template #actions="{ row }">
-          <Button type="error" text size="small" @click="handleForceLogout(row)">强制下线</Button>
-        </template>
       </DataTable>
     </div>
   </Page>

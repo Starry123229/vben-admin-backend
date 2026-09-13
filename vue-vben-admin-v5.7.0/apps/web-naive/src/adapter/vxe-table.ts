@@ -238,7 +238,7 @@ setupVbenVxeTable({
           'div',
           {
             class: 'flex table-operations',
-            style: { justifyContent: align },
+            style: { columnGap: '6px', justifyContent: align },
           },
           btns,
         );

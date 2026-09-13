@@ -166,7 +166,6 @@ catalog:
   stylelint-scss: ^7.1.1
   tailwind-merge: ^3.6.0
   tailwindcss: ^4.3.0
-  tdesign-vue-next: ^1.20.0
   theme-colors: ^0.1.0
   tippy.js: ^6.3.7
   tsdown: ^0.22.0

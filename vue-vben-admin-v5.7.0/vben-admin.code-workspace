@@ -17,10 +17,6 @@
       "path": "apps/web-naive"
     },
     {
-      "name": "@vben/web-tdesign",
-      "path": "apps/web-tdesign"
-    },
-    {
       "name": "@vben/commitlint-config",
       "path": "internal/lint-configs/commitlint-config"
     },

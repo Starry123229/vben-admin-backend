@@ -1,6 +1,5 @@
 package com.vben.backend.module.system.service;
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,7 +8,6 @@ import com.vben.backend.module.system.entity.SysLoginLog;
 import com.vben.backend.module.system.entity.SysOperationLog;
 import com.vben.backend.module.system.mapper.SysLoginLogMapper;
 import com.vben.backend.module.system.mapper.SysOperationLogMapper;
-import com.vben.backend.module.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +25,6 @@ public class SysLogService {
 
     private final SysOperationLogMapper operationLogMapper;
     private final SysLoginLogMapper loginLogMapper;
-    private final SysUserMapper userMapper;
 
     /**
      * 操作日志分页列表。

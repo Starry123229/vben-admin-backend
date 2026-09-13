@@ -46,23 +46,27 @@ public class SysDictService {
         return new PageResult<>(result.getRecords(), result.getTotal());
     }
 
+    /** 新建字典类型：校验编码非空与唯一性 */
     public Long createType(SysDictType type) {
-        if (!StringUtils.hasText(type.getCode())) {
+        String code = type.getCode();
+        if (!StringUtils.hasText(code)) {
             throw ServiceException.badRequest("字典编码不能为空");
         }
-        if (codeExists(type.getCode(), null)) {
-            throw ServiceException.badRequest("字典编码已存在: " + type.getCode());
+        if (codeExists(code, null)) {
+            throw ServiceException.badRequest("字典编码已存在: " + code);
         }
         dictTypeMapper.insert(type);
         return type.getId();
     }
 
+    /** 更新字典类型：id 必须存在，编码改动时校验唯一性 */
     public void updateType(SysDictType type) {
         if (type.getId() == null || dictTypeMapper.selectById(type.getId()) == null) {
             throw ServiceException.badRequest("字典类型不存在");
         }
-        if (StringUtils.hasText(type.getCode()) && codeExists(type.getCode(), type.getId())) {
-            throw ServiceException.badRequest("字典编码已存在: " + type.getCode());
+        String code = type.getCode();
+        if (StringUtils.hasText(code) && codeExists(code, type.getId())) {
+            throw ServiceException.badRequest("字典编码已存在: " + code);
         }
         dictTypeMapper.updateById(type);
     }

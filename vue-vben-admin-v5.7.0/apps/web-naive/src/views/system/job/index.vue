@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { h, onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
 import {
   NButton as Button,
-  NDialog as Dialog,
   NInput as Input,
   NDataTable as DataTable,
+  NModal as Modal,
   NSpace as Space,
   NTag as Tag,
   useDialog,
@@ -28,9 +28,26 @@ const columns = [
   { title: '分组', key: 'groupName', width: 100 },
   { title: '调用目标', key: 'invokeTarget', width: 200 },
   { title: 'Cron表达式', key: 'cron', width: 150 },
-  { title: '状态', key: 'status', width: 80 },
+  {
+    title: '状态',
+    key: 'status',
+    width: 80,
+    render: (row: any) =>
+      h(Tag, { type: row.status === 1 ? 'success' : 'default' }, { default: () => (row.status === 1 ? '运行' : '暂停') }),
+  },
   { title: '备注', key: 'remark', ellipsis: { tooltip: true }, width: 200 },
-  { title: '操作', key: 'actions', width: 200, fixed: 'right' },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 200,
+    fixed: 'right' as const,
+    render: (row: any) =>
+      h('div', { class: 'flex items-center gap-1' }, [
+        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleToggle(row) }, { default: () => (row.status === 1 ? '暂停' : '启动') }),
+        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleEdit(row) }, { default: () => '编辑' }),
+        h(Button, { type: 'error', text: true, size: 'small', onClick: () => handleDelete(row) }, { default: () => '删除' }),
+      ]),
+  },
 ];
 
 async function loadData() {
@@ -76,16 +93,8 @@ onMounted(() => loadData());
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="900"
         :pagination="false" :row-key="(row: any) => row.id" size="small">
-        <template #status="{ row }">
-          <Tag :type="row.status === 1 ? 'success' : 'default'">{{ row.status === 1 ? '运行' : '暂停' }}</Tag>
-        </template>
-        <template #actions="{ row }">
-          <Button type="primary" text size="small" @click="handleToggle(row)">{{ row.status === 1 ? '暂停' : '启动' }}</Button>
-          <Button type="primary" text size="small" @click="handleEdit(row)">编辑</Button>
-          <Button type="error" text size="small" @click="handleDelete(row)">删除</Button>
-        </template>
       </DataTable>
-      <Dialog v-model:show="modalVisible" :title="modalTitle" style="width: 500px">
+      <Modal v-model:show="modalVisible" preset="card" :title="modalTitle" style="width: 520px">
         <div class="space-y-3 py-4">
           <div><label class="mb-1 block text-sm">任务名称</label><Input v-model:value="formState.name" placeholder="请输入任务名称" /></div>
           <div><label class="mb-1 block text-sm">分组</label><Input v-model:value="formState.groupName" placeholder="如 DEFAULT" /></div>
@@ -93,13 +102,13 @@ onMounted(() => loadData());
           <div><label class="mb-1 block text-sm">Cron表达式</label><Input v-model:value="formState.cron" placeholder="如 0 0 * * * ?" /></div>
           <div><label class="mb-1 block text-sm">备注</label><Input v-model:value="formState.remark" type="textarea" :rows="2" /></div>
         </div>
-        <template #action>
+        <template #footer>
           <Space>
             <Button @click="modalVisible = false">取消</Button>
             <Button type="primary" :loading="saving" @click="handleSave">确定</Button>
           </Space>
         </template>
-      </Dialog>
+      </Modal>
     </div>
   </Page>
 </template>

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { h, onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
-import { Button, Input, message, Modal, Select, Space, Table, Tag } from 'antdv-next';
+import { Button, Input, message, Modal, Table, Tag } from 'antdv-next';
 import { createJob, deleteJob, getJobList, toggleJob, updateJob } from '#/api/system/job';
 
 defineOptions({ name: 'SysJob' });
@@ -19,12 +19,12 @@ const columns = [
   { title: 'Cron表达式', dataIndex: 'cron', width: 150 },
   {
     title: '状态', dataIndex: 'status', width: 80,
-    customRender: ({ record }: any) => {
+    render: (_: any, record: any) => {
       return record.status === 1 ? h(Tag, { color: 'green' }, () => '运行') : h(Tag, { color: 'default' }, () => '暂停');
     },
   },
   { title: '备注', dataIndex: 'remark', ellipsis: true, width: 200 },
-  { title: '操作', key: 'action', width: 200, fixed: 'right' },
+  { title: '操作', key: 'action', width: 200, fixed: 'right' as const },
 ];
 
 async function loadData() {

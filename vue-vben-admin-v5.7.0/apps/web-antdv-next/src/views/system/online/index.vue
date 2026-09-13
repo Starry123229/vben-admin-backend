@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { h, onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { Page } from '@vben/common-ui';
 import { useAccessStore } from '@vben/stores';
-import { Button, Input, message, Modal, Space, Table, Tag } from 'antdv-next';
+import { Button, Input, message, Modal, Table } from 'antdv-next';
 import { forceLogout, getOnlineList } from '#/api/system/online';
 
 defineOptions({ name: 'OnlineUser' });
@@ -15,7 +15,7 @@ const columns = [
   { title: '用户名', dataIndex: 'username', width: 120 },
   { title: 'Token', dataIndex: 'token', ellipsis: true, width: 250 },
   { title: '登录时间', dataIndex: 'loginTime', width: 180 },
-  { title: '操作', key: 'action', width: 100, fixed: 'right' },
+  { title: '操作', key: 'action', width: 100, fixed: 'right' as const },
 ];
 
 async function loadData() {

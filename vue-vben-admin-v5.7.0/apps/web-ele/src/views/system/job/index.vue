@@ -5,11 +5,8 @@ import {
   ElButton as Button,
   ElDialog as Dialog,
   ElInput as Input,
-  ElInputNumber as InputNumber,
   ElMessage as message,
   ElMessageBox as MessageBox,
-  ElOption as Option,
-  ElSelect as Select,
   ElTable as Table,
   ElTableColumn as TableColumn,
   ElTag as Tag,
@@ -80,7 +77,7 @@ onMounted(() => loadData());
             <Tag :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '运行' : '暂停' }}</Tag>
           </template>
         </TableColumn>
-        <TableColumn prop="remark" label="备注" show-overflow-tooltip width="200" />
+        <TableColumn prop="remark" label="备注" show-overflow-tooltip min-width="200" />
         <TableColumn label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <Button type="primary" link size="small" @click="handleToggle(row)">

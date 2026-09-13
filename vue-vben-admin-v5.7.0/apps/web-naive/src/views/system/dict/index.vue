@@ -30,9 +30,25 @@ const columns = [
   { title: '字典名称', key: 'name', width: 150 },
   { title: '字典编码', key: 'code', width: 200 },
   { title: '备注', key: 'remark', ellipsis: { tooltip: true }, width: 200 },
-  { title: '状态', key: 'status', width: 80 },
+  {
+    title: '状态',
+    key: 'status',
+    width: 80,
+    render: (row: any) =>
+      h(Tag, { type: row.status === 1 ? 'success' : 'error' }, { default: () => (row.status === 1 ? '启用' : '停用') }),
+  },
   { title: '创建时间', key: 'createTime', width: 180, render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' },
-  { title: '操作', key: 'actions', width: 150, fixed: 'right' },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 150,
+    fixed: 'right',
+    render: (row: any) =>
+      h('div', { class: 'flex items-center gap-1' }, [
+        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleEdit(row) }, { default: () => '编辑' }),
+        h(Button, { type: 'error', text: true, size: 'small', onClick: () => handleDelete(row) }, { default: () => '删除' }),
+      ]),
+  },
 ];
 
 async function loadData() {
@@ -72,13 +88,6 @@ onMounted(() => loadData());
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="900"
         :pagination="false" :row-key="(row: any) => row.id" size="small">
-        <template #status="{ row }">
-          <Tag :type="row.status === 1 ? 'success' : 'error'">{{ row.status === 1 ? '启用' : '停用' }}</Tag>
-        </template>
-        <template #actions="{ row }">
-          <Button type="primary" text size="small" @click="handleEdit(row)">编辑</Button>
-          <Button type="error" text size="small" @click="handleDelete(row)">删除</Button>
-        </template>
       </DataTable>
       <div class="mt-4 flex justify-end">
         <Pagination :page="currentPage" :page-size="pageSize" :item-count="total"

@@ -29,7 +29,7 @@ const columns = [
     title: '登录方式',
     dataIndex: 'loginType',
     width: 100,
-    customRender: ({ text }: any) => {
+    render: (text: any) => {
       const map: Record<string, string> = {
         account: '账号密码',
         phone: '手机验证码',
@@ -43,14 +43,14 @@ const columns = [
     title: '状态',
     dataIndex: 'status',
     width: 80,
-    customRender: ({ record }: any) => {
+    render: (_: any, record: any) => {
       return record.status === 1
         ? h(Tag, { color: 'green' }, () => '成功')
         : h(Tag, { color: 'red' }, () => '失败');
     },
   },
   { title: '提示消息', dataIndex: 'message', width: 200, ellipsis: true },
-  { title: '登录时间', dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: '登录时间', dataIndex: 'createTime', width: 180, render: (text: any) => (text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-') },
 ];
 
 async function loadData() {

@@ -43,14 +43,14 @@ const columns = [
     title: '状态',
     dataIndex: 'status',
     width: 80,
-    customRender: ({ record }: any) => {
+    render: (_: any, record: any) => {
       return record.status === 1
         ? h(Tag, { color: 'green' }, () => '启用')
         : h(Tag, { color: 'red' }, () => '停用');
     },
   },
-  { title: '创建时间', dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
-  { title: '操作', key: 'action', width: 150, fixed: 'right' },
+  { title: '创建时间', dataIndex: 'createTime', width: 180, render: (text: any) => (text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-') },
+  { title: '操作', key: 'action', width: 150, fixed: 'right' as const },
 ];
 
 async function loadData() {

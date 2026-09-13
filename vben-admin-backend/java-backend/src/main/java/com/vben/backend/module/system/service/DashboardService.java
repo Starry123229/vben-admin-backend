@@ -2,7 +2,6 @@ package com.vben.backend.module.system.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.vben.backend.module.system.entity.SysDept;
-import com.vben.backend.module.system.entity.SysMenu;
 import com.vben.backend.module.system.entity.SysRole;
 import com.vben.backend.module.system.entity.SysUser;
 import com.vben.backend.module.system.entity.SysLoginLog;

@@ -7,7 +7,6 @@ import { computed, ref } from 'vue';
 import { AuthenticationCodeLogin, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
-import { message } from '#/adapter/naive';
 import { phoneLoginApi, sendSmsApi } from '#/api/core/auth';
 import { useMessage } from 'naive-ui';
 import { useAuthStore } from '#/store';

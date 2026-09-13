@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, h, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Page } from '@vben/common-ui';
 import {
   NButton as Button,
-  NDialog as Dialog,
   NInput as Input,
   NInputNumber as InputNumber,
+  NModal as Modal,
   NSelect as Select,
   NDataTable as DataTable,
   NSpace as Space,
@@ -33,10 +33,26 @@ const columns = [
   { title: '字典标签', key: 'label', width: 150 },
   { title: '字典值', key: 'value', width: 150 },
   { title: '排序', key: 'sort', width: 80 },
-  { title: '状态', key: 'status', width: 80 },
+  {
+    title: '状态',
+    key: 'status',
+    width: 80,
+    render: (row: any) =>
+      h(Tag, { type: row.status === 1 ? 'success' : 'error' }, { default: () => (row.status === 1 ? '启用' : '停用') }),
+  },
   { title: 'CSS样式', key: 'cssClass', width: 100 },
   { title: '备注', key: 'remark', ellipsis: { tooltip: true }, width: 200 },
-  { title: '操作', key: 'actions', width: 150, fixed: 'right' },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 150,
+    fixed: 'right',
+    render: (row: any) =>
+      h('div', { class: 'flex items-center gap-1' }, [
+        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleEdit(row) }, { default: () => '编辑' }),
+        h(Button, { type: 'error', text: true, size: 'small', onClick: () => handleDelete(row) }, { default: () => '删除' }),
+      ]),
+  },
 ];
 
 async function loadData() {
@@ -77,15 +93,8 @@ onMounted(() => loadData());
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="900"
         :pagination="false" :row-key="(row: any) => row.id" size="small">
-        <template #status="{ row }">
-          <Tag :type="row.status === 1 ? 'success' : 'error'">{{ row.status === 1 ? '启用' : '停用' }}</Tag>
-        </template>
-        <template #actions="{ row }">
-          <Button type="primary" text size="small" @click="handleEdit(row)">编辑</Button>
-          <Button type="error" text size="small" @click="handleDelete(row)">删除</Button>
-        </template>
       </DataTable>
-      <Dialog v-model:show="modalVisible" :title="modalTitle" style="width: 500px">
+      <Modal v-model:show="modalVisible" preset="card" :title="modalTitle" style="width: 520px">
         <div class="space-y-3 py-4">
           <div><label class="mb-1 block text-sm">字典标签</label><Input v-model:value="formState.label" placeholder="请输入字典标签" /></div>
           <div><label class="mb-1 block text-sm">字典值</label><Input v-model:value="formState.value" placeholder="请输入字典值" /></div>
@@ -96,13 +105,13 @@ onMounted(() => loadData());
           <div><label class="mb-1 block text-sm">CSS样式</label><Input v-model:value="formState.cssClass" placeholder="如 primary / success" /></div>
           <div><label class="mb-1 block text-sm">备注</label><Input v-model:value="formState.remark" type="textarea" :rows="2" /></div>
         </div>
-        <template #action>
+        <template #footer>
           <Space>
             <Button @click="modalVisible = false">取消</Button>
             <Button type="primary" :loading="saving" @click="handleSave">确定</Button>
           </Space>
         </template>
-      </Dialog>
+      </Modal>
     </div>
   </Page>
 </template>

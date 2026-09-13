@@ -92,7 +92,6 @@ const formSchema = computed((): VbenFormSchema[] => {
   ];
 });
 
-const dialog = useDialog();
 function showTerms() {
   dialog.info({
     title: '隐私政策 & 条款',

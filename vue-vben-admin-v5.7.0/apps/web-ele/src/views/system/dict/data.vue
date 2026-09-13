@@ -79,7 +79,7 @@ onMounted(() => loadData());
           </template>
         </TableColumn>
         <TableColumn prop="cssClass" label="CSS样式" width="100" />
-        <TableColumn prop="remark" label="备注" show-overflow-tooltip width="200" />
+        <TableColumn prop="remark" label="备注" show-overflow-tooltip min-width="200" />
         <TableColumn label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <Button type="primary" link size="small" @click="handleEdit(row)">编辑</Button>

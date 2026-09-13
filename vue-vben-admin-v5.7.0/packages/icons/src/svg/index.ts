@@ -16,7 +16,6 @@ const SvgGoogleIcon = createIconifyIcon('svg:google');
 const SvgQQChatIcon = createIconifyIcon('svg:qqchat');
 const SvgWeChatIcon = createIconifyIcon('svg:wechat');
 const SvgDingDingIcon = createIconifyIcon('svg:dingding');
-const SvgTDesignIcon = createIconifyIcon('svg:tdesign-logo');
 const SvgAntdvNextLogoIcon = createIconifyIcon('svg:antdv-next-logo');
 
 export {
@@ -34,6 +33,5 @@ export {
   SvgGithubIcon,
   SvgGoogleIcon,
   SvgQQChatIcon,
-  SvgTDesignIcon,
   SvgWeChatIcon,
 };

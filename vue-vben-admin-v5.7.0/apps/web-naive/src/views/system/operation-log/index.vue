@@ -32,7 +32,7 @@ const columns = [
   { title: '请求URL', key: 'requestUrl', width: 200, ellipsis: { tooltip: true } },
   { title: 'IP', key: 'ip', width: 120 },
   { title: '耗时(ms)', key: 'costTime', width: 90 },
-  { title: '状态', key: 'status', width: 80 },
+  { title: '状态', key: 'status', width: 80, render: (row: any) => h(Tag, { type: row.status === 1 ? 'success' : 'error' }, { default: () => (row.status === 1 ? '成功' : '失败') }) },
   { title: '错误信息', key: 'errorMsg', width: 200, ellipsis: { tooltip: true } },
   { title: '操作时间', key: 'createTime', width: 180, render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' },
 ];
@@ -74,9 +74,6 @@ onMounted(() => loadData());
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="1200"
         :pagination="false" :row-key="(row: any) => row.id" size="small">
-        <template #status="{ row }">
-          <Tag :type="row.status === 1 ? 'success' : 'error'">{{ row.status === 1 ? '成功' : '失败' }}</Tag>
-        </template>
       </DataTable>
       <div class="mt-4 flex justify-end">
         <Pagination :page="currentPage" :page-size="pageSize" :item-count="total"

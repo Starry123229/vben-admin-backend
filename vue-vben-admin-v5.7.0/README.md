@@ -10,7 +10,6 @@
   | `apps/web-antdv-next` | Ant Design Vue (next) | `pnpm dev:antdv-next` |
   | `apps/web-ele` | Element Plus | `pnpm dev:ele` |
   | `apps/web-naive` | Naive UI | `pnpm dev:naive` |
-  | `apps/web-tdesign` | TDesign | `pnpm dev:tdesign` |
 
 - 已移除全部官方演示页面（demos / workspace / about）
 - 已对接自建后端（见仓库根目录 `vben-admin-backend/`），接口前缀 `/api`，开发环境代理到 `http://localhost:8080/api`

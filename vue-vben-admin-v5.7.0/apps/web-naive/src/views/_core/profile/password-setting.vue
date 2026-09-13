@@ -5,7 +5,9 @@ import { computed } from 'vue';
 
 import { ProfilePasswordSetting, z } from '@vben/common-ui';
 
-import { message } from '#/adapter/naive';
+import { useMessage } from 'naive-ui';
+
+const message = useMessage();
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [

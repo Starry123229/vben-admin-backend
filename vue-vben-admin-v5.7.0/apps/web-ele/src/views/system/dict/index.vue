@@ -69,7 +69,7 @@ onMounted(() => loadData());
       <Table v-loading="loading" :data="dataSource" border size="small" style="width: 100%">
         <TableColumn prop="name" label="字典名称" width="150" />
         <TableColumn prop="code" label="字典编码" width="200" />
-        <TableColumn prop="remark" label="备注" show-overflow-tooltip width="200" />
+        <TableColumn prop="remark" label="备注" show-overflow-tooltip min-width="200" />
         <TableColumn label="状态" width="80">
           <template #default="{ row }">
             <Tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '停用' }}</Tag>

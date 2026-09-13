@@ -77,7 +77,7 @@ onMounted(() => loadData());
             <Tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '成功' : '失败' }}</Tag>
           </template>
         </TableColumn>
-        <TableColumn prop="message" label="提示消息" width="200" show-overflow-tooltip />
+        <TableColumn prop="message" label="提示消息" min-width="200" show-overflow-tooltip />
         <TableColumn prop="createTime" label="登录时间" width="180">
           <template #default="{ row }">{{ row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}</template>
         </TableColumn>

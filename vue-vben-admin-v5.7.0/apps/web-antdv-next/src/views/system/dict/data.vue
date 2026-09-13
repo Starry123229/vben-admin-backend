@@ -44,7 +44,7 @@ const columns = [
     title: '状态',
     dataIndex: 'status',
     width: 80,
-    customRender: ({ record }: any) => {
+    render: (_: any, record: any) => {
       return record.status === 1
         ? h(Tag, { color: 'green' }, () => '启用')
         : h(Tag, { color: 'red' }, () => '停用');
@@ -52,7 +52,7 @@ const columns = [
   },
   { title: 'CSS样式', dataIndex: 'cssClass', width: 100 },
   { title: '备注', dataIndex: 'remark', ellipsis: true, width: 200 },
-  { title: '操作', key: 'action', width: 150, fixed: 'right' },
+  { title: '操作', key: 'action', width: 150, fixed: 'right' as const },
 ];
 
 async function loadData() {
@@ -161,7 +161,7 @@ onMounted(() => {
           </div>
           <div>
             <label class="mb-1 block text-sm">排序</label>
-            <Input-number v-model:value="formState.sort" :min="0" style="width: 100%" />
+            <InputNumber v-model:value="formState.sort" :min="0" style="width: 100%" />
           </div>
           <div>
             <label class="mb-1 block text-sm">状态</label>

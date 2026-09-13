@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
 
-import { message, Table, Tag, Input, Select, DatePicker, Button, Space } from 'antdv-next';
+import { message, Table, Tag, Input, Select, Button, Space } from 'antdv-next';
 
 import { clearOperationLogs, getOperationLogList } from '#/api/system/log';
 
@@ -33,14 +33,14 @@ const columns = [
     title: '状态',
     dataIndex: 'status',
     width: 80,
-    customRender: ({ record }: any) => {
+    render: (_: any, record: any) => {
       return record.status === 1
         ? h(Tag, { color: 'green' }, () => '成功')
         : h(Tag, { color: 'red' }, () => '失败');
     },
   },
   { title: '错误信息', dataIndex: 'errorMsg', ellipsis: true, width: 200 },
-  { title: '操作时间', dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: '操作时间', dataIndex: 'createTime', width: 180, render: (text: any) => (text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-') },
 ];
 
 async function loadData() {

@@ -31,8 +31,8 @@ const columns = [
   { title: 'IP地址', key: 'ip', width: 140 },
   { title: '浏览器', key: 'browser', width: 120, ellipsis: { tooltip: true } },
   { title: '操作系统', key: 'os', width: 120, ellipsis: { tooltip: true } },
-  { title: '登录方式', key: 'loginType', width: 100 },
-  { title: '状态', key: 'status', width: 80 },
+  { title: '登录方式', key: 'loginType', width: 100, render: (row: any) => loginTypeMap[row.loginType] || row.loginType || '-' },
+  { title: '状态', key: 'status', width: 80, render: (row: any) => h(Tag, { type: row.status === 1 ? 'success' : 'error' }, { default: () => (row.status === 1 ? '成功' : '失败') }) },
   { title: '提示消息', key: 'message', width: 200, ellipsis: { tooltip: true } },
   { title: '登录时间', key: 'createTime', width: 180, render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' },
 ];
@@ -73,10 +73,6 @@ onMounted(() => loadData());
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="1100"
         :pagination="false" :row-key="(row: any) => row.id" size="small">
-        <template #loginType="{ row }">{{ loginTypeMap[row.loginType] || row.loginType || '-' }}</template>
-        <template #status="{ row }">
-          <Tag :type="row.status === 1 ? 'success' : 'error'">{{ row.status === 1 ? '成功' : '失败' }}</Tag>
-        </template>
       </DataTable>
       <div class="mt-4 flex justify-end">
         <Pagination :page="currentPage" :page-size="pageSize" :item-count="total"

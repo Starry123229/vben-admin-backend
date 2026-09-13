@@ -148,7 +148,7 @@ async function handleSend() {
     description="向用户或角色发送站内通知消息"
   >
     <Card class="mx-4 max-w-[720px]">
-      <Form label-placement="top" class="max-w-[560px]" :show-feedback="false">
+      <Form label-placement="top" class="max-w-[560px]">
         <FormItem label="发送目标">
           <RadioGroup v-model:value="formState.targetType">
             <RadioButton
@@ -201,17 +201,18 @@ async function handleSend() {
         </FormItem>
 
         <FormItem label="消息类型">
-          <RadioGroup v-model:value="formState.type">
-            <RadioButton v-for="t in typeOptions" :key="t" :value="t">
-              <Tag
-                :type="typeTagType[t] || 'default'"
-                size="small"
-                class="mr-0 border-none"
-              >
-                {{ t }}
-              </Tag>
-            </RadioButton>
-          </RadioGroup>
+          <Space>
+            <Tag
+              v-for="t in typeOptions"
+              :key="t"
+              :type="formState.type === t ? typeTagType[t] || 'primary' : 'default'"
+              size="small"
+              class="cursor-pointer"
+              @click="formState.type = t"
+            >
+              {{ t }}
+            </Tag>
+          </Space>
         </FormItem>
 
         <FormItem label="内容">

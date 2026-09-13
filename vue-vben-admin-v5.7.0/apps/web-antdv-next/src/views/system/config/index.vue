@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { h, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
-import { Button, Input, InputNumber, message, Modal, Select, Space, Table, Tag } from 'antdv-next';
+import { Button, Input, message, Modal, Select, Space, Table } from 'antdv-next';
 import { createConfig, deleteConfig, getConfigList, updateConfig } from '#/api/system/config';
 
 defineOptions({ name: 'SysConfig' });
@@ -22,7 +22,7 @@ const columns = [
   { title: '参数值', dataIndex: 'value', ellipsis: true, width: 200 },
   { title: '类型', dataIndex: 'type', width: 80 },
   { title: '备注', dataIndex: 'remark', ellipsis: true, width: 200 },
-  { title: '操作', key: 'action', width: 150, fixed: 'right' },
+  { title: '操作', key: 'action', width: 150, fixed: 'right' as const },
 ];
 
 async function loadData() {

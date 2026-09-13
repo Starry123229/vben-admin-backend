@@ -7,7 +7,9 @@ import { computed, ref } from 'vue';
 import { AuthenticationForgetPassword, z } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
-import { message } from '#/adapter/naive';
+import { useMessage } from 'naive-ui';
+
+const message = useMessage();
 import { resetPasswordApi, sendResetCodeApi } from '#/api/core/auth';
 
 defineOptions({ name: 'ForgetPassword' });

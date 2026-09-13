@@ -1,6 +1,5 @@
 package com.vben.backend.module.auth.controller;
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.vben.backend.common.result.R;
 import com.vben.backend.module.auth.dto.ForgotPasswordRequest;
 import com.vben.backend.module.auth.dto.LoginResult;

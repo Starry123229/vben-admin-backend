@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { h, onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import dayjs from 'dayjs';
 import { Page } from '@vben/common-ui';
 import { useAccessStore } from '@vben/stores';
-import { Button, Input, message, Modal, Space, Table, Tag } from 'ant-design-vue';
+import { Button, Input, message, Modal, Table } from 'ant-design-vue';
 import { forceLogout, getOnlineList } from '#/api/system/online';
 
 defineOptions({ name: 'OnlineUser' });

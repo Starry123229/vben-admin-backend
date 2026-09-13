@@ -5,7 +5,6 @@ import {
   ElButton as Button,
   ElDialog as Dialog,
   ElInput as Input,
-  ElInputNumber as InputNumber,
   ElMessage as message,
   ElMessageBox as MessageBox,
   ElOption as Option,
@@ -84,7 +83,7 @@ onMounted(() => loadData());
         <TableColumn prop="key" label="参数键" width="200" />
         <TableColumn prop="value" label="参数值" show-overflow-tooltip width="200" />
         <TableColumn prop="type" label="类型" width="80" />
-        <TableColumn prop="remark" label="备注" show-overflow-tooltip width="200" />
+        <TableColumn prop="remark" label="备注" show-overflow-tooltip min-width="200" />
         <TableColumn label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <Button type="primary" link size="small" @click="handleEdit(row)">编辑</Button>
