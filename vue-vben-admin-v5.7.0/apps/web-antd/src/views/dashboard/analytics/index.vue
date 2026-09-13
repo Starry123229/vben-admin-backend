@@ -17,6 +17,7 @@ import {
 import { markRaw, onMounted, ref } from 'vue';
 
 import {
+  getBrowserDistributionApi,
   getDeptDistributionApi,
   getOverviewApi,
   getRoleDistributionApi,
@@ -77,14 +78,17 @@ const trendData = ref<{ month: string; count: number }[]>([]);
 const roleData = ref<{ name: string; value: number }[]>([]);
 // 部门分布数据
 const deptData = ref<{ name: string; value: number }[]>([]);
+// 浏览器分布数据
+const browserData = ref<{ name: string; value: number }[]>([]);
 
 onMounted(async () => {
   try {
-    const [overview, trends, roles, depts] = await Promise.all([
+    const [overview, trends, roles, depts, browsers] = await Promise.all([
       getOverviewApi(),
       getUserTrendsApi(),
       getRoleDistributionApi(),
       getDeptDistributionApi(),
+      getBrowserDistributionApi(),
     ]);
 
     overviewItems.value = [
@@ -130,6 +134,10 @@ onMounted(async () => {
       name: item.name,
       value: Number(item.value) || 0,
     }));
+    browserData.value = browsers.map((item) => ({
+      name: item.name,
+      value: Number(item.value) || 0,
+    }));
   } catch (error) {
     console.error('加载仪表盘数据失败:', error);
   }
@@ -161,8 +169,8 @@ onMounted(async () => {
       >
         <AnalyticsVisitsSource :dept-data="deptData" />
       </AnalysisChartCard>
-      <AnalysisChartCard class="mt-5 md:mt-0 md:w-1/3" title="访问来源">
-        <AnalyticsVisitsSales />
+      <AnalysisChartCard class="mt-5 md:mt-0 md:w-1/3" title="浏览器分布">
+        <AnalyticsVisitsSales :browser-data="browserData" />
       </AnalysisChartCard>
     </div>
   </div>

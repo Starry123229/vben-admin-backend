@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { h, onMounted, ref } from 'vue';
+import dayjs from 'dayjs';
 import { useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
@@ -9,6 +10,7 @@ import {
   Input,
   message,
   Modal,
+  RadioGroup,
   Select,
   Space,
   Table,
@@ -16,8 +18,10 @@ import {
 } from 'ant-design-vue';
 
 import {
+  createDictType,
   deleteDictType,
   getDictTypeList,
+  updateDictType,
 } from '#/api/system/dict';
 
 defineOptions({ name: 'DictType' });
@@ -34,6 +38,11 @@ const searchForm = ref({
   status: undefined as number | undefined,
 });
 
+const modalVisible = ref(false);
+const modalTitle = ref('新增字典');
+const formState = ref<any>({});
+const saving = ref(false);
+
 const columns = [
   { title: '字典名称', dataIndex: 'name', width: 150 },
   { title: '字典编码', dataIndex: 'code', width: 200 },
@@ -48,8 +57,8 @@ const columns = [
         : h(Tag, { color: 'red' }, () => '停用');
     },
   },
-  { title: '创建时间', dataIndex: 'createTime', width: 180 },
-  { title: '操作', key: 'action', width: 150, fixed: 'right' },
+  { title: '创建时间', dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: '操作', key: 'action', width: 200, fixed: 'right' },
 ];
 
 async function loadData() {
@@ -78,8 +87,40 @@ function handleReset() {
   loadData();
 }
 
+function handleAdd() {
+  modalTitle.value = '新增字典';
+  formState.value = { name: '', code: '', status: 1, remark: '' };
+  modalVisible.value = true;
+}
+
 function handleEdit(record: any) {
+  modalTitle.value = '编辑字典';
+  formState.value = { ...record };
+  modalVisible.value = true;
+}
+
+function handleData(record: any) {
   router.push(`/system/dict/data/${record.id}`);
+}
+
+async function handleSave() {
+  if (!formState.value.name || !formState.value.code) {
+    message.warning('请填写字典名称和字典编码');
+    return;
+  }
+  saving.value = true;
+  try {
+    if (formState.value.id) {
+      await updateDictType(formState.value.id, formState.value);
+    } else {
+      await createDictType(formState.value);
+    }
+    message.success('保存成功');
+    modalVisible.value = false;
+    loadData();
+  } finally {
+    saving.value = false;
+  }
 }
 
 function handleDelete(record: any) {
@@ -134,6 +175,7 @@ onMounted(() => {
         <Space>
           <Button type="primary" @click="handleSearch">搜索</Button>
           <Button @click="handleReset">重置</Button>
+          <Button type="primary" @click="handleAdd">新增字典</Button>
         </Space>
       </div>
 
@@ -158,12 +200,51 @@ onMounted(() => {
             <Button type="link" size="small" @click="handleEdit(record)">
               编辑
             </Button>
+            <Button type="link" size="small" @click="handleData(record)">
+              数据
+            </Button>
             <Button type="link" danger size="small" @click="handleDelete(record)">
               删除
             </Button>
           </template>
         </template>
       </Table>
+
+      <Modal
+        v-model:open="modalVisible"
+        :title="modalTitle"
+        :confirm-loading="saving"
+        @ok="handleSave"
+      >
+        <div class="space-y-3 py-4">
+          <div>
+            <label class="mb-1 block text-sm">字典名称</label>
+            <Input v-model:value="formState.name" placeholder="请输入字典名称" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm">字典编码</label>
+            <Input
+              v-model:value="formState.code"
+              placeholder="如 sys_user_sex"
+              :disabled="!!formState.id"
+            />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm">状态</label>
+            <RadioGroup
+              v-model:value="formState.status"
+              :options="[
+                { label: '启用', value: 1 },
+                { label: '停用', value: 0 },
+              ]"
+            />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm">备注</label>
+            <Input.TextArea v-model:value="formState.remark" :rows="2" />
+          </div>
+        </div>
+      </Modal>
     </div>
   </Page>
 </template>

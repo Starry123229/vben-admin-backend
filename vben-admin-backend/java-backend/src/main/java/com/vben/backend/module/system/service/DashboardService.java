@@ -5,8 +5,10 @@ import com.vben.backend.module.system.entity.SysDept;
 import com.vben.backend.module.system.entity.SysMenu;
 import com.vben.backend.module.system.entity.SysRole;
 import com.vben.backend.module.system.entity.SysUser;
+import com.vben.backend.module.system.entity.SysLoginLog;
 import com.vben.backend.module.system.entity.SysUserRole;
 import com.vben.backend.module.system.mapper.SysDeptMapper;
+import com.vben.backend.module.system.mapper.SysLoginLogMapper;
 import com.vben.backend.module.system.mapper.SysMenuMapper;
 import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysUserMapper;
@@ -34,6 +36,7 @@ public class DashboardService {
     private final SysRoleMapper roleMapper;
     private final SysDeptMapper deptMapper;
     private final SysMenuMapper menuMapper;
+    private final SysLoginLogMapper loginLogMapper;
 
     /**
      * 概览统计：总用户数、启用用户数、角色数、部门数、菜单数。
@@ -73,15 +76,17 @@ public class DashboardService {
                 monthlyCount.merge(month, 1L, Long::sum);
             }
         }
-        // 转为列表
-        return monthlyCount.entrySet().stream()
-                .map(e -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("month", e.getKey());
-                    item.put("count", e.getValue().intValue());
-                    return item;
-                })
-                .toList();
+        // 补齐最近 12 个月（无数据的月份填 0），保证折线图正常展示
+        java.time.YearMonth now = java.time.YearMonth.now();
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        for (int i = 11; i >= 0; i--) {
+            String month = now.minusMonths(i).toString();
+            Map<String, Object> item = new HashMap<>();
+            item.put("month", month);
+            item.put("count", monthlyCount.getOrDefault(month, 0L).intValue());
+            result.add(item);
+        }
+        return result;
     }
 
     /**
@@ -112,5 +117,29 @@ public class DashboardService {
             item.put("value", count);
             return item;
         }).toList();
+    }
+
+    /**
+     * 浏览器分布统计：按登录日志中的浏览器分组计数。
+     */
+    public List<Map<String, Object>> browserDistribution() {
+        List<SysLoginLog> logs = loginLogMapper.selectList(null);
+        java.util.Map<String, Long> counter = new java.util.HashMap<>();
+        for (SysLoginLog log : logs) {
+            String browser = log.getBrowser();
+            if (browser == null || browser.isBlank() || "Unknown".equalsIgnoreCase(browser)) {
+                browser = "其他";
+            }
+            counter.merge(browser, 1L, Long::sum);
+        }
+        return counter.entrySet().stream()
+                .sorted(java.util.Map.Entry.<String, Long>comparingByValue().reversed())
+                .map(e -> {
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("name", e.getKey());
+                    item.put("value", e.getValue().intValue());
+                    return item;
+                })
+                .toList();
     }
 }

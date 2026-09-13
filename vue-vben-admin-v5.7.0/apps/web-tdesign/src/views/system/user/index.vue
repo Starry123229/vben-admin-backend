@@ -16,7 +16,6 @@ import { Button, MessagePlugin as message } from 'tdesign-vue-next';
 import { DialogPlugin } from 'tdesign-vue-next';
 
 import { useAccess } from '@vben/access';
-import { useAccess } from '@vben/access';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
 import { deleteUser, getUserList, updateUser } from '#/api/system/user';
 import { getDeptList } from '#/api/system/dept';

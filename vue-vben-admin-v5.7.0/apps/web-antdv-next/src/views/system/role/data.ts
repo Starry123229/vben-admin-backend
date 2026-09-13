@@ -90,7 +90,8 @@ export function useRoleColumns(
       width: 100,
       cellRender: {
         name: onStatusChange ? 'CellSwitch' : 'CellTag',
-        attrs: { beforeChange: onStatusChange },
+        // 状态切换需「编辑角色」权限码；无权限时 Switch 禁用
+        attrs: { beforeChange: onStatusChange, accessCode: 'AC_1000002' },
       },
     },
     {

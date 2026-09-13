@@ -129,7 +129,7 @@ export function useUserColumns(
       width: 100,
       cellRender: {
         name: onStatusChange ? 'CellSwitch' : 'CellTag',
-        attrs: { beforeChange: onStatusChange },
+        attrs: { beforeChange: onStatusChange, accessCode: 'AC_100020' },
       },
     },
     {

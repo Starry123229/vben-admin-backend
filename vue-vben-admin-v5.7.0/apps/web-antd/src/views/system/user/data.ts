@@ -129,7 +129,8 @@ export function useUserColumns(
       width: 100,
       cellRender: {
         name: onStatusChange ? 'CellSwitch' : 'CellTag',
-        attrs: { beforeChange: onStatusChange },
+        // 状态切换需「编辑用户」权限码；无权限时 Switch 禁用
+        attrs: { beforeChange: onStatusChange, accessCode: 'AC_100020' },
       },
     },
     {

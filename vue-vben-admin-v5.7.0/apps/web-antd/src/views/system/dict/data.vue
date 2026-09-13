@@ -117,6 +117,7 @@ onMounted(() => {
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-semibold">字典数据</h2>
         <Space>
           <Button @click="router.back()">返回</Button>
           <Button type="primary" @click="handleAdd">新增</Button>
@@ -161,7 +162,7 @@ onMounted(() => {
           </div>
           <div>
             <label class="mb-1 block text-sm">排序</label>
-            <Input-number v-model:value="formState.sort" :min="0" style="width: 100%" />
+            <InputNumber v-model:value="formState.sort" :min="0" style="width: 100%" />
           </div>
           <div>
             <label class="mb-1 block text-sm">状态</label>

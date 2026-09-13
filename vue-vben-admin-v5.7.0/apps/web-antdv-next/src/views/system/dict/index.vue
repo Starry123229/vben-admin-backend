@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { h, onMounted, ref } from 'vue';
+import dayjs from 'dayjs';
 import { useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
@@ -13,7 +14,7 @@ import {
   Space,
   Table,
   Tag,
-} from 'ant-design-vue';
+} from 'antdv-next';
 
 import {
   deleteDictType,
@@ -48,7 +49,7 @@ const columns = [
         : h(Tag, { color: 'red' }, () => '停用');
     },
   },
-  { title: '创建时间', dataIndex: 'createTime', width: 180 },
+  { title: '创建时间', dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
   { title: '操作', key: 'action', width: 150, fixed: 'right' },
 ];
 

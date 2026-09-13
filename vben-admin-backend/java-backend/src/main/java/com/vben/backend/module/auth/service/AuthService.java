@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -73,7 +75,7 @@ public class AuthService {
         SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getUsername, username));
         if (user == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
-            recordLoginLog(user != null ? user.getId() : null, username, null, "account", 0, "用户名或密码错误");
+            recordLoginLog(user != null ? user.getId() : null, username, getCurrentRequest(), "account", 0, "用户名或密码错误");
             throw ServiceException.forbidden("Username or password is incorrect.");
         }
         return loginByUserId(user.getId(), response);
@@ -90,7 +92,7 @@ public class AuthService {
         }
         StpUtil.login(userId);
         issueRefreshToken(userId, response);
-        recordLoginLog(userId, user.getUsername(), null, "account", 1, "登录成功");
+        recordLoginLog(userId, user.getUsername(), getCurrentRequest(), "account", 1, "登录成功");
         return StpUtil.getTokenValue();
     }
 
@@ -136,7 +138,7 @@ public class AuthService {
         }
     }
 
-    /** 当前用户权限码：角色 → 授权菜单 → button 型 authCode */
+    /** 当前用户权限码：启用角色 → 授权菜单 → 启用的 button 型 authCode */
     public List<String> getCodes(long userId) {
         List<Long> roleIds = userRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>()
                         .eq(SysUserRole::getUserId, userId)).stream()
@@ -144,8 +146,16 @@ public class AuthService {
         if (roleIds.isEmpty()) {
             return List.of();
         }
+        // 仅保留启用状态的角色（status=1），禁用角色的权限码不应再生效
+        List<Long> activeRoleIds = roleMapper.selectList(new LambdaQueryWrapper<SysRole>()
+                        .in(SysRole::getId, roleIds)
+                        .eq(SysRole::getStatus, 1)).stream()
+                .map(SysRole::getId).toList();
+        if (activeRoleIds.isEmpty()) {
+            return List.of();
+        }
         List<Long> menuIds = roleMenuMapper.selectList(new LambdaQueryWrapper<SysRoleMenu>()
-                        .in(SysRoleMenu::getRoleId, roleIds)).stream()
+                        .in(SysRoleMenu::getRoleId, activeRoleIds)).stream()
                 .map(SysRoleMenu::getMenuId).toList();
         if (menuIds.isEmpty()) {
             return List.of();
@@ -153,6 +163,7 @@ public class AuthService {
         return menuMapper.selectList(new LambdaQueryWrapper<SysMenu>()
                         .in(SysMenu::getId, menuIds)
                         .eq(SysMenu::getType, "button")
+                        .eq(SysMenu::getStatus, 1)
                         .isNotNull(SysMenu::getAuthCode)).stream()
                 .map(SysMenu::getAuthCode).distinct().toList();
     }
@@ -174,21 +185,75 @@ public class AuthService {
     // ---------------------------------------------------------------------------- 私有方法
 
     /** 记录登录日志 */
-    private void recordLoginLog(Long userId, String username, String ip,
+    private void recordLoginLog(Long userId, String username, HttpServletRequest request,
                                 String loginType, int status, String message) {
         try {
             SysLoginLog log = new SysLoginLog();
             log.setUserId(userId);
             log.setUsername(username);
-            log.setIp(ip);
             log.setStatus(status);
             log.setMessage(message);
             log.setLoginType(loginType);
             log.setCreateTime(LocalDateTime.now());
+            // 从请求中获取 IP、浏览器、操作系统
+            if (request != null) {
+                log.setIp(getClientIp(request));
+                String userAgent = request.getHeader("User-Agent");
+                if (userAgent != null) {
+                    log.setBrowser(parseBrowser(userAgent));
+                    log.setOs(parseOs(userAgent));
+                }
+            }
             loginLogMapper.insert(log);
         } catch (Exception e) {
             // 日志记录失败不影响主流程
         }
+    }
+
+    /** 通过 RequestContextHolder 获取当前请求 */
+    private HttpServletRequest getCurrentRequest() {
+        try {
+            ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            return attrs != null ? attrs.getRequest() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
+            ip = "127.0.0.1";
+        }
+        return ip;
+    }
+
+    private String parseBrowser(String userAgent) {
+        if (userAgent.contains("Edg/")) return "Edge";
+        if (userAgent.contains("Chrome/")) return "Chrome";
+        if (userAgent.contains("Firefox/")) return "Firefox";
+        if (userAgent.contains("Safari/") && !userAgent.contains("Chrome")) return "Safari";
+        if (userAgent.contains("MSIE") || userAgent.contains("Trident/")) return "IE";
+        return "Unknown";
+    }
+
+    private String parseOs(String userAgent) {
+        if (userAgent.contains("Windows NT 10")) return "Windows 10/11";
+        if (userAgent.contains("Windows NT")) return "Windows";
+        if (userAgent.contains("Mac OS X")) return "macOS";
+        if (userAgent.contains("Linux")) return "Linux";
+        if (userAgent.contains("Android")) return "Android";
+        if (userAgent.contains("iPhone") || userAgent.contains("iPad")) return "iOS";
+        return "Unknown";
     }
 
     /** 生成随机 refreshToken，SHA-256 入库，并写入 HttpOnly Cookie */

@@ -19,9 +19,14 @@ import {
   Tag,
 } from 'tdesign-vue-next';
 
+import { useAccess } from '@vben/access';
+
 import { $t } from '#/locales';
 
 import { useVbenForm } from './form';
+
+// 在 setupVbenVxeTable 外部获取权限工具，避免在渲染器内部反复调用 composable
+const { hasAccessByCodes } = useAccess();
 
 setupVbenVxeTable({
   configVxeTable: (vxeUI) => {
@@ -106,18 +111,24 @@ setupVbenVxeTable({
       },
     });
 
-    // 单元格渲染：Switch
+    // 单元格渲染：Switch（支持 accessCode 权限控制）
     vxeUI.renderer.add('CellSwitch', {
       renderTableDefault({ attrs, props }, { column, row }) {
         const loadingKey = `__loading_${column.field}`;
+        // 权限码检查：若配置了 accessCode 且用户无权限，则禁用 Switch
+        const accessCode = (attrs as any)?.accessCode;
+        const hasPermission = !accessCode || hasAccessByCodes([accessCode]);
         const finallyProps = {
           customValue: [1, 0],
           ...props,
           value: row[column.field],
+          disabled: !hasPermission || (props as any)?.disabled,
           loading: row[loadingKey] ?? false,
           onChange: onChange,
         };
         async function onChange(newVal: any) {
+          // 无权限时禁止切换
+          if (!hasPermission) return;
           row[loadingKey] = true;
           try {
             const result = await attrs?.beforeChange?.(newVal, row);
@@ -186,7 +197,6 @@ setupVbenVxeTable({
           if (opt.show === false) return false;
           // 按钮级权限码：sys_menu(type=button).auth_code，与后端 @SaCheckPermission 同源
           if (opt.accessCode) {
-            const { hasAccessByCodes } = useAccess();
             return hasAccessByCodes([opt.accessCode]);
           }
           return true;

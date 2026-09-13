@@ -44,3 +44,10 @@ export async function getDeptDistributionApi() {
     '/dashboard/dept-distribution',
   );
 }
+
+/** 浏览器分布（来源：登录日志） */
+export async function getBrowserDistributionApi() {
+  return requestClient.get<DashboardApi.DistributionItem[]>(
+    '/dashboard/browser-distribution',
+  );
+}

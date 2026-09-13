@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { h, ref } from 'vue';
+import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
 
-import { Button, Input, message, Select, Space, Table, Tag } from 'ant-design-vue';
+import { Button, Input, message, Select, Space, Table, Tag } from 'antdv-next';
 
 import { clearLoginLogs, getLoginLogList } from '#/api/system/log';
 
@@ -49,7 +50,7 @@ const columns = [
     },
   },
   { title: '提示消息', dataIndex: 'message', width: 200, ellipsis: true },
-  { title: '登录时间', dataIndex: 'createTime', width: 180 },
+  { title: '登录时间', dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
 ];
 
 async function loadData() {

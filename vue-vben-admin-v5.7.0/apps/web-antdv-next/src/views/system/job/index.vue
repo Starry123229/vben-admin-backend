@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { h, onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
-import { Button, Input, message, Modal, Select, Space, Table, Tag } from 'ant-design-vue';
+import { Button, Input, message, Modal, Select, Space, Table, Tag } from 'antdv-next';
 import { createJob, deleteJob, getJobList, toggleJob, updateJob } from '#/api/system/job';
 
 defineOptions({ name: 'SysJob' });

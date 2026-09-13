@@ -3,7 +3,9 @@ package com.vben.backend.module.system.aspect;
 import cn.dev33.satoken.stp.StpUtil;
 import com.vben.backend.module.system.annotation.Log;
 import com.vben.backend.module.system.entity.SysOperationLog;
+import com.vben.backend.module.system.entity.SysUser;
 import com.vben.backend.module.system.mapper.SysOperationLogMapper;
+import com.vben.backend.module.system.mapper.SysUserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import java.time.LocalDateTime;
 public class LogAspect {
 
     private final SysOperationLogMapper operationLogMapper;
+    private final SysUserMapper userMapper;
 
     @Around("@annotation(logAnnotation)")
     public Object around(ProceedingJoinPoint joinPoint, Log logAnnotation) throws Throwable {
@@ -72,7 +75,16 @@ public class LogAspect {
         try {
             if (StpUtil.isLogin()) {
                 logRecord.setUserId(StpUtil.getLoginIdAsLong());
-                logRecord.setUsername((String) StpUtil.getSession().get("username"));
+                // 从 session 获取用户名，如果为空则尝试从数据库查询
+                String username = (String) StpUtil.getSession().get("username");
+                if (username == null || username.isEmpty()) {
+                    SysUser user =
+                            userMapper.selectById(StpUtil.getLoginIdAsLong());
+                    if (user != null) {
+                        username = user.getUsername();
+                    }
+                }
+                logRecord.setUsername(username);
             }
         } catch (Exception e) {
             // 忽略用户信息获取失败
@@ -111,6 +123,10 @@ public class LogAspect {
         // 多层代理取第一个
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
+        }
+        // IPv6 localhost 转换为 IPv4
+        if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
+            ip = "127.0.0.1";
         }
         return ip;
     }

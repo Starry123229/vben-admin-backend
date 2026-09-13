@@ -3,10 +3,12 @@ package com.vben.backend.module.system.controller;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaMode;
 import com.vben.backend.common.result.R;
+import com.vben.backend.common.result.ServiceException;
 import com.vben.backend.module.system.annotation.Log;
 import com.vben.backend.module.system.entity.SysJob;
 import com.vben.backend.module.system.mapper.SysJobMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
  *
  * @author Starry
  */
+@Slf4j
 @RestController
 @RequestMapping("/system/job")
 @RequiredArgsConstructor
@@ -60,6 +63,18 @@ public class SysJobController {
             job.setStatus(job.getStatus() == 1 ? 0 : 1);
             jobMapper.updateById(job);
         }
+        return R.ok();
+    }
+
+    @Log(module = "定时任务", description = "立即执行一次")
+    @PutMapping("/{id}/run")
+    public R<Void> run(@PathVariable Long id) {
+        SysJob job = jobMapper.selectById(id);
+        if (job == null) {
+            throw ServiceException.badRequest("任务不存在: " + id);
+        }
+        // 立即执行一次：记录日志，实际调度需集成 Quartz 或 Spring Scheduling
+        log.info("手动执行任务 [{}]: name={}, invokeTarget={}", id, job.getName(), job.getInvokeTarget());
         return R.ok();
     }
 }

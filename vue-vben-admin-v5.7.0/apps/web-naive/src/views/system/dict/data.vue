@@ -1,188 +1,108 @@
 <script lang="ts" setup>
-import { computed, h, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
 import { Page } from '@vben/common-ui';
-
 import {
-  Button,
-  Input,
-  InputNumber,
-  message,
-  Modal,
-  Select,
-  Space,
-  Table,
-  Tag,
-} from 'ant-design-vue';
-
-import {
-  createDictData,
-  deleteDictData,
-  getDictDataList,
-  updateDictData,
-} from '#/api/system/dict';
+  NButton as Button,
+  NDialog as Dialog,
+  NInput as Input,
+  NInputNumber as InputNumber,
+  NSelect as Select,
+  NDataTable as DataTable,
+  NSpace as Space,
+  NTag as Tag,
+  useDialog,
+  useMessage,
+} from 'naive-ui';
+import { createDictData, deleteDictData, getDictDataList, updateDictData } from '#/api/system/dict';
 
 defineOptions({ name: 'DictData' });
-
+const message = useMessage();
+const dialog = useDialog();
 const route = useRoute();
 const router = useRouter();
 const typeId = computed(() => Number(route.params.typeId));
 const loading = ref(false);
 const dataSource = ref<any[]>([]);
-
 const modalVisible = ref(false);
 const modalTitle = ref('');
 const formState = ref<any>({});
 const saving = ref(false);
 
 const columns = [
-  { title: '字典标签', dataIndex: 'label', width: 150 },
-  { title: '字典值', dataIndex: 'value', width: 150 },
-  { title: '排序', dataIndex: 'sort', width: 80 },
-  {
-    title: '状态',
-    dataIndex: 'status',
-    width: 80,
-    customRender: ({ record }: any) => {
-      return record.status === 1
-        ? h(Tag, { color: 'green' }, () => '启用')
-        : h(Tag, { color: 'red' }, () => '停用');
-    },
-  },
-  { title: 'CSS样式', dataIndex: 'cssClass', width: 100 },
-  { title: '备注', dataIndex: 'remark', ellipsis: true, width: 200 },
-  { title: '操作', key: 'action', width: 150, fixed: 'right' },
+  { title: '字典标签', key: 'label', width: 150 },
+  { title: '字典值', key: 'value', width: 150 },
+  { title: '排序', key: 'sort', width: 80 },
+  { title: '状态', key: 'status', width: 80 },
+  { title: 'CSS样式', key: 'cssClass', width: 100 },
+  { title: '备注', key: 'remark', ellipsis: { tooltip: true }, width: 200 },
+  { title: '操作', key: 'actions', width: 150, fixed: 'right' },
 ];
 
 async function loadData() {
   loading.value = true;
-  try {
-    dataSource.value = await getDictDataList(typeId.value);
-  } finally {
-    loading.value = false;
-  }
+  try { dataSource.value = await getDictDataList(typeId.value); }
+  finally { loading.value = false; }
 }
 
-function handleAdd() {
-  modalTitle.value = '新增字典数据';
-  formState.value = {
-    typeId: typeId.value,
-    sort: 0,
-    status: 1,
-  };
-  modalVisible.value = true;
-}
-
-function handleEdit(record: any) {
-  modalTitle.value = '编辑字典数据';
-  formState.value = { ...record };
-  modalVisible.value = true;
-}
+function handleAdd() { modalTitle.value = '新增字典数据'; formState.value = { typeId: typeId.value, sort: 0, status: 1 }; modalVisible.value = true; }
+function handleEdit(record: any) { modalTitle.value = '编辑字典数据'; formState.value = { ...record }; modalVisible.value = true; }
 
 async function handleSave() {
   saving.value = true;
   try {
-    if (formState.value.id) {
-      await updateDictData(formState.value.id, formState.value);
-    } else {
-      await createDictData(formState.value);
-    }
-    message.success('保存成功');
-    modalVisible.value = false;
-    loadData();
-  } finally {
-    saving.value = false;
-  }
+    if (formState.value.id) { await updateDictData(formState.value.id, formState.value); }
+    else { await createDictData(formState.value); }
+    message.success('保存成功'); modalVisible.value = false; loadData();
+  } finally { saving.value = false; }
 }
 
 function handleDelete(record: any) {
-  Modal.confirm({
-    title: '确认删除',
-    content: `确定要删除字典数据「${record.label}」吗？`,
-    onOk: async () => {
-      await deleteDictData(record.id);
-      message.success('删除成功');
-      loadData();
-    },
+  dialog.warning({
+    title: '确认删除', content: `确定要删除字典数据「${record.label}」吗？`,
+    positiveText: '确定', negativeText: '取消',
+    onPositiveClick: async () => { await deleteDictData(record.id); message.success('删除成功'); loadData(); },
   });
 }
 
-onMounted(() => {
-  loadData();
-});
+onMounted(() => loadData());
 </script>
 
 <template>
   <Page auto-content-height>
     <div class="overflow-hidden">
-      <div class="mb-4 flex items-center justify-between">
-        <Space>
-          <Button @click="router.back()">返回</Button>
-          <Button type="primary" @click="handleAdd">新增</Button>
-        </Space>
+      <div class="mb-4 flex items-center gap-2">
+        <Button @click="router.back()">返回</Button>
+        <Button type="primary" @click="handleAdd">新增</Button>
       </div>
-
-      <Table
-        :loading="loading"
-        :data-source="dataSource"
-        :columns="columns"
-        :pagination="false"
-        :scroll="{ x: 900 }"
-        row-key="id"
-        size="small"
-      >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'action'">
-            <Button type="link" size="small" @click="handleEdit(record)">
-              编辑
-            </Button>
-            <Button type="link" danger size="small" @click="handleDelete(record)">
-              删除
-            </Button>
-          </template>
+      <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="900"
+        :pagination="false" :row-key="(row: any) => row.id" size="small">
+        <template #status="{ row }">
+          <Tag :type="row.status === 1 ? 'success' : 'error'">{{ row.status === 1 ? '启用' : '停用' }}</Tag>
         </template>
-      </Table>
-
-      <Modal
-        v-model:open="modalVisible"
-        :title="modalTitle"
-        @ok="handleSave"
-        :confirm-loading="saving"
-      >
+        <template #actions="{ row }">
+          <Button type="primary" text size="small" @click="handleEdit(row)">编辑</Button>
+          <Button type="error" text size="small" @click="handleDelete(row)">删除</Button>
+        </template>
+      </DataTable>
+      <Dialog v-model:show="modalVisible" :title="modalTitle" style="width: 500px">
         <div class="space-y-3 py-4">
-          <div>
-            <label class="mb-1 block text-sm">字典标签</label>
-            <Input v-model:value="formState.label" placeholder="请输入字典标签" />
+          <div><label class="mb-1 block text-sm">字典标签</label><Input v-model:value="formState.label" placeholder="请输入字典标签" /></div>
+          <div><label class="mb-1 block text-sm">字典值</label><Input v-model:value="formState.value" placeholder="请输入字典值" /></div>
+          <div><label class="mb-1 block text-sm">排序</label><InputNumber v-model:value="formState.sort" :min="0" style="width: 100%" /></div>
+          <div><label class="mb-1 block text-sm">状态</label>
+            <Select v-model:value="formState.status" :options="[{label:'启用',value:1},{label:'停用',value:0}]" />
           </div>
-          <div>
-            <label class="mb-1 block text-sm">字典值</label>
-            <Input v-model:value="formState.value" placeholder="请输入字典值" />
-          </div>
-          <div>
-            <label class="mb-1 block text-sm">排序</label>
-            <Input-number v-model:value="formState.sort" :min="0" style="width: 100%" />
-          </div>
-          <div>
-            <label class="mb-1 block text-sm">状态</label>
-            <Select
-              v-model:value="formState.status"
-              :options="[
-                { label: '启用', value: 1 },
-                { label: '停用', value: 0 },
-              ]"
-            />
-          </div>
-          <div>
-            <label class="mb-1 block text-sm">CSS样式</label>
-            <Input v-model:value="formState.cssClass" placeholder="如 primary / success" />
-          </div>
-          <div>
-            <label class="mb-1 block text-sm">备注</label>
-            <Input.TextArea v-model:value="formState.remark" :rows="2" />
-          </div>
+          <div><label class="mb-1 block text-sm">CSS样式</label><Input v-model:value="formState.cssClass" placeholder="如 primary / success" /></div>
+          <div><label class="mb-1 block text-sm">备注</label><Input v-model:value="formState.remark" type="textarea" :rows="2" /></div>
         </div>
-      </Modal>
+        <template #action>
+          <Space>
+            <Button @click="modalVisible = false">取消</Button>
+            <Button type="primary" :loading="saving" @click="handleSave">确定</Button>
+          </Space>
+        </template>
+      </Dialog>
     </div>
   </Page>
 </template>

@@ -2,7 +2,7 @@
 import { h, onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
 import { Button, Input, message, Modal, Select, Space, Table, Tag } from 'ant-design-vue';
-import { createJob, deleteJob, getJobList, toggleJob, updateJob } from '#/api/system/job';
+import { createJob, deleteJob, getJobList, runJob, toggleJob, updateJob } from '#/api/system/job';
 
 defineOptions({ name: 'SysJob' });
 const loading = ref(false);
@@ -15,7 +15,7 @@ const saving = ref(false);
 const columns = [
   { title: '任务名称', dataIndex: 'name', width: 150 },
   { title: '分组', dataIndex: 'groupName', width: 100 },
-  { title: '调用目标', dataIndex: 'invokeTarget', width: 200 },
+  { title: '调用目标', dataIndex: 'invokeTarget', width: 200, ellipsis: true, customCell: () => ({ style: 'word-break: break-all;' }) },
   { title: 'Cron表达式', dataIndex: 'cron', width: 150 },
   {
     title: '状态', dataIndex: 'status', width: 80,
@@ -24,7 +24,7 @@ const columns = [
     },
   },
   { title: '备注', dataIndex: 'remark', ellipsis: true, width: 200 },
-  { title: '操作', key: 'action', width: 200, fixed: 'right' },
+  { title: '操作', key: 'action', width: 250, fixed: 'right' },
 ];
 
 async function loadData() {
@@ -62,6 +62,11 @@ async function handleToggle(record: any) {
   loadData();
 }
 
+async function handleRun(record: any) {
+  await runJob(record.id);
+  message.success(`任务「${record.name}」已触发执行`);
+}
+
 onMounted(() => loadData());
 </script>
 
@@ -77,6 +82,9 @@ onMounted(() => loadData());
           <template v-if="column.key === 'action'">
             <Button type="link" size="small" @click="handleToggle(record)">
               {{ record.status === 1 ? '暂停' : '启动' }}
+            </Button>
+            <Button type="link" size="small" @click="handleRun(record)">
+              执行一次
             </Button>
             <Button type="link" size="small" @click="handleEdit(record)">编辑</Button>
             <Button type="link" danger size="small" @click="handleDelete(record)">删除</Button>

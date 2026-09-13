@@ -245,7 +245,7 @@ INSERT INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `redir
 (106, 100, 'OperationLog',             'menu',    'operation-log',              '/system/operation-log/index', NULL,                        1, 4, NULL,        '{"icon":"lucide:file-text","order":4,"title":"page.system.operationLog"}'),
 (107, 100, 'LoginLog',                 'menu',    'login-log',                  '/system/login-log/index',     NULL,                        1, 5, NULL,        '{"icon":"lucide:log-in","order":5,"title":"page.system.loginLog"}'),
 (108, 100, 'Dict',                     'menu',    'dict',                       '/system/dict/index',           NULL,                        1, 6, NULL,        '{"icon":"lucide:book-open","order":6,"title":"page.system.dict"}'),
-(109, 108, 'DictData',                 'menu',    'data/:typeId',               '/system/dict/data',            NULL,                        1, 0, NULL,        '{"hideInMenu":true,"title":"字典数据"}'),
+(109, 100, 'DictData',                 'menu',    'dict/data/:typeId',          '/system/dict/data',            NULL,                        1, 0, NULL,        '{"activePath":"/system/dict","hideInMenu":true,"title":"字典数据"}'),
 (1001,101, 'SystemUserCreate',        'button',  NULL,                        NULL,                          NULL,                         1, 0, 'AC_100010', '{"title":"新增用户"}'),
 (1002,101, 'SystemUserUpdate',        'button',  NULL,                        NULL,                          NULL,                         1, 1, 'AC_100020', '{"title":"编辑用户"}'),
 (1003,101, 'SystemUserDelete',        'button',  NULL,                        NULL,                          NULL,                         1, 2, 'AC_100030', '{"title":"删除用户"}'),

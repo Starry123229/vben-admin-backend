@@ -1,6 +1,8 @@
 <script lang="ts" setup>
-import { h, onMounted, ref } from 'vue';
+import { h, onMounted, ref, computed } from 'vue';
+import dayjs from 'dayjs';
 import { Page } from '@vben/common-ui';
+import { useAccessStore } from '@vben/stores';
 import { Button, Input, message, Modal, Space, Table, Tag } from 'ant-design-vue';
 import { forceLogout, getOnlineList } from '#/api/system/online';
 
@@ -13,8 +15,7 @@ const columns = [
   { title: '用户ID', dataIndex: 'userId', width: 80 },
   { title: '用户名', dataIndex: 'username', width: 120 },
   { title: 'Token', dataIndex: 'token', ellipsis: true, width: 250 },
-  { title: '登录时间', dataIndex: 'loginTime', width: 180 },
-  { title: '最后访问', dataIndex: 'lastAccessTime', width: 180 },
+  { title: '登录时间', dataIndex: 'loginTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
   { title: '操作', key: 'action', width: 100, fixed: 'right' },
 ];
 
@@ -26,10 +27,23 @@ async function loadData() {
 
 function handleSearch() { loadData(); }
 
+const accessStore = useAccessStore();
+// 当前用户的 token，用于判断是否是自己
+const currentToken = computed(() => accessStore.accessToken);
+
 function handleForceLogout(record: any) {
+  // 不允许强制下线自己
+  if (record.token === currentToken.value) {
+    message.warning('不能强制下线自己，如需退出请使用退出登录功能');
+    return;
+  }
   Modal.confirm({
     title: '确认下线', content: `确定要强制用户「${record.username}」下线吗？`,
-    onOk: async () => { await forceLogout(record.token); message.success('已强制下线'); loadData(); },
+    onOk: async () => {
+      await forceLogout(record.token);
+      message.success(`已强制用户「${record.username}」下线`);
+      loadData();
+    },
   });
 }
 

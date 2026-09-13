@@ -16,5 +16,8 @@ async function deleteJob(id: number) {
 async function toggleJob(id: number) {
   return requestClient.put(`/system/job/${id}/toggle`);
 }
+async function runJob(id: number) {
+  return requestClient.put(`/system/job/${id}/run`);
+}
 
-export { createJob, deleteJob, getJobList, toggleJob, updateJob };
+export { createJob, deleteJob, getJobList, runJob, toggleJob, updateJob };

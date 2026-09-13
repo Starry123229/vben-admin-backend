@@ -89,7 +89,7 @@ export function useRoleColumns(
       width: 100,
       cellRender: {
         name: onStatusChange ? 'CellSwitch' : 'CellTag',
-        attrs: { beforeChange: onStatusChange },
+        attrs: { beforeChange: onStatusChange, accessCode: 'AC_1000002' },
       },
     },
     {

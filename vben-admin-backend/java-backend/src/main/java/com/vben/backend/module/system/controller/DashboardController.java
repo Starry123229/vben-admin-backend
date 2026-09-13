@@ -43,4 +43,10 @@ public class DashboardController {
     public R<java.util.List<java.util.Map<String, Object>>> deptDistribution() {
         return R.ok(dashboardService.deptDistribution());
     }
+
+    /** GET /dashboard/browser-distribution：浏览器分布（来源：登录日志） */
+    @GetMapping("/browser-distribution")
+    public R<java.util.List<java.util.Map<String, Object>>> browserDistribution() {
+        return R.ok(dashboardService.browserDistribution());
+    }
 }

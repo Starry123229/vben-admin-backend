@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Page } from '@vben/common-ui';
+import { IconifyIcon } from '@vben/icons';
 import { $t } from '@vben/locales';
 import { useUserStore } from '@vben/stores';
 
@@ -26,12 +27,12 @@ const overview = ref({
 const recentNotices = ref<any[]>([]);
 
 const shortcuts = computed(() => [
-  { icon: '👤', title: $t('page.system.user'), path: '/system/user', color: '#4f6ef7' },
-  { icon: '👥', title: $t('page.system.role'), path: '/system/role', color: '#10b981' },
-  { icon: '🏢', title: $t('page.system.dept'), path: '/system/dept', color: '#f59e0b' },
-  { icon: '📋', title: $t('page.system.menu'), path: '/system/menu', color: '#8b5cf6' },
-  { icon: '🔔', title: $t('page.system.notice'), path: '/system/notice', color: '#ef4444' },
-  { icon: '📊', title: $t('page.dashboard.dataAnalysis'), path: '/analytics', color: '#06b6d4' },
+  { icon: 'lucide:user', title: $t('page.system.user'), path: '/system/user', color: '#4f6ef7' },
+  { icon: 'lucide:shield-check', title: $t('page.system.role'), path: '/system/role', color: '#10b981' },
+  { icon: 'lucide:building-2', title: $t('page.system.dept'), path: '/system/dept', color: '#f59e0b' },
+  { icon: 'lucide:menu', title: $t('page.system.menu'), path: '/system/menu', color: '#8b5cf6' },
+  { icon: 'lucide:bell', title: $t('page.system.notice'), path: '/system/notice', color: '#ef4444' },
+  { icon: 'lucide:bar-chart-3', title: $t('page.dashboard.dataAnalysis'), path: '/analytics', color: '#06b6d4' },
 ]);
 
 const statItems = computed(() => [
@@ -90,8 +91,8 @@ function goTo(path: string) {
             {{ $t('page.dashboard.welcomeDesc') }}
           </p>
         </div>
-        <div class="hidden h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-5xl md:flex">
-          👋
+        <div class="hidden h-20 w-20 items-center justify-center rounded-full bg-primary/10 md:flex">
+          <IconifyIcon icon="lucide:hand" class="size-10 text-primary" />
         </div>
       </div>
 
@@ -121,10 +122,10 @@ function goTo(path: string) {
               @click="goTo(item.path)"
             >
               <div
-                class="mb-2 flex h-12 w-12 items-center justify-center rounded-full text-2xl"
+                class="mb-2 flex h-12 w-12 items-center justify-center rounded-full"
                 :style="{ backgroundColor: item.color + '15' }"
               >
-                {{ item.icon }}
+                <IconifyIcon :icon="item.icon" :style="{ color: item.color }" class="size-6" />
               </div>
               <span class="text-sm font-medium">{{ item.title }}</span>
             </div>

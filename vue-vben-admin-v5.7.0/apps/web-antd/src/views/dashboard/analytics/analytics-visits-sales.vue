@@ -6,7 +6,7 @@ import { onMounted, ref, watch } from 'vue';
 import { EchartsUI, useEcharts } from '@vben/plugins/echarts';
 
 const props = defineProps<{
-  deptData?: { name: string; value: number }[];
+  browserData?: { name: string; value: number }[];
 }>();
 
 const chartRef = ref<EchartsUIType>();
@@ -17,15 +17,17 @@ onMounted(() => {
 });
 
 watch(
-  () => props.deptData,
+  () => props.browserData,
   () => renderChart(),
   { deep: true },
 );
 
 function renderChart() {
-  const data = props.deptData || [];
+  const data = props.browserData || [];
+  const hasData = data.length > 0;
 
   renderEcharts({
+    // 无数据时置灰显示占位扇形，避免误解为真实占比
     series: [
       {
         animationDelay() {
@@ -34,17 +36,28 @@ function renderChart() {
         animationEasing: 'exponentialInOut',
         animationType: 'scale',
         center: ['50%', '50%'],
-        color: ['#5ab1ef', '#b6a2de', '#67e0e3', '#2ec7c9', '#fa6e86', '#ff9f7f'],
-        data: data.length > 0
+        color: hasData
+          ? ['#5ab1ef', '#b6a2de', '#67e0e3', '#2ec7c9', '#fa6e86', '#ff9f7f']
+          : ['#e5e7eb'],
+        data: hasData
           ? data.toSorted((a, b) => a.value - b.value)
           : [{ name: '暂无数据', value: 1 }],
-        name: '部门占比',
+        itemStyle: hasData ? {} : { opacity: 0.4 },
+        label: { show: hasData },
+        name: '浏览器占比',
         radius: '80%',
         roseType: 'radius',
         type: 'pie',
       },
     ],
-
+    title: hasData
+      ? undefined
+      : {
+          text: '暂无数据',
+          left: 'center',
+          top: 'center',
+          textStyle: { color: '#9ca3af', fontSize: 14, fontWeight: 'normal' },
+        },
     tooltip: {
       trigger: 'item',
     },

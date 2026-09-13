@@ -80,7 +80,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="w-2/3">
+  <div class="w-full max-w-3xl">
     <div class="mb-4 flex items-center justify-between">
       <span>
         未读消息
