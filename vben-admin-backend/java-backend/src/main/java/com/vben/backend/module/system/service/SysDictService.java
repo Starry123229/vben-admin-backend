@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vben.backend.common.result.PageResult;
+import com.vben.backend.common.result.ServiceException;
 import com.vben.backend.module.system.entity.SysDictData;
 import com.vben.backend.module.system.entity.SysDictType;
 import com.vben.backend.module.system.mapper.SysDictDataMapper;
 import com.vben.backend.module.system.mapper.SysDictTypeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -45,11 +47,23 @@ public class SysDictService {
     }
 
     public Long createType(SysDictType type) {
+        if (!StringUtils.hasText(type.getCode())) {
+            throw ServiceException.badRequest("字典编码不能为空");
+        }
+        if (codeExists(type.getCode(), null)) {
+            throw ServiceException.badRequest("字典编码已存在: " + type.getCode());
+        }
         dictTypeMapper.insert(type);
         return type.getId();
     }
 
     public void updateType(SysDictType type) {
+        if (type.getId() == null || dictTypeMapper.selectById(type.getId()) == null) {
+            throw ServiceException.badRequest("字典类型不存在");
+        }
+        if (StringUtils.hasText(type.getCode()) && codeExists(type.getCode(), type.getId())) {
+            throw ServiceException.badRequest("字典编码已存在: " + type.getCode());
+        }
         dictTypeMapper.updateById(type);
     }
 
@@ -96,6 +110,9 @@ public class SysDictService {
     }
 
     public void updateData(SysDictData data) {
+        if (data.getId() == null || dictDataMapper.selectById(data.getId()) == null) {
+            throw ServiceException.badRequest("字典数据不存在");
+        }
         dictDataMapper.updateById(data);
     }
 

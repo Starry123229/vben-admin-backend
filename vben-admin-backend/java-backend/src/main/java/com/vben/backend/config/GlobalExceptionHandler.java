@@ -6,11 +6,15 @@ import cn.dev33.satoken.exception.NotRoleException;
 import com.vben.backend.common.result.R;
 import com.vben.backend.common.result.ServiceException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -73,6 +77,31 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<R<Void>> handleNotFound(NoResourceFoundException e) {
         return ResponseEntity.status(404).body(R.fail("Not Found"));
+    }
+
+    /** 请求体不可读（JSON 语法错误/请求体缺失）：400（原落到兜底 500） */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<R<Void>> handleNotReadable(HttpMessageNotReadableException e) {
+        return ResponseEntity.badRequest().body(R.fail("请求体格式错误"));
+    }
+
+    /** 参数类型/格式不匹配（如时间参数非法）：400（原落到兜底 500） */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<R<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        return ResponseEntity.badRequest().body(R.fail("参数格式错误: " + e.getName()));
+    }
+
+    /** 请求不是 multipart/form-data（上传接口未带文件部件）：400（原落到兜底 500） */
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<R<Void>> handleMultipart(MultipartException e) {
+        return ResponseEntity.badRequest().body(R.fail("上传请求格式错误，请使用 multipart/form-data"));
+    }
+
+    /** 数据库唯一约束/完整性冲突：400（避免唯一键冲突以 500 暴露） */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<R<Void>> handleDataIntegrity(DataIntegrityViolationException e) {
+        log.warn("数据完整性冲突: {}", e.getMessage());
+        return ResponseEntity.badRequest().body(R.fail("数据已存在或违反唯一约束"));
     }
 
     /** 兜底：500，仅记日志，不泄漏内部细节 */

@@ -181,6 +181,9 @@ public class AuthExtService {
     /** 已登录用户扫描二维码并确认：把 ticket 与当前用户绑定。 */
     @Transactional
     public void scanQr(String ticket) {
+        if (!loginMethods.isQrcode()) {
+            throw ServiceException.forbidden("扫码登录已关闭");
+        }
         QrSession session = QrSession.SESSIONS.get(ticket);
         if (session == null) {
             throw ServiceException.badRequest("二维码已失效");
@@ -192,6 +195,9 @@ public class AuthExtService {
 
     /** 轮询二维码状态：confirmed 时返回该用户 accessToken（由前端提交 response 换 token）。 */
     public QrSession pollQr(String ticket, HttpServletResponse response) {
+        if (!loginMethods.isQrcode()) {
+            throw ServiceException.forbidden("扫码登录已关闭");
+        }
         QrSession session = QrSession.SESSIONS.get(ticket);
         if (session == null) {
             throw ServiceException.badRequest("二维码已失效");

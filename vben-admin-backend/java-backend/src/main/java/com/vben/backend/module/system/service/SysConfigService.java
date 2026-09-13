@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.vben.backend.common.result.PageResult;
+import com.vben.backend.common.result.ServiceException;
 import com.vben.backend.module.system.entity.SysConfig;
 import com.vben.backend.module.system.mapper.SysConfigMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -39,11 +41,23 @@ public class SysConfigService {
     }
 
     public Long create(SysConfig config) {
+        if (!StringUtils.hasText(config.getKey())) {
+            throw ServiceException.badRequest("参数键不能为空");
+        }
+        if (keyExists(config.getKey(), null)) {
+            throw ServiceException.badRequest("参数键已存在: " + config.getKey());
+        }
         configMapper.insert(config);
         return config.getId();
     }
 
     public void update(SysConfig config) {
+        if (config.getId() == null || configMapper.selectById(config.getId()) == null) {
+            throw ServiceException.badRequest("参数不存在");
+        }
+        if (StringUtils.hasText(config.getKey()) && keyExists(config.getKey(), config.getId())) {
+            throw ServiceException.badRequest("参数键已存在: " + config.getKey());
+        }
         configMapper.updateById(config);
     }
 
