@@ -61,6 +61,14 @@ public class NoticeController {
     @PostMapping("/send")
     @SaCheckRole(value = {"super", "admin"}, mode = SaMode.OR)
     public R<Void> sendToUser(@RequestBody SendNoticeRequest req) {
+        // 兼容 content 字段名
+        if (req.message == null || req.message.isBlank()) {
+            req.message = req.content;
+        }
+        // 兼容 receiverIds / userIds / userId 字段名
+        if (req.userId == null && req.receiverId != null) {
+            req.userId = req.receiverId;
+        }
         noticeService.sendToUser(req.userId, req.title, req.message,
                 req.avatar, req.link, req.type);
         return R.ok();
@@ -77,8 +85,10 @@ public class NoticeController {
     /** 发送通知请求体 */
     public static class SendNoticeRequest {
         public Long userId;
+        public Long receiverId;
         public String title;
         public String message;
+        public String content;
         public String avatar;
         public String link;
         public String type;

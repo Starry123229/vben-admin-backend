@@ -75,8 +75,11 @@ public class SysDeptService {
         deptMapper.updateById(dept);
     }
 
-    /** 删除部门：有子部门或已关联用户则拒绝 */
+    /** 删除部门：不存在则报错，有子部门或已关联用户则拒绝 */
     public void remove(Long id) {
+        if (id == null || deptMapper.selectById(id) == null) {
+            throw ServiceException.badRequest("部门不存在");
+        }
         long children = deptMapper.selectCount(new LambdaQueryWrapper<SysDept>().eq(SysDept::getPid, id));
         if (children > 0) {
             throw ServiceException.badRequest("该部门存在子部门，无法删除");

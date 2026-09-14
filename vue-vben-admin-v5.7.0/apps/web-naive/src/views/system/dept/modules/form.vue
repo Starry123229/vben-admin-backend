@@ -1,9 +1,11 @@
-<script lang="ts" setup>
+﻿<script lang="ts" setup>
 import type { SystemDeptApi } from '#/api/system/dept';
 
 import { computed, nextTick, ref } from 'vue';
 
 import { useVbenDrawer, useVbenForm } from '@vben/common-ui';
+
+import { $t } from '#/locales';
 
 import { createDept, updateDept } from '#/api/system/dept';
 import { useDeptFormSchema } from '../data';
@@ -53,7 +55,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
   },
 });
 
-const title = computed(() => (id.value ? '编辑部门' : '新增部门'));
+const title = computed(() => (id.value ? $t('page.common.editDept') : $t('page.common.addDept')));
 </script>
 <template>
   <Drawer :title="title">

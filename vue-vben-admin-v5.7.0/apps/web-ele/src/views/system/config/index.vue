@@ -15,6 +15,8 @@ import {
 } from 'element-plus';
 import { createConfig, deleteConfig, getConfigList, updateConfig } from '#/api/system/config';
 
+import { $t } from '#/locales';
+
 defineOptions({ name: 'SysConfig' });
 const loading = ref(false);
 const dataSource = ref<any[]>([]);
@@ -39,10 +41,10 @@ function handleSearch() { currentPage.value = 1; loadData(); }
 function handleReset() { searchForm.value = { name: '', key: '' }; currentPage.value = 1; loadData(); }
 
 function handleAdd() {
-  modalTitle.value = '新增参数'; formState.value = { type: 'string' }; modalVisible.value = true;
+  modalTitle.value = $t('page.common.addConfig'); formState.value = { type: 'string' }; modalVisible.value = true;
 }
 function handleEdit(record: any) {
-  modalTitle.value = '编辑参数'; formState.value = { ...record }; modalVisible.value = true;
+  modalTitle.value = $t('page.common.editConfig'); formState.value = { ...record }; modalVisible.value = true;
 }
 
 async function handleSave() {
@@ -50,15 +52,15 @@ async function handleSave() {
   try {
     if (formState.value.id) { await updateConfig(formState.value.id, formState.value); }
     else { await createConfig(formState.value); }
-    message.success('保存成功'); modalVisible.value = false; loadData();
+    message.success($t('page.common.saveSuccess')); modalVisible.value = false; loadData();
   } finally { saving.value = false; }
 }
 
 async function handleDelete(record: any) {
   try {
-    await MessageBox.confirm(`确定要删除参数「${record.name}」吗？`, '确认删除', { type: 'warning' });
+    await MessageBox.confirm($t('page.common.deleteConfigConfirm', { name: record.name }), $t('page.common.confirmDeleteTitle'), { type: 'warning' });
     await deleteConfig(record.id);
-    message.success('删除成功');
+    message.success($t('page.common.deleteSuccess'));
     loadData();
   } catch { /* cancelled */ }
 }
@@ -72,22 +74,22 @@ onMounted(() => loadData());
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center gap-2">
-        <Input v-model="searchForm.name" placeholder="参数名称" style="width: 150px" clearable />
-        <Input v-model="searchForm.key" placeholder="参数键" style="width: 150px" clearable />
-        <Button type="primary" @click="handleSearch">搜索</Button>
-        <Button @click="handleReset">重置</Button>
-        <Button type="primary" @click="handleAdd">新增</Button>
+        <Input v-model="searchForm.name" :placeholder="$t('page.config.configName')" style="width: 150px" clearable />
+        <Input v-model="searchForm.key" :placeholder="$t('page.config.configKey')" style="width: 150px" clearable />
+        <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
+        <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
+        <Button type="primary" @click="handleAdd">{{ $t('page.common.addConfig') }}</Button>
       </div>
       <Table v-loading="loading" :data="dataSource" border size="small" style="width: 100%">
-        <TableColumn prop="name" label="参数名称" width="150" />
-        <TableColumn prop="key" label="参数键" width="200" />
-        <TableColumn prop="value" label="参数值" show-overflow-tooltip width="200" />
-        <TableColumn prop="type" label="类型" width="80" />
-        <TableColumn prop="remark" label="备注" show-overflow-tooltip min-width="200" />
-        <TableColumn label="操作" width="150" fixed="right">
+        <TableColumn prop="name" :label="$t('page.config.configName')" width="150" />
+        <TableColumn prop="key" :label="$t('page.config.configKey')" width="200" />
+        <TableColumn prop="value" :label="$t('page.config.configValue')" show-overflow-tooltip width="200" />
+        <TableColumn prop="type" :label="$t('page.config.configType')" width="80" />
+        <TableColumn prop="remark" :label="$t('page.common.remark')" show-overflow-tooltip min-width="200" />
+        <TableColumn :label="$t('page.common.action')" width="150" fixed="right">
           <template #default="{ row }">
-            <Button type="primary" link size="small" @click="handleEdit(row)">编辑</Button>
-            <Button type="danger" link size="small" @click="handleDelete(row)">删除</Button>
+            <Button type="primary" link size="small" @click="handleEdit(row)">{{ $t('page.common.edit') }}</Button>
+            <Button type="danger" link size="small" @click="handleDelete(row)">{{ $t('page.common.delete') }}</Button>
           </template>
         </TableColumn>
       </Table>
@@ -104,22 +106,22 @@ onMounted(() => loadData());
       </div>
       <Dialog v-model="modalVisible" :title="modalTitle" width="500px">
         <div class="space-y-3 py-4">
-          <div><label class="mb-1 block text-sm">参数名称</label><Input v-model="formState.name" placeholder="请输入参数名称" /></div>
-          <div><label class="mb-1 block text-sm">参数键</label><Input v-model="formState.key" placeholder="如 sys.name" /></div>
-          <div><label class="mb-1 block text-sm">参数值</label><Input v-model="formState.value" placeholder="请输入参数值" /></div>
-          <div><label class="mb-1 block text-sm">类型</label>
+          <div><label class="mb-1 block text-sm">{{ $t('page.config.configName') }}</label><Input v-model="formState.name" :placeholder="$t('page.common.input')" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.config.configKey') }}</label><Input v-model="formState.key" placeholder="sys.name" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.config.configValue') }}</label><Input v-model="formState.value" :placeholder="$t('page.common.input')" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.config.configType') }}</label>
             <Select v-model="formState.type" style="width: 100%">
-              <Option label="字符串" value="string" />
-              <Option label="数字" value="number" />
-              <Option label="布尔" value="boolean" />
+              <Option label="String" value="string" />
+              <Option label="Number" value="number" />
+              <Option label="Boolean" value="boolean" />
               <Option label="JSON" value="json" />
             </Select>
           </div>
-          <div><label class="mb-1 block text-sm">备注</label><Input v-model="formState.remark" type="textarea" :rows="2" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.common.remark') }}</label><Input v-model="formState.remark" type="textarea" :rows="2" /></div>
         </div>
         <template #footer>
-          <Button @click="modalVisible = false">取消</Button>
-          <Button type="primary" :loading="saving" @click="handleSave">确定</Button>
+          <Button @click="modalVisible = false">{{ $t('page.common.cancel') }}</Button>
+          <Button type="primary" :loading="saving" @click="handleSave">{{ $t('page.common.confirm') }}</Button>
         </template>
       </Dialog>
     </div>

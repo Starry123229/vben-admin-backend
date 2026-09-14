@@ -95,6 +95,10 @@ public class SysMenuService {
         if (!StringUtils.hasText(req.getType())) {
             throw ServiceException.badRequest("菜单类型不能为空");
         }
+        // 校验菜单类型：dir=目录，menu=菜单，button=按钮
+        if (!List.of("dir", "menu", "button").contains(req.getType())) {
+            throw ServiceException.badRequest("菜单类型无效，仅支持 dir/menu/button");
+        }
         checkUnique(req.getName(), req.getPath(), null);
         SysMenu menu = toEntity(req, null);
         menu.setCreateTime(LocalDateTime.now());
@@ -127,13 +131,22 @@ public class SysMenuService {
         }
     }
 
-    /** 删除菜单：有子节点则拒绝 */
+    /** 删除菜单：不存在则报错，有子节点则拒绝 */
     @Transactional
     public void remove(Long id) {
+        if (id == null) {
+            throw ServiceException.badRequest("菜单 ID 不能为空");
+        }
+        SysMenu menu = menuMapper.selectById(id);
+        if (menu == null) {
+            throw ServiceException.badRequest("菜单不存在");
+        }
         long children = menuMapper.selectCount(new LambdaQueryWrapper<SysMenu>().eq(SysMenu::getPid, id));
         if (children > 0) {
             throw ServiceException.badRequest("该菜单存在子节点，无法删除");
         }
+        // 级联清理角色-菜单关联
+        roleMenuMapper.delete(new LambdaQueryWrapper<SysRoleMenu>().eq(SysRoleMenu::getMenuId, id));
         menuMapper.deleteById(id);
     }
 

@@ -14,7 +14,7 @@ import {
   ElTableColumn as TableColumn,
   ElTag as Tag,
 } from 'element-plus';
-import { clearOperationLogs, getOperationLogList } from '#/api/system/log';
+import { clearOperationLogs, exportOperationLog, getOperationLogList } from '#/api/system/log';
 
 defineOptions({ name: 'OperationLog' });
 const loading = ref(false);
@@ -46,6 +46,17 @@ async function handleClear() {
 
 function handlePageChange(page: number) { currentPage.value = page; loadData(); }
 function handlePageSizeChange(size: number) { pageSize.value = size; currentPage.value = 1; loadData(); }
+
+const exportLoading = ref(false);
+async function handleExport() {
+  exportLoading.value = true;
+  try {
+    await exportOperationLog(searchForm.value);
+    message.success('导出成功');
+  } catch {
+    message.error('导出失败');
+  } finally { exportLoading.value = false; }
+}
 onMounted(() => loadData());
 </script>
 
@@ -61,6 +72,7 @@ onMounted(() => loadData());
         </Select>
         <Button type="primary" @click="handleSearch">搜索</Button>
         <Button @click="handleReset">重置</Button>
+        <Button type="success" :loading="exportLoading" @click="handleExport">导出Excel</Button>
         <Button type="danger" @click="handleClear">清空日志</Button>
       </div>
       <Table v-loading="loading" :data="dataSource" border size="small" style="width: 100%">

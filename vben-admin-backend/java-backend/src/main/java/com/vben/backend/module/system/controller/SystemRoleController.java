@@ -45,8 +45,9 @@ public class SystemRoleController {
     @GetMapping("/list")
     public R<?> list(@RequestParam(defaultValue = "1") int page,
                      @RequestParam(defaultValue = "10") int pageSize,
-                     @RequestParam(required = false) String name) {
-        return R.ok(roleService.listRoles(page, pageSize, name));
+                     @RequestParam(required = false) String name,
+                     @RequestParam(required = false) Integer status) {
+        return R.ok(roleService.listRoles(page, pageSize, name, status));
     }
 
     /** POST /system/role：新建角色，需「编辑角色」码 */
@@ -83,8 +84,9 @@ public class SystemRoleController {
     @Log(module = "角色管理", description = "导出角色列表")
     @GetMapping("/export")
     public void export(HttpServletResponse response,
-                       @RequestParam(required = false) String name) throws java.io.IOException {
-        List<SysRole> roles = roleService.listRoles(1, 10000, name).getItems();
+                       @RequestParam(required = false) String name,
+                       @RequestParam(required = false) Integer status) throws java.io.IOException {
+        List<SysRole> roles = roleService.listRoles(1, 10000, name, status).getItems();
         List<String> headers = List.of("ID", "角色名称", "角色编码", "状态", "备注", "创建时间");
         List<Map<String, Object>> data = new ArrayList<>();
         for (SysRole r : roles) {

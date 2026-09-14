@@ -105,7 +105,7 @@ function onDelete(row: SystemMenuApi.SystemMenu) {
   // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
   deleteMenu(row.id)
     .then(() => {
-      message.success(`删除 ${row.name} 成功`);
+      message.success($t('page.common.deleteSuccessMsg', { name: row.name }));
       onRefresh();
     })
     .catch(() => {});
@@ -114,11 +114,11 @@ function onDelete(row: SystemMenuApi.SystemMenu) {
 <template>
   <Page auto-content-height>
     <FormDrawer @success="onRefresh" />
-    <Grid :table-title="'菜单管理'">
+    <Grid :table-title="$t('page.menu.title')">
       <template #toolbar-tools>
         <Button type="primary" @click="onCreate">
           <Plus class="size-5" />
-          新增菜单
+          {{ $t('page.common.addMenu') }}
         </Button>
       </template>
       <template #title="{ row }">

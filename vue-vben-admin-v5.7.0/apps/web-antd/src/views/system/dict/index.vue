@@ -24,6 +24,8 @@ import {
   updateDictType,
 } from '#/api/system/dict';
 
+import { $t } from '#/locales';
+
 defineOptions({ name: 'DictType' });
 
 const router = useRouter();
@@ -39,26 +41,26 @@ const searchForm = ref({
 });
 
 const modalVisible = ref(false);
-const modalTitle = ref('新增字典');
+const modalTitle = ref($t('page.common.addDict'));
 const formState = ref<any>({});
 const saving = ref(false);
 
 const columns = [
-  { title: '字典名称', dataIndex: 'name', width: 150 },
-  { title: '字典编码', dataIndex: 'code', width: 200 },
-  { title: '备注', dataIndex: 'remark', ellipsis: true, width: 200 },
+  { title: $t('page.dict.dictName'), dataIndex: 'name', width: 150 },
+  { title: $t('page.dict.dictType'), dataIndex: 'code', width: 200 },
+  { title: $t('page.common.remark'), dataIndex: 'remark', ellipsis: true, width: 200 },
   {
-    title: '状态',
+    title: $t('page.common.status'),
     dataIndex: 'status',
     width: 80,
     customRender: ({ record }: any) => {
       return record.status === 1
-        ? h(Tag, { color: 'green' }, () => '启用')
-        : h(Tag, { color: 'red' }, () => '停用');
+        ? h(Tag, { color: 'green' }, () => $t('page.common.enable'))
+        : h(Tag, { color: 'red' }, () => $t('page.common.disable'));
     },
   },
-  { title: '创建时间', dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
-  { title: '操作', key: 'action', width: 200, fixed: 'right' },
+  { title: $t('page.common.createTime'), dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: $t('page.common.action'), key: 'action', width: 200, fixed: 'right' },
 ];
 
 async function loadData() {
@@ -88,24 +90,24 @@ function handleReset() {
 }
 
 function handleAdd() {
-  modalTitle.value = '新增字典';
+  modalTitle.value = $t('page.common.addDict');
   formState.value = { name: '', code: '', status: 1, remark: '' };
   modalVisible.value = true;
 }
 
 function handleEdit(record: any) {
-  modalTitle.value = '编辑字典';
+  modalTitle.value = $t('page.common.editDict');
   formState.value = { ...record };
   modalVisible.value = true;
 }
 
 function handleData(record: any) {
-  router.push(`/system/dict/data/${record.id}`);
+  router.push(`/system/tools/dict/data/${record.id}`);
 }
 
 async function handleSave() {
   if (!formState.value.name || !formState.value.code) {
-    message.warning('请填写字典名称和字典编码');
+    message.warning($t('page.common.input'));
     return;
   }
   saving.value = true;
@@ -115,7 +117,7 @@ async function handleSave() {
     } else {
       await createDictType(formState.value);
     }
-    message.success('保存成功');
+    message.success($t('page.common.saveSuccess'));
     modalVisible.value = false;
     loadData();
   } finally {
@@ -125,11 +127,11 @@ async function handleSave() {
 
 function handleDelete(record: any) {
   Modal.confirm({
-    title: '确认删除',
-    content: `确定要删除字典「${record.name}」及其所有数据吗？`,
+    title: $t('page.common.confirmDeleteTitle'),
+    content: $t('page.common.deleteDictConfirm', { name: record.name }),
     onOk: async () => {
       await deleteDictType(record.id);
-      message.success('删除成功');
+      message.success($t('page.common.deleteSuccess'));
       loadData();
     },
   });
@@ -152,30 +154,30 @@ onMounted(() => {
       <div class="mb-4 flex flex-wrap items-center gap-2">
         <Input
           v-model:value="searchForm.name"
-          placeholder="字典名称"
+          :placeholder="$t('page.dict.dictName')"
           style="width: 150px"
           allow-clear
         />
         <Input
           v-model:value="searchForm.code"
-          placeholder="字典编码"
+          :placeholder="$t('page.dict.dictType')"
           style="width: 150px"
           allow-clear
         />
         <Select
           v-model:value="searchForm.status"
-          placeholder="状态"
+          :placeholder="$t('page.common.status')"
           style="width: 120px"
           allow-clear
           :options="[
-            { label: '启用', value: 1 },
-            { label: '停用', value: 0 },
+            { label: $t('page.common.enable'), value: 1 },
+            { label: $t('page.common.disable'), value: 0 },
           ]"
         />
         <Space>
-          <Button type="primary" @click="handleSearch">搜索</Button>
-          <Button @click="handleReset">重置</Button>
-          <Button type="primary" @click="handleAdd">新增字典</Button>
+          <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
+          <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
+          <Button type="primary" @click="handleAdd">{{ $t('page.common.addDict') }}</Button>
         </Space>
       </div>
 
@@ -188,7 +190,7 @@ onMounted(() => {
           pageSize: pageSize,
           total: total,
           showSizeChanger: true,
-          showTotal: (t: number) => `共 ${t} 条`,
+          showTotal: (t: number) => $t('page.common.total') + ' ' + t + ' ' + $t('page.common.records'),
           onChange: handlePageChange,
         }"
         :scroll="{ x: 900 }"
@@ -198,13 +200,13 @@ onMounted(() => {
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'action'">
             <Button type="link" size="small" @click="handleEdit(record)">
-              编辑
+              {{ $t('page.common.edit') }}
             </Button>
             <Button type="link" size="small" @click="handleData(record)">
-              数据
+              {{ $t('page.dict.data') }}
             </Button>
             <Button type="link" danger size="small" @click="handleDelete(record)">
-              删除
+              {{ $t('page.common.delete') }}
             </Button>
           </template>
         </template>
@@ -218,29 +220,29 @@ onMounted(() => {
       >
         <div class="space-y-3 py-4">
           <div>
-            <label class="mb-1 block text-sm">字典名称</label>
-            <Input v-model:value="formState.name" placeholder="请输入字典名称" />
+            <label class="mb-1 block text-sm">{{ $t('page.dict.dictName') }}</label>
+            <Input v-model:value="formState.name" :placeholder="$t('page.common.input')" />
           </div>
           <div>
-            <label class="mb-1 block text-sm">字典编码</label>
+            <label class="mb-1 block text-sm">{{ $t('page.dict.dictType') }}</label>
             <Input
               v-model:value="formState.code"
-              placeholder="如 sys_user_sex"
+              placeholder="sys_user_sex"
               :disabled="!!formState.id"
             />
           </div>
           <div>
-            <label class="mb-1 block text-sm">状态</label>
+            <label class="mb-1 block text-sm">{{ $t('page.common.status') }}</label>
             <RadioGroup
               v-model:value="formState.status"
               :options="[
-                { label: '启用', value: 1 },
-                { label: '停用', value: 0 },
+                { label: $t('page.common.enable'), value: 1 },
+                { label: $t('page.common.disable'), value: 0 },
               ]"
             />
           </div>
           <div>
-            <label class="mb-1 block text-sm">备注</label>
+            <label class="mb-1 block text-sm">{{ $t('page.common.remark') }}</label>
             <Input.TextArea v-model:value="formState.remark" :rows="2" />
           </div>
         </div>

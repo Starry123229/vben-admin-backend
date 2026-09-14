@@ -31,7 +31,7 @@ const shortcuts = computed(() => [
   { icon: 'lucide:shield-check', title: $t('page.system.role'), path: '/system/role', color: '#10b981' },
   { icon: 'lucide:building-2', title: $t('page.system.dept'), path: '/system/dept', color: '#f59e0b' },
   { icon: 'lucide:menu', title: $t('page.system.menu'), path: '/system/menu', color: '#8b5cf6' },
-  { icon: 'lucide:bell', title: $t('page.system.notice'), path: '/system/notice', color: '#ef4444' },
+  { icon: 'lucide:bell', title: $t('page.system.notice'), path: '/system/tools/notice', color: '#ef4444' },
   { icon: 'lucide:bar-chart-3', title: $t('page.dashboard.dataAnalysis'), path: '/analytics', color: '#06b6d4' },
 ]);
 

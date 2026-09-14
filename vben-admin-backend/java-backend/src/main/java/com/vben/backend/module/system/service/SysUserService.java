@@ -16,8 +16,9 @@ import com.vben.backend.module.system.entity.SysUserRole;
 import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysUserMapper;
 import com.vben.backend.module.system.mapper.SysUserRoleMapper;
+import com.vben.backend.module.system.storage.FileStorageProvider;
+import com.vben.backend.module.system.util.PasswordValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,10 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -47,10 +44,7 @@ public class SysUserService {
     private final SysRoleMapper roleMapper;
     private final SysUserRoleMapper userRoleMapper;
     private final BCryptPasswordEncoder passwordEncoder;
-
-    /** 头像等上传文件的存储根目录（默认 ./uploads，可用 V_BEN_UPLOAD_DIR 覆盖） */
-    @Value("${vben.auth.upload-dir:./uploads}")
-    private String uploadDir;
+    private final FileStorageProvider fileStorageProvider;
 
     private static final long AVATAR_MAX_SIZE = 5 * 1024 * 1024L;
     private static final Set<String> AVATAR_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".webp", ".gif");
@@ -98,9 +92,10 @@ public class SysUserService {
         if (!StringUtils.hasText(req.getUsername())) {
             throw ServiceException.badRequest("登录名不能为空");
         }
-        if (!StringUtils.hasText(req.getPassword())) {
-            throw ServiceException.badRequest("密码不能为空");
-        }
+if (!StringUtils.hasText(req.getPassword())) {
+throw ServiceException.badRequest("密码不能为空");
+}
+PasswordValidator.validate(req.getPassword());
         long dup = userMapper.selectCount(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUsername, req.getUsername()));
         if (dup > 0) {
             throw ServiceException.badRequest("登录名已存在");
@@ -170,6 +165,10 @@ public class SysUserService {
         if (id == loginId) {
             throw ServiceException.badRequest("不能删除当前登录账号");
         }
+        SysUser user = userMapper.selectById(id);
+        if (user == null) {
+            throw ServiceException.badRequest("用户不存在");
+        }
         userRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, id));
         userMapper.deleteById(id);
     }
@@ -191,8 +190,8 @@ public class SysUserService {
     }
 
     /**
-     * 当前用户上传头像：校验类型与大小，落盘到 {upload-dir}/avatar/，
-     * 更新 sys_user.avatar 并返回可公开访问的 URL（/avatar/file/{filename}）。
+     * 当前用户上传头像：校验类型与大小，通过 FileStorageProvider 存储，
+     * 更新 sys_user.avatar 并返回可公开访问的 URL。
      */
     public String saveAvatar(MultipartFile file) {
         if (file == null || file.isEmpty()) {
@@ -211,15 +210,8 @@ public class SysUserService {
             throw ServiceException.badRequest("仅支持 jpg/png/webp/gif 格式");
         }
         long loginId = StpUtil.getLoginIdAsLong();
-        String filename = "u" + loginId + "-" + System.currentTimeMillis() + ext;
-        try {
-            Path dir = Paths.get(uploadDir, "avatar").toAbsolutePath().normalize();
-            Files.createDirectories(dir);
-            file.transferTo(dir.resolve(filename).toFile());
-        } catch (IOException e) {
-            throw new ServiceException(HttpStatus.INTERNAL_SERVER_ERROR, "头像保存失败");
-        }
-        String url = "/api/avatar/file/" + filename;
+        // 使用 FileStorageProvider 上传到 avatar 目录
+        String url = fileStorageProvider.upload(file, "avatar");
         applyAvatar(loginId, url);
         return url;
     }
@@ -238,13 +230,16 @@ public class SysUserService {
     /** 当前用户修改自己的密码 */
     public void changePassword(ChangePasswordRequest req) {
         if (!StringUtils.hasText(req.getOldPassword())
-                || !StringUtils.hasText(req.getNewPassword())
-                || !StringUtils.hasText(req.getConfirmPassword())) {
+                || !StringUtils.hasText(req.getNewPassword())) {
             throw ServiceException.badRequest("密码项不能为空");
         }
-        if (!req.getNewPassword().equals(req.getConfirmPassword())) {
+        // confirmPassword 为空时默认使用 newPassword
+        String confirmPassword = StringUtils.hasText(req.getConfirmPassword())
+                ? req.getConfirmPassword() : req.getNewPassword();
+        if (!req.getNewPassword().equals(confirmPassword)) {
             throw ServiceException.badRequest("两次输入的新密码不一致");
         }
+        PasswordValidator.validate(req.getNewPassword());
         long loginId = StpUtil.getLoginIdAsLong();
         SysUser user = userMapper.selectById(loginId);
         if (user == null || !passwordEncoder.matches(req.getOldPassword(), user.getPasswordHash())) {
@@ -264,6 +259,7 @@ public class SysUserService {
         if (!StringUtils.hasText(newPassword)) {
             throw ServiceException.badRequest("新密码不能为空");
         }
+        PasswordValidator.validate(newPassword);
         SysUser user = userMapper.selectById(id);
         if (user == null) {
             throw ServiceException.badRequest("用户不存在");

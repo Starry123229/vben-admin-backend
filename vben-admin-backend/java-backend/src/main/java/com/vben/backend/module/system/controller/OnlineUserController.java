@@ -79,12 +79,24 @@ public class OnlineUserController {
     /** 强制下线：支持通过 token 或 userId 下线 */
     @DeleteMapping("/{tokenOrId}")
     public R<Void> forceLogout(@PathVariable String tokenOrId) {
+        // 防止管理员强制下线自己
+        String currentToken = StpUtil.getTokenValue();
+        if (currentToken != null && currentToken.equals(tokenOrId)) {
+            throw com.vben.backend.common.result.ServiceException.badRequest("不能强制下线当前登录账号");
+        }
         // 先尝试按 token 注销
         StpUtil.logoutByTokenValue(tokenOrId);
         // 同时尝试按 loginId 注销（兼容前端传 userId 的场景）
         try {
             long userId = Long.parseLong(tokenOrId);
+            // 防止通过 userId 下线自己
+            Object currentLoginId = StpUtil.getLoginId();
+            if (currentLoginId != null && String.valueOf(currentLoginId).equals(String.valueOf(userId))) {
+                throw com.vben.backend.common.result.ServiceException.badRequest("不能强制下线当前登录账号");
+            }
             StpUtil.logout(userId);
+        } catch (com.vben.backend.common.result.ServiceException e) {
+            throw e;
         } catch (NumberFormatException ignored) {
             // 不是数字，仅按 token 注销即可
         }

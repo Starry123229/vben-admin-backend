@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import type { SystemMenuApi } from '#/api/system/menu';
-
 import type { Recordable } from '@vben/types';
+
+import type { SystemMenuApi } from '#/api/system/menu';
 
 import { computed, nextTick, ref } from 'vue';
 
@@ -129,7 +129,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
   },
 });
 
-const title = computed(() => (id.value ? '编辑菜单' : '新增菜单'));
+const title = computed(() => (id.value ? $t('page.common.editMenu') : $t('page.common.addMenu')));
 </script>
 <template>
   <Drawer :title="title">

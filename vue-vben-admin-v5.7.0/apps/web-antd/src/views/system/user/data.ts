@@ -4,29 +4,31 @@ import type { SystemUserApi } from '#/api/system/user';
 import { getDeptList } from '#/api/system/dept';
 import { getRoleList } from '#/api/system/role';
 
+import { $t } from '#/locales';
+
 export function useUserFormSchema(): VbenFormSchema[] {
   return [
     {
       component: 'Input',
       fieldName: 'username',
-      label: '登录账号',
+      label: $t('page.user.username'),
       rules: 'required',
     },
     {
       component: 'InputPassword',
       fieldName: 'password',
-      label: '密码',
-      help: '新建时必填；编辑时留空表示不修改',
+      label: $t('page.user.password'),
+      help: $t('page.user.password'),
     },
     {
       component: 'Input',
       fieldName: 'realName',
-      label: '真实姓名',
+      label: $t('page.user.realName'),
     },
     {
       component: 'ApiSelect',
       fieldName: 'deptId',
-      label: '部门',
+      label: $t('page.user.dept'),
       modelPropName: 'value',
       componentProps: {
         allowClear: true,
@@ -38,7 +40,7 @@ export function useUserFormSchema(): VbenFormSchema[] {
     {
       component: 'ApiSelect',
       fieldName: 'roleIds',
-      label: '角色',
+      label: $t('page.user.role'),
       modelPropName: 'value',
       componentProps: {
         multiple: true,
@@ -51,21 +53,21 @@ export function useUserFormSchema(): VbenFormSchema[] {
     {
       component: 'RadioGroup',
       fieldName: 'status',
-      label: '状态',
+      label: $t('page.common.status'),
       defaultValue: 1,
       componentProps: {
         buttonStyle: 'solid',
         optionType: 'button',
         options: [
-          { label: '启用', value: 1 },
-          { label: '停用', value: 0 },
+          { label: $t('page.common.enable'), value: 1 },
+          { label: $t('page.common.disable'), value: 0 },
         ],
       },
     },
     {
       component: 'Textarea',
       fieldName: 'remark',
-      label: '备注',
+      label: $t('page.common.remark'),
     },
   ];
 }
@@ -75,17 +77,17 @@ export function useUserGridFormSchema(): VbenFormSchema[] {
     {
       component: 'Input',
       fieldName: 'username',
-      label: '登录账号',
+      label: $t('page.user.username'),
     },
     {
       component: 'Select',
       fieldName: 'status',
-      label: '状态',
+      label: $t('page.common.status'),
       componentProps: {
         allowClear: true,
         options: [
-          { label: '启用', value: 1 },
-          { label: '停用', value: 0 },
+          { label: $t('page.common.enable'), value: 1 },
+          { label: $t('page.common.disable'), value: 0 },
         ],
       },
     },
@@ -100,23 +102,23 @@ export function useUserColumns(
   return [
     {
       field: 'username',
-      title: '登录账号',
+      title: $t('page.user.username'),
       width: 160,
     },
     {
       field: 'realName',
-      title: '真实姓名',
+      title: $t('page.user.realName'),
       width: 140,
     },
     {
       field: 'roleCodes',
-      title: '角色',
+      title: $t('page.user.role'),
       formatter: ({ row }) => (row.roleCodes || []).join('，') || '-',
       minWidth: 140,
     },
     {
       field: 'deptId',
-      title: '部门',
+      title: $t('page.user.dept'),
       width: 120,
       formatter: ({ row }) => {
         if (row.deptId == null) return '-';
@@ -125,7 +127,7 @@ export function useUserColumns(
     },
     {
       field: 'status',
-      title: '状态',
+      title: $t('page.common.status'),
       width: 100,
       cellRender: {
         name: onStatusChange ? 'CellSwitch' : 'CellTag',
@@ -135,18 +137,18 @@ export function useUserColumns(
     },
     {
       field: 'remark',
-      title: '备注',
+      title: $t('page.common.remark'),
       minWidth: 140,
     },
     {
       field: 'createTime',
-      title: '创建时间',
+      title: $t('page.common.createTime'),
       width: 180,
       formatter: 'formatDateTime',
     },
     {
       field: 'operation',
-      title: '操作',
+      title: $t('page.common.action'),
       width: 160,
       fixed: 'right',
       align: 'center',
@@ -154,7 +156,7 @@ export function useUserColumns(
         name: 'CellOperation',
         attrs: {
           nameField: 'username',
-          nameTitle: '登录账号',
+          nameTitle: $t('page.user.username'),
           onClick: onActionClick,
         },
         // 按钮级权限：与后端 @SaCheckPermission 同一套码

@@ -72,6 +72,9 @@ public class SysDictService {
     }
 
     public void deleteType(Long id) {
+        if (id == null || dictTypeMapper.selectById(id) == null) {
+            throw ServiceException.badRequest("字典类型不存在");
+        }
         dictTypeMapper.deleteById(id);
         // 同时删除关联的字典数据
         dictDataMapper.delete(new LambdaQueryWrapper<SysDictData>()
@@ -109,6 +112,12 @@ public class SysDictService {
     }
 
     public Long createData(SysDictData data) {
+        if (!StringUtils.hasText(data.getLabel())) {
+            throw ServiceException.badRequest("字典标签不能为空");
+        }
+        if (data.getTypeId() == null) {
+            throw ServiceException.badRequest("字典类型ID不能为空");
+        }
         dictDataMapper.insert(data);
         return data.getId();
     }
@@ -121,6 +130,9 @@ public class SysDictService {
     }
 
     public void deleteData(Long id) {
+        if (id == null || dictDataMapper.selectById(id) == null) {
+            throw ServiceException.badRequest("字典数据不存在");
+        }
         dictDataMapper.deleteById(id);
     }
 }

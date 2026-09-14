@@ -1,9 +1,11 @@
-<script lang="ts" setup>
+﻿<script lang="ts" setup>
 import type { SystemUserApi } from '#/api/system/user';
 
 import { computed, nextTick, ref } from 'vue';
 
 import { useVbenDrawer, useVbenForm } from '@vben/common-ui';
+
+import { $t } from '#/locales';
 
 import { createUser, updateUser } from '#/api/system/user';
 import { useUserFormSchema } from '../data';
@@ -60,7 +62,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
   },
 });
 
-const title = computed(() => (id.value ? '编辑用户' : '新增用户'));
+const title = computed(() => (id.value ? $t('page.common.editUser') : $t('page.common.addUser')));
 </script>
 <template>
   <Drawer :title="title">

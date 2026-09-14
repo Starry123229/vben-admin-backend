@@ -61,7 +61,7 @@ async function loadData() {
 
 function handleSearch() { currentPage.value = 1; loadData(); }
 function handleReset() { searchForm.value = { name: '', code: '', status: undefined }; currentPage.value = 1; loadData(); }
-function handleEdit(record: any) { router.push(`/system/dict/data/${record.id}`); }
+function handleEdit(record: any) { router.push(`/system/tools/dict/data/${record.id}`); }
 
 function handleDelete(record: any) {
   dialog.warning({

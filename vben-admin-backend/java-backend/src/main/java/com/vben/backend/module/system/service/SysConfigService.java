@@ -62,6 +62,9 @@ public class SysConfigService {
     }
 
     public void delete(Long id) {
+        if (id == null || configMapper.selectById(id) == null) {
+            throw ServiceException.badRequest("参数不存在");
+        }
         configMapper.deleteById(id);
     }
 

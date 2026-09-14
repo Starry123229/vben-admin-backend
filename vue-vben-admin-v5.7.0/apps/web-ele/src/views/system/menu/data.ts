@@ -2,12 +2,14 @@ import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeTableGridColumns } from '#/adapter/vxe-table';
 import { SystemMenuApi } from '#/api/system/menu';
 
+import { $t } from '#/locales';
+
 export function useMenuFormSchema(): VbenFormSchema[] {
   return [
     {
       component: 'RadioGroup',
       fieldName: 'type',
-      label: '菜单类型',
+      label: $t('page.menu.type'),
       defaultValue: 'menu',
       componentProps: {
         buttonStyle: 'solid',
@@ -18,26 +20,26 @@ export function useMenuFormSchema(): VbenFormSchema[] {
     {
       component: 'Input',
       fieldName: 'name',
-      label: '菜单名称(路由名)',
+      label: $t('page.menu.name'),
       rules: 'required',
     },
     {
       component: 'Input',
       fieldName: 'pid',
-      label: '上级菜单',
+      label: $t('page.menu.pid'),
       formItemClass: 'items-start',
       modelPropName: 'modelValue',
     },
     {
       component: 'Input',
       fieldName: 'title',
-      label: '菜单标题',
+      label: $t('page.menu.name'),
       rules: 'required',
     },
     {
       component: 'Input',
       fieldName: 'path',
-      label: '路由路径',
+      label: $t('page.menu.path'),
       help: '以 / 开头，如 /system/user',
       dependencies: {
         show: (values) =>
@@ -48,7 +50,7 @@ export function useMenuFormSchema(): VbenFormSchema[] {
     {
       component: 'Input',
       fieldName: 'component',
-      label: '组件路径',
+      label: $t('page.menu.component'),
       help: '如 /system/user/index 或 BasicLayout',
       dependencies: {
         show: (values) =>
@@ -59,7 +61,7 @@ export function useMenuFormSchema(): VbenFormSchema[] {
     {
       component: 'Input',
       fieldName: 'authCode',
-      label: '权限标识',
+      label: $t('page.menu.authCode'),
       help: '按钮型菜单必填，如 system:user:create',
       dependencies: {
         show: (values) => values.type === 'button',
@@ -69,7 +71,7 @@ export function useMenuFormSchema(): VbenFormSchema[] {
     {
       component: 'IconPicker',
       fieldName: 'icon',
-      label: '图标',
+      label: $t('page.menu.icon'),
       dependencies: {
         show: (values) =>
           ['catalog', 'embedded', 'link', 'menu'].includes(values.type),
@@ -79,8 +81,8 @@ export function useMenuFormSchema(): VbenFormSchema[] {
     {
       component: 'Input',
       fieldName: 'redirect',
-      label: '重定向',
-      help: '目录型菜单可设置，如 /system/user',
+      label: $t('page.menu.path'),
+      help: $t('page.menu.path'),
       dependencies: {
         show: (values) => values.type === 'catalog',
         triggerFields: ['type'],
@@ -89,21 +91,21 @@ export function useMenuFormSchema(): VbenFormSchema[] {
     {
       component: 'InputNumber',
       fieldName: 'sort',
-      label: '排序',
+      label: $t('page.menu.sort'),
       defaultValue: 0,
       componentProps: { class: 'w-full' },
     },
     {
       component: 'RadioGroup',
       fieldName: 'status',
-      label: '状态',
+      label: $t('page.common.status'),
       defaultValue: 1,
       componentProps: {
         buttonStyle: 'solid',
         optionType: 'button',
         options: [
-          { label: '启用', value: 1 },
-          { label: '停用', value: 0 },
+          { label: $t('page.common.enable'), value: 1 },
+          { label: $t('page.common.disable'), value: 0 },
         ],
       },
     },
@@ -116,7 +118,7 @@ export function useMenuColumns(
   return [
     {
       field: 'meta.title',
-      title: '菜单标题',
+      title: $t('page.menu.name'),
       treeNode: true,
       fixed: 'left',
       width: 240,
@@ -124,43 +126,43 @@ export function useMenuColumns(
     },
     {
       field: 'type',
-      title: '类型',
+      title: $t('page.menu.type'),
       width: 100,
       cellRender: {
         name: 'CellTag',
         options: [
-          { color: 'processing', label: '目录', value: 'catalog' },
-          { color: 'default', label: '菜单', value: 'menu' },
-          { color: 'error', label: '按钮', value: 'button' },
-          { color: 'success', label: '内嵌', value: 'embedded' },
-          { color: 'warning', label: '外链', value: 'link' },
+          { color: 'processing', label: $t('page.menu.directory'), value: 'catalog' },
+          { color: 'default', label: $t('page.menu.menu'), value: 'menu' },
+          { color: 'error', label: $t('page.menu.button'), value: 'button' },
+          { color: 'success', label: 'embedded', value: 'embedded' },
+          { color: 'warning', label: 'link', value: 'link' },
         ],
       },
     },
     {
       field: 'authCode',
-      title: '权限标识',
+      title: $t('page.menu.authCode'),
       width: 200,
     },
     {
       field: 'path',
-      title: '路由路径',
+      title: $t('page.menu.path'),
       width: 200,
     },
     {
       field: 'component',
-      title: '组件路径',
+      title: $t('page.menu.component'),
       minWidth: 200,
     },
     {
       field: 'status',
-      title: '状态',
+      title: $t('page.common.status'),
       width: 100,
       cellRender: { name: 'CellTag' },
     },
     {
       field: 'operation',
-      title: '操作',
+      title: $t('page.common.action'),
       width: 200,
       fixed: 'right',
       align: 'center',
@@ -168,11 +170,11 @@ export function useMenuColumns(
         name: 'CellOperation',
         attrs: {
           nameField: 'name',
-          nameTitle: '菜单名称',
+          nameTitle: $t('page.menu.name'),
           onClick: onActionClick,
         },
         options: [
-          { code: 'append', text: '新增下级' },
+          { code: 'append', text: $t('page.common.add') },
           'edit',
           'delete',
         ],

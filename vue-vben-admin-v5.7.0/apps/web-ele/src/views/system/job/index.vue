@@ -13,6 +13,8 @@ import {
 } from 'element-plus';
 import { createJob, deleteJob, getJobList, toggleJob, updateJob } from '#/api/system/job';
 
+import { $t } from '#/locales';
+
 defineOptions({ name: 'SysJob' });
 const loading = ref(false);
 const dataSource = ref<any[]>([]);
@@ -28,10 +30,10 @@ async function loadData() {
 }
 
 function handleAdd() {
-  modalTitle.value = '新增任务'; formState.value = { groupName: 'DEFAULT', status: 0 }; modalVisible.value = true;
+  modalTitle.value = $t('page.common.addJob'); formState.value = { groupName: 'DEFAULT', status: 0 }; modalVisible.value = true;
 }
 function handleEdit(record: any) {
-  modalTitle.value = '编辑任务'; formState.value = { ...record }; modalVisible.value = true;
+  modalTitle.value = $t('page.common.editJob'); formState.value = { ...record }; modalVisible.value = true;
 }
 
 async function handleSave() {
@@ -39,22 +41,22 @@ async function handleSave() {
   try {
     if (formState.value.id) { await updateJob(formState.value.id, formState.value); }
     else { await createJob(formState.value); }
-    message.success('保存成功'); modalVisible.value = false; loadData();
+    message.success($t('page.common.saveSuccess')); modalVisible.value = false; loadData();
   } finally { saving.value = false; }
 }
 
 async function handleDelete(record: any) {
   try {
-    await MessageBox.confirm(`确定要删除任务「${record.name}」吗？`, '确认删除', { type: 'warning' });
+    await MessageBox.confirm($t('page.common.deleteJobConfirm', { name: record.name }), $t('page.common.confirmDeleteTitle'), { type: 'warning' });
     await deleteJob(record.id);
-    message.success('删除成功');
+    message.success($t('page.common.deleteSuccess'));
     loadData();
   } catch { /* cancelled */ }
 }
 
 async function handleToggle(record: any) {
   await toggleJob(record.id);
-  message.success(record.status === 1 ? '已暂停' : '已启动');
+  message.success(record.status === 1 ? $t('page.job.pausedMsg') : $t('page.job.startedMsg'));
   loadData();
 }
 
@@ -65,41 +67,41 @@ onMounted(() => loadData());
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4">
-        <Button type="primary" @click="handleAdd">新增任务</Button>
+        <Button type="primary" @click="handleAdd">{{ $t('page.common.addJob') }}</Button>
       </div>
       <Table v-loading="loading" :data="dataSource" border size="small" style="width: 100%">
-        <TableColumn prop="name" label="任务名称" width="150" />
-        <TableColumn prop="groupName" label="分组" width="100" />
-        <TableColumn prop="invokeTarget" label="调用目标" width="200" />
-        <TableColumn prop="cron" label="Cron表达式" width="150" />
-        <TableColumn label="状态" width="80">
+        <TableColumn prop="name" :label="$t('page.job.name')" width="150" />
+        <TableColumn prop="groupName" :label="$t('page.job.group')" width="100" />
+        <TableColumn prop="invokeTarget" :label="$t('page.job.invokeTarget')" width="200" />
+        <TableColumn prop="cron" :label="$t('page.job.cron')" width="150" />
+        <TableColumn :label="$t('page.job.status')" width="80">
           <template #default="{ row }">
-            <Tag :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? '运行' : '暂停' }}</Tag>
+            <Tag :type="row.status === 1 ? 'success' : 'info'">{{ row.status === 1 ? $t('page.job.running') : $t('page.job.paused') }}</Tag>
           </template>
         </TableColumn>
-        <TableColumn prop="remark" label="备注" show-overflow-tooltip min-width="200" />
-        <TableColumn label="操作" width="200" fixed="right">
+        <TableColumn prop="remark" :label="$t('page.common.remark')" show-overflow-tooltip min-width="200" />
+        <TableColumn :label="$t('page.common.action')" width="200" fixed="right">
           <template #default="{ row }">
             <Button type="primary" link size="small" @click="handleToggle(row)">
-              {{ row.status === 1 ? '暂停' : '启动' }}
+              {{ row.status === 1 ? $t('page.job.pause') : $t('page.job.resume') }}
             </Button>
-            <Button type="primary" link size="small" @click="handleEdit(row)">编辑</Button>
-            <Button type="danger" link size="small" @click="handleDelete(row)">删除</Button>
+            <Button type="primary" link size="small" @click="handleEdit(row)">{{ $t('page.common.edit') }}</Button>
+            <Button type="danger" link size="small" @click="handleDelete(row)">{{ $t('page.common.delete') }}</Button>
           </template>
         </TableColumn>
       </Table>
 
       <Dialog v-model="modalVisible" :title="modalTitle" width="500px">
         <div class="space-y-3 py-4">
-          <div><label class="mb-1 block text-sm">任务名称</label><Input v-model="formState.name" placeholder="请输入任务名称" /></div>
-          <div><label class="mb-1 block text-sm">分组</label><Input v-model="formState.groupName" placeholder="如 DEFAULT" /></div>
-          <div><label class="mb-1 block text-sm">调用目标</label><Input v-model="formState.invokeTarget" placeholder="如 beanName.method" /></div>
-          <div><label class="mb-1 block text-sm">Cron表达式</label><Input v-model="formState.cron" placeholder="如 0 0 * * * ?" /></div>
-          <div><label class="mb-1 block text-sm">备注</label><Input v-model="formState.remark" type="textarea" :rows="2" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.job.name') }}</label><Input v-model="formState.name" :placeholder="$t('page.common.input')" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.job.group') }}</label><Input v-model="formState.groupName" placeholder="DEFAULT" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.job.invokeTarget') }}</label><Input v-model="formState.invokeTarget" placeholder="beanName.method" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.job.cron') }}</label><Input v-model="formState.cron" placeholder="0 0 * * * ?" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.common.remark') }}</label><Input v-model="formState.remark" type="textarea" :rows="2" /></div>
         </div>
         <template #footer>
-          <Button @click="modalVisible = false">取消</Button>
-          <Button type="primary" :loading="saving" @click="handleSave">确定</Button>
+          <Button @click="modalVisible = false">{{ $t('page.common.cancel') }}</Button>
+          <Button type="primary" :loading="saving" @click="handleSave">{{ $t('page.common.confirm') }}</Button>
         </template>
       </Dialog>
     </div>

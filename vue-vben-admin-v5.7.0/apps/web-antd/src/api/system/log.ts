@@ -61,9 +61,33 @@ async function clearLoginLogs() {
   return requestClient.delete('/system/log/login');
 }
 
+/** 导出操作日志 Excel */
+async function exportOperationLog(params?: Recordable<any>) {
+  const blob = await requestClient.download<Blob>('/system/log/operation/export', { params });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '操作日志.xlsx';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/** 导出登录日志 Excel */
+async function exportLoginLog(params?: Recordable<any>) {
+  const blob = await requestClient.download<Blob>('/system/log/login/export', { params });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '登录日志.xlsx';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export {
   clearLoginLogs,
   clearOperationLogs,
+  exportLoginLog,
+  exportOperationLog,
   getLoginLogList,
   getOperationLogList,
 };

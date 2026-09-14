@@ -12,6 +12,7 @@ import { NButton as Button } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
+import { $t } from '#/locales';
 import { deleteDept, getDeptList } from '#/api/system/dept';
 
 import { useDeptColumns, useDeptGridFormSchema } from './data';
@@ -26,6 +27,7 @@ const [FormDrawer, formDrawerApi] = useVbenDrawer({
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
     schema: useDeptGridFormSchema(),
+    showCollapseButton: false,
     submitOnChange: true,
   },
   gridOptions: {
@@ -77,7 +79,7 @@ function onDelete(row: SystemDeptApi.SystemDept) {
   // 删除确认已由操作列 CellOperation 的 Popconfirm 完成，此处直接删除，避免双重确认
   deleteDept(row.id)
     .then(() => {
-      message.success(`删除 ${row.name} 成功`);
+      message.success($t('page.common.deleteSuccessMsg', { name: row.name }));
       onRefresh();
     })
     .catch(() => {});
@@ -94,11 +96,11 @@ function onCreate() {
 <template>
   <Page auto-content-height>
     <FormDrawer @success="onRefresh" />
-    <Grid :table-title="'部门管理'">
+    <Grid :table-title="$t('page.dept.title')">
       <template #toolbar-tools>
         <Button type="primary" @click="onCreate">
           <Plus class="size-5" />
-          新增部门
+          {{ $t('page.common.addDept') }}
         </Button>
       </template>
     </Grid>

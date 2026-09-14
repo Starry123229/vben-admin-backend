@@ -6,45 +6,32 @@ import { preferences } from '@vben/preferences';
 import { useUserStore } from '@vben/stores';
 
 import {
-  NButton as Button,
-  NCard as Card,
-  NForm as Form,
-  NFormItem as FormItem,
-  NInput as Input,
-  NRadioButton as RadioButton,
-  NRadioGroup as RadioGroup,
-  NSelect as Select,
-  NTag as Tag,
-  useMessage,
+  Button,
+  Card,
+  Form,
+  FormItem,
+  Input,
+  message,
+  RadioButton,
+  RadioGroup,
+  Select,
+  Tag,
 } from 'naive-ui';
 
-import {
-  broadcastNoticeToRoleApi,
-  sendNoticeToUserApi,
-} from '#/api/system/notice';
+import { $t } from '#/locales';
 import { getRoleList } from '#/api/system/role';
+import { broadcastNoticeToRoleApi, sendNoticeToUserApi } from '#/api/system/notice';
 import { getUserList } from '#/api/system/user';
-
-const message = useMessage();
 
 const userStore = useUserStore();
 const sending = ref(false);
 
-const targetOptions = [
-  { label: '指定用户', value: 'user' },
-  { label: '按角色广播', value: 'role' },
-];
+const targetOptions = computed(() => [
+  { label: $t('page.notice.targetUser'), value: 'user' },
+  { label: $t('page.notice.targetRole'), value: 'role' },
+]);
 
 const typeOptions = ['info', 'success', 'warning', 'error'];
-
-/** 消息类型对应的 Tag 类型色 */
-type TagType = 'default' | 'error' | 'info' | 'primary' | 'success' | 'warning';
-const typeTagType: Record<string, TagType> = {
-  error: 'error',
-  info: 'primary',
-  success: 'success',
-  warning: 'warning',
-};
 
 /** 用户下拉选项 */
 const userOptions = ref<{ label: string; value: number }[]>([]);
@@ -117,7 +104,9 @@ async function handleSend() {
         });
         count += 1;
       }
-      message.success(`已发送通知给 ${count} 位用户`);
+      message.success(
+        $t('page.notice.sendSuccess', { count, type: $t('page.notice.targetUser') }),
+      );
     } else {
       for (const roleId of formState.roleIds) {
         const n = await broadcastNoticeToRoleApi({
@@ -129,7 +118,9 @@ async function handleSend() {
         });
         count += n ?? 0;
       }
-      message.success(`已广播通知，共送达 ${count} 位用户`);
+      message.success(
+        $t('page.notice.broadcastSuccess', { count }),
+      );
     }
     // 重置表单
     formState.title = '';
@@ -141,15 +132,16 @@ async function handleSend() {
   }
 }
 </script>
+
 <template>
   <Page
     auto-content-height
-    title="通知管理"
-    description="向用户或角色发送站内通知消息"
+    :title="$t('page.notice.title')"
+    :description="$t('page.notice.description')"
   >
     <Card class="mx-4 max-w-[720px]">
-      <Form label-placement="top" class="max-w-[560px]">
-        <FormItem label="发送目标">
+      <Form layout="vertical" class="max-w-[560px]">
+        <FormItem :label="$t('page.notice.targetType')">
           <RadioGroup v-model:value="formState.targetType">
             <RadioButton
               v-for="opt in targetOptions"
@@ -164,74 +156,68 @@ async function handleSend() {
         <FormItem
           v-if="formState.targetType === 'user'"
           required
-          label="接收用户"
+          :label="$t('page.notice.selectUser')"
         >
           <Select
             v-model:value="formState.userIds"
+            mode="multiple"
+            allow-clear
+            :placeholder="$t('page.notice.selectUserPlaceholder')"
             :options="userOptions"
-            multiple
-            filterable
-            clearable
-            placeholder="选择一个或多个用户"
+            option-filter-prop="label"
           />
         </FormItem>
 
         <FormItem
           v-if="formState.targetType === 'role'"
           required
-          label="目标角色"
+          :label="$t('page.notice.selectRole')"
         >
           <Select
             v-model:value="formState.roleIds"
+            mode="multiple"
+            allow-clear
+            :placeholder="$t('page.notice.selectRolePlaceholder')"
             :options="roleOptions"
-            multiple
-            filterable
-            clearable
-            placeholder="选择一个或多个角色（角色下所有用户均会收到）"
+            option-filter-prop="label"
           />
         </FormItem>
 
-        <FormItem required label="标题">
+        <FormItem required :label="$t('page.notice.noticeTitle')">
           <Input
             v-model:value="formState.title"
+            :placeholder="$t('page.notice.enterTitle')"
             :maxlength="128"
             show-count
-            placeholder="请输入通知标题"
           />
         </FormItem>
 
-        <FormItem label="消息类型">
-          <Space>
-            <Tag
-              v-for="t in typeOptions"
-              :key="t"
-              :type="formState.type === t ? typeTagType[t] || 'primary' : 'default'"
-              size="small"
-              class="cursor-pointer"
-              @click="formState.type = t"
-            >
-              {{ t }}
-            </Tag>
-          </Space>
+        <FormItem :label="$t('page.notice.noticeType')">
+          <RadioGroup v-model:value="formState.type">
+            <RadioButton v-for="t in typeOptions" :key="t" :value="t">
+              <Tag :color="t === 'info' ? 'blue' : t === 'success' ? 'green' : t === 'warning' ? 'orange' : 'red'" class="mr-0 border-none">
+                {{ $t(`page.notice.noticeInfo${t.charAt(0).toUpperCase() + t.slice(1)}`) }}
+              </Tag>
+            </RadioButton>
+          </RadioGroup>
         </FormItem>
 
-        <FormItem label="内容">
-          <Input
+        <FormItem :label="$t('page.notice.noticeContent')">
+          <Input.TextArea
             v-model:value="formState.content"
-            type="textarea"
-            :autosize="{ minRows: 4 }"
-            placeholder="请输入通知内容（可选）"
+            :placeholder="$t('page.notice.enterContent')"
+            :rows="4"
           />
         </FormItem>
 
-        <FormItem class="mt-3">
+        <FormItem>
           <Button
             type="primary"
             :loading="sending"
             :disabled="!canSubmit"
             @click="handleSend"
           >
-            发送通知
+            {{ $t('page.notice.sendNotice') }}
           </Button>
         </FormItem>
       </Form>

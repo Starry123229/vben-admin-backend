@@ -129,6 +129,14 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- MinIO SDK：仅在 vben.storage.type=minio 时使用，设为 optional 不影响 local 模式 -->
+    <dependency>
+      <groupId>io.minio</groupId>
+      <artifactId>minio</artifactId>
+      <version>8.5.17</version>
+      <optional>true</optional>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>

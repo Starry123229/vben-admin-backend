@@ -73,7 +73,21 @@ vben:
       register: false      # 注册入口
       oauth: false        # 第三方 OAuth（qq/wechat/github/google 总开关）
     # 头像等上传文件的存储根目录（相对路径基于后端进程工作目录，可用 VBEN_AUTH_UPLOAD_DIR 覆盖）
-    upload-dir: ${VBEN_AUTH_UPLOAD_DIR:c:/Users/18164/Desktop/vben/vben-admin-backend/uploads}
+    upload-dir: ${VBEN_AUTH_UPLOAD_DIR:./uploads}
+
+  # 文件存储配置：local（本地磁盘，默认）或 minio（MinIO/S3 对象存储）
+  # 切换到 MinIO 时需添加 MinIO SDK 依赖并配置以下连接信息
+  storage:
+    type: ${VBEN_STORAGE_TYPE:local}
+    local:
+      base-dir: ${VBEN_STORAGE_LOCAL_DIR:./uploads}
+      url-prefix: /api/avatar/file
+    minio:
+      endpoint: ${VBEN_STORAGE_MINIO_ENDPOINT:http://localhost:9000}
+      access-key: ${VBEN_STORAGE_MINIO_ACCESS_KEY:minioadmin}
+      secret-key: ${VBEN_STORAGE_MINIO_SECRET_KEY:minioadmin}
+      bucket: ${VBEN_STORAGE_MINIO_BUCKET:vben-uploads}
+      url-prefix: ${VBEN_STORAGE_MINIO_URL_PREFIX:http://localhost:9000/vben-uploads}
 
     # ------------------------------------------------------------------
     # 第三方 OAuth 登录（qq / wechat / github / google）
@@ -118,3 +132,12 @@ knife4j:
   enable: true
   setting:
     language: zh-CN
+
+# 应用级配置
+app:
+  # 消息中心：邮件发送开关（false=仅站内信，true=站内信+邮件）
+  message:
+    mail-enabled: ${APP_MESSAGE_MAIL_ENABLED:false}
+  # 多租户开关（false=单租户模式，true=多租户隔离）
+  tenant:
+    enabled: ${APP_TENANT_ENABLED:false}

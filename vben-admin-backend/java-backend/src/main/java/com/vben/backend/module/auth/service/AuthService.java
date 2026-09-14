@@ -17,6 +17,7 @@ import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysRoleMenuMapper;
 import com.vben.backend.module.system.mapper.SysUserMapper;
 import com.vben.backend.module.system.mapper.SysUserRoleMapper;
+import com.vben.backend.module.system.util.IpLocationUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -138,7 +139,8 @@ public class AuthService {
         }
     }
 
-    /** 当前用户权限码：启用角色 → 授权菜单 → 启用的 button 型 authCode */
+    /** 当前用户权限码：启用角色 → 授权菜单 → 启用的 button 型 authCode。
+     * 超级管理员拥有全部权限码，与 buildRoutesByUserId 的 super 逻辑保持一致。 */
     public List<String> getCodes(long userId) {
         List<Long> roleIds = userRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>()
                         .eq(SysUserRole::getUserId, userId)).stream()
@@ -147,13 +149,22 @@ public class AuthService {
             return List.of();
         }
         // 仅保留启用状态的角色（status=1），禁用角色的权限码不应再生效
-        List<Long> activeRoleIds = roleMapper.selectList(new LambdaQueryWrapper<SysRole>()
+        List<SysRole> activeRoles = roleMapper.selectList(new LambdaQueryWrapper<SysRole>()
                         .in(SysRole::getId, roleIds)
-                        .eq(SysRole::getStatus, 1)).stream()
-                .map(SysRole::getId).toList();
-        if (activeRoleIds.isEmpty()) {
+                        .eq(SysRole::getStatus, 1));
+        if (activeRoles.isEmpty()) {
             return List.of();
         }
+        // 超级管理员拥有全部权限码：直接返回所有启用的 button 型菜单的 authCode
+        boolean isSuper = activeRoles.stream().anyMatch(r -> "super".equals(r.getCode()));
+        if (isSuper) {
+            return menuMapper.selectList(new LambdaQueryWrapper<SysMenu>()
+                        .eq(SysMenu::getType, "button")
+                        .eq(SysMenu::getStatus, 1)
+                        .isNotNull(SysMenu::getAuthCode)).stream()
+                .map(SysMenu::getAuthCode).distinct().toList();
+        }
+        List<Long> activeRoleIds = activeRoles.stream().map(SysRole::getId).toList();
         List<Long> menuIds = roleMenuMapper.selectList(new LambdaQueryWrapper<SysRoleMenu>()
                         .in(SysRoleMenu::getRoleId, activeRoleIds)).stream()
                 .map(SysRoleMenu::getMenuId).toList();
@@ -197,8 +208,9 @@ public class AuthService {
             log.setCreateTime(LocalDateTime.now());
             // 从请求中获取 IP、浏览器、操作系统
             if (request != null) {
-                log.setIp(getClientIp(request));
-                String userAgent = request.getHeader("User-Agent");
+            log.setIp(getClientIp(request));
+            log.setLocation(IpLocationUtil.getLocation(log.getIp()));
+            String userAgent = request.getHeader("User-Agent");
                 if (userAgent != null) {
                     log.setBrowser(parseBrowser(userAgent));
                     log.setOs(parseOs(userAgent));

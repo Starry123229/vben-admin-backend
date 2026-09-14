@@ -10,14 +10,15 @@ import type { SystemUserApi } from '#/api/system/user';
 import { computed, onMounted, ref } from 'vue';
 
 import { Page, Tree, useVbenDrawer } from '@vben/common-ui';
-import { Plus } from '@vben/icons';
+import { Download, Plus } from '@vben/icons';
 
 import { ElButton as Button, ElMessage as message } from 'element-plus';
 import { ElMessageBox } from 'element-plus';
 
 import { useAccess } from '@vben/access';
+import { $t } from '#/locales';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteUser, getUserList, updateUser } from '#/api/system/user';
+import { deleteUser, exportUserList, getUserList, updateUser } from '#/api/system/user';
 import { getDeptList } from '#/api/system/dept';
 
 import { useUserColumns, useUserGridFormSchema } from './data';
@@ -36,6 +37,7 @@ const [FormDrawer, formDrawerApi] = useVbenDrawer({
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
     schema: useUserGridFormSchema(),
+    showCollapseButton: false,
     submitOnChange: true,
   },
   gridOptions: {
@@ -83,22 +85,22 @@ function onActionClick(e: OnActionClickParams<SystemUserApi.SystemUser>) {
 
 function confirm(content: string, title: string) {
   return ElMessageBox.confirm(content, title, {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+    confirmButtonText: $t('page.common.confirmOk'),
+    cancelButtonText: $t('page.common.confirmCancel'),
     type: 'warning',
   })
     .then(() => true)
     .catch(() => {
-      throw new Error('已取消');
+      throw new Error($t('page.common.cancelled'));
     });
 }
 
 async function onStatusChange(newStatus: number, row: SystemUserApi.SystemUser) {
-  const statusText = newStatus === 1 ? '启用' : '禁用';
+  const statusText = newStatus === 1 ? $t('page.common.enable') : $t('page.common.disable');
   try {
     await confirm(
-      `确定将【${row.username}】的状态切换为【${statusText}】吗？`,
-      '切换状态',
+      $t('page.common.switchStatusConfirm', { name: row.username, status: statusText }),
+      $t('page.common.switchStatus'),
     );
     await updateUser(row.id, { status: newStatus });
     return true;
@@ -114,13 +116,13 @@ function onEdit(row: SystemUserApi.SystemUser) {
 async function onDelete(row: SystemUserApi.SystemUser) {
   // ElPopconfirm 无法在 vxe 单元格内渲染，删除确认改由页面层 ElMessageBox 完成
   try {
-    await confirm(`确定删除 ${row.username} 吗？`, '删除确认');
+    await confirm($t('page.common.confirmDelete') + ' ' + row.username + '?', $t('page.common.confirmDeleteTitle'));
   } catch {
     return; // 用户取消
   }
   deleteUser(row.id)
     .then(() => {
-      message.success(`删除 ${row.username} 成功`);
+      message.success($t('page.common.deleteSuccessMsg', { name: row.username }));
       onRefresh();
     })
     .catch(() => {});
@@ -132,6 +134,19 @@ function onRefresh() {
 
 function onCreate() {
   formDrawerApi.setData({}).open();
+}
+
+async function onExport() {
+  try {
+    const params: Recordable<any> = {};
+    if (selectedDeptId.value) {
+      params.deptId = Number(selectedDeptId.value);
+    }
+    await exportUserList(params);
+    message.success($t('page.common.exportSuccess'));
+  } catch {
+    message.error($t('page.common.exportFailed'));
+  }
 }
 
 function buildDeptTree(list: Recordable<any>[]) {
@@ -180,7 +195,7 @@ onMounted(async () => {
     <FormDrawer @success="onRefresh" />
     <div class="flex size-full">
       <div class="w-1/6 border-r p-2">
-        <Button class="mb-2 w-full" @click="clearDept">全部部门</Button>
+        <Button class="mb-2 w-full" @click="clearDept">{{ $t('page.common.allDept') }}</Button>
         <Tree
           :tree-data="deptTree"
           label-field="name"
@@ -191,11 +206,15 @@ onMounted(async () => {
         />
       </div>
       <div class="w-5/6 pl-4">
-        <Grid :table-title="'用户管理'">
+        <Grid :table-title="$t('page.user.title')">
           <template #toolbar-tools>
             <Button v-if="hasAccessByCodes(['AC_100010'])" type="primary" @click="onCreate">
               <Plus class="size-5" />
-              新增用户
+              {{ $t('page.common.addUser') }}
+            </Button>
+            <Button v-if="hasAccessByCodes(['AC_1000000'])" class="ml-2" @click="onExport">
+              <Download class="size-5" />
+              {{ $t('page.common.exportExcel') }}
             </Button>
           </template>
         </Grid>

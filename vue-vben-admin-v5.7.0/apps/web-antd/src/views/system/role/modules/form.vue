@@ -129,7 +129,7 @@ const [Drawer, drawerApi] = useVbenDrawer({
   },
 });
 
-const title = computed(() => (id.value ? '编辑角色' : '新增角色'));
+const title = computed(() => (id.value ? $t('page.common.editRole') : $t('page.common.addRole')));
 </script>
 <template>
   <Drawer :title="title">

@@ -47,9 +47,21 @@ async function resetUserPassword(id: number, newPassword: string) {
   });
 }
 
+/** 导出用户列表 Excel */
+async function exportUserList(params?: Recordable<any>) {
+  const blob = await requestClient.download<Blob>('/system/user/export', { params });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '用户列表.xlsx';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export {
   createUser,
   deleteUser,
+  exportUserList,
   getUserList,
   resetUserPassword,
   updateUser,

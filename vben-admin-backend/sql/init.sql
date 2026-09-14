@@ -265,14 +265,14 @@ INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
 (1,1),(1,2),(1,3),(1,21),
 (2,1),(2,2),(2,3),(2,21),
 (3,1),(3,2),(3,21),
--- 系统管理 + 通知管理：super / admin 全部页面；user 仅系统管理目录 + 用户/角色管理页
-(1,100),(1,101),(1,102),(1,103),(1,104),(1,105),(1,106),(1,107),(1,108),(1,109),
-(2,100),(2,101),(2,102),(2,103),(2,104),(2,105),(2,106),(2,107),(2,108),(2,109),
-(3,100),(3,101),(3,102),
--- 按钮权限：super/admin 全部；user = 用户只读(1006) + 角色查看/编辑(1004,1005)，无用户增删改码
+-- 系统管理 + 通知管理：super / admin 全部页面；user 仅系统管理目录 + 用户管理页
+(1,100),(1,101),(1,102),(1,103),(1,104),(1,105),(1,106),(1,107),(1,108),(1,109),(1,110),(1,111),(1,112),(1,113),(1,1019),(1,1020),(1,1021),(1,1022),
+(2,100),(2,101),(2,102),(2,103),(2,104),(2,105),(2,106),(2,107),(2,108),(2,109),(2,110),(2,111),(2,112),(2,113),(2,1019),(2,1020),(2,1021),(2,1022),
+(3,100),(3,102),
+-- 按钮权限：super/admin 全部；user = 用户只读(1006)，无增删改及角色管理码
 (1,1001),(1,1002),(1,1003),(1,1006),(1,1004),(1,1005),
 (2,1001),(2,1002),(2,1003),(2,1006),(2,1004),(2,1005),
-(3,1006),(3,1004),(3,1005);
+(3,1006);
 
 -- 部门（用户管理页左侧部门树过滤器）
 INSERT INTO `sys_dept` (`id`, `pid`, `name`, `status`, `remark`) VALUES
@@ -317,3 +317,121 @@ INSERT INTO `sys_dict_data` (`type_id`, `label`, `value`, `sort`, `status`, `css
 (3, '成功', 'success', 2, 1, 'success'),
 (3, '警告', 'warning', 3, 1, 'warning'),
 (3, '错误', 'error', 4, 1, 'danger');
+
+-- ==============================================================================
+-- 站内信表
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS `sys_message` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+    `user_id`     BIGINT       NOT NULL DEFAULT 0  COMMENT '接收人用户ID（0=全员广播）',
+    `sender_id`   BIGINT       NOT NULL DEFAULT 0  COMMENT '发送人用户ID（0=系统消息）',
+    `title`       VARCHAR(255) NOT NULL            COMMENT '消息标题',
+    `content`     TEXT                              COMMENT '消息内容',
+    `type`        VARCHAR(50)  DEFAULT 'notice'     COMMENT '消息类型：notice/alert/task',
+    `biz_id`      VARCHAR(100) DEFAULT NULL         COMMENT '业务关联ID',
+    `is_read`     TINYINT      NOT NULL DEFAULT 0   COMMENT '是否已读：0=未读 1=已读',
+    `create_time` DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_user_read` (`user_id`, `is_read`),
+    INDEX `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='站内信';
+
+-- ==============================================================================
+-- 附件中心表
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS `sys_attachment` (
+    `id`              BIGINT       NOT NULL AUTO_INCREMENT,
+    `original_name`   VARCHAR(500) NOT NULL             COMMENT '原始文件名',
+    `storage_path`    VARCHAR(500) NOT NULL             COMMENT '存储路径/对象key',
+    `file_size`       BIGINT       DEFAULT 0            COMMENT '文件大小(字节)',
+    `content_type`    VARCHAR(200) DEFAULT NULL         COMMENT 'MIME类型',
+    `file_ext`        VARCHAR(20)  DEFAULT NULL         COMMENT '文件后缀',
+    `md5_hash`        VARCHAR(64)  DEFAULT NULL         COMMENT 'MD5哈希',
+    `upload_user_id`  BIGINT       DEFAULT 0            COMMENT '上传人ID',
+    `upload_username` VARCHAR(100) DEFAULT NULL         COMMENT '上传人用户名',
+    `biz_type`        VARCHAR(50)  DEFAULT NULL         COMMENT '业务类型',
+    `biz_id`          VARCHAR(100) DEFAULT NULL         COMMENT '业务ID',
+    `url`             VARCHAR(500) DEFAULT NULL         COMMENT '访问URL',
+    `create_time`     DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_md5` (`md5_hash`),
+    INDEX `idx_biz` (`biz_type`, `biz_id`),
+    INDEX `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='附件中心';
+
+-- ==============================================================================
+-- 审计日志表（数据变更对比）
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS `sys_audit_log` (
+    `id`             BIGINT       NOT NULL AUTO_INCREMENT,
+    `user_id`        BIGINT       DEFAULT 0            COMMENT '操作人ID',
+    `username`       VARCHAR(100) DEFAULT NULL         COMMENT '操作人用户名',
+    `module`         VARCHAR(50)  DEFAULT NULL         COMMENT '操作模块',
+    `operation`      VARCHAR(20)  DEFAULT NULL         COMMENT '操作类型(CREATE/UPDATE/DELETE)',
+    `entity_type`    VARCHAR(100) DEFAULT NULL         COMMENT '实体类型',
+    `entity_id`      VARCHAR(64)  DEFAULT NULL         COMMENT '实体ID',
+    `old_data`       TEXT                              COMMENT '变更前数据(JSON)',
+    `new_data`       TEXT                              COMMENT '变更后数据(JSON)',
+    `changed_fields` TEXT                              COMMENT '变更字段摘要',
+    `ip`             VARCHAR(64)  DEFAULT NULL         COMMENT '请求IP',
+    `create_time`    DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_module` (`module`),
+    INDEX `idx_entity` (`entity_type`, `entity_id`),
+    INDEX `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='审计日志';
+
+-- ==============================================================================
+-- 工作流定义表
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS `sys_workflow` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+    `name`        VARCHAR(100) NOT NULL             COMMENT '流程名称',
+    `code`        VARCHAR(50)  NOT NULL             COMMENT '流程编码',
+    `type`        VARCHAR(50)  DEFAULT 'approval'   COMMENT '流程类型',
+    `definition`  TEXT                              COMMENT '流程定义(JSON审批链)',
+    `status`      TINYINT      NOT NULL DEFAULT 1   COMMENT '状态:0=禁用 1=启用',
+    `remark`      VARCHAR(500) DEFAULT NULL         COMMENT '备注',
+    `create_time` DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='工作流定义';
+
+-- ==============================================================================
+-- 工作流实例表（审批申请）
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS `sys_workflow_instance` (
+    `id`             BIGINT       NOT NULL AUTO_INCREMENT,
+    `workflow_id`    BIGINT       NOT NULL             COMMENT '工作流定义ID',
+    `workflow_name`  VARCHAR(100) DEFAULT NULL         COMMENT '流程名称(冗余)',
+    `applicant_id`   BIGINT       NOT NULL             COMMENT '申请人ID',
+    `applicant_name` VARCHAR(100) DEFAULT NULL         COMMENT '申请人用户名',
+    `title`          VARCHAR(200) NOT NULL             COMMENT '申请标题',
+    `content`        TEXT                              COMMENT '申请内容',
+    `current_step`   INT          DEFAULT 0            COMMENT '当前审批步骤',
+    `total_steps`    INT          DEFAULT 0            COMMENT '总审批步骤数',
+    `status`         VARCHAR(20)  DEFAULT 'pending'    COMMENT '状态:pending/approved/rejected/cancelled',
+    `biz_type`       VARCHAR(50)  DEFAULT NULL         COMMENT '业务类型',
+    `biz_id`         VARCHAR(64)  DEFAULT NULL         COMMENT '业务ID',
+    `create_time`    DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    `finish_time`    DATETIME     DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `idx_applicant` (`applicant_id`),
+    INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='工作流实例';
+
+-- ==============================================================================
+-- 工作流审批任务表
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS `sys_workflow_task` (
+    `id`            BIGINT       NOT NULL AUTO_INCREMENT,
+    `instance_id`   BIGINT       NOT NULL             COMMENT '工作流实例ID',
+    `step`          INT          NOT NULL             COMMENT '审批步骤序号',
+    `approver_id`   BIGINT       NOT NULL             COMMENT '审批人ID',
+    `approver_name` VARCHAR(100) DEFAULT NULL         COMMENT '审批人用户名',
+    `action`        VARCHAR(20)  NOT NULL             COMMENT '审批动作:approve/reject',
+    `comment`       TEXT                              COMMENT '审批意见',
+    `approve_time`  DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    INDEX `idx_instance` (`instance_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='工作流审批任务';

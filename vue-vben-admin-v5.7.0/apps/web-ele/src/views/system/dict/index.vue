@@ -17,6 +17,8 @@ import {
 } from 'element-plus';
 import { deleteDictType, getDictTypeList } from '#/api/system/dict';
 
+import { $t } from '#/locales';
+
 defineOptions({ name: 'DictType' });
 const router = useRouter();
 const loading = ref(false);
@@ -37,13 +39,13 @@ async function loadData() {
 
 function handleSearch() { currentPage.value = 1; loadData(); }
 function handleReset() { searchForm.value = { name: '', code: '', status: undefined }; currentPage.value = 1; loadData(); }
-function handleEdit(record: any) { router.push(`/system/dict/data/${record.id}`); }
+function handleEdit(record: any) { router.push(`/system/tools/dict/data/${record.id}`); }
 
 async function handleDelete(record: any) {
   try {
-    await MessageBox.confirm(`确定要删除字典「${record.name}」及其所有数据吗？`, '确认删除', { type: 'warning' });
+    await MessageBox.confirm($t('page.common.deleteDictConfirm', { name: record.name }), $t('page.common.confirmDeleteTitle'), { type: 'warning' });
     await deleteDictType(record.id);
-    message.success('删除成功');
+    message.success($t('page.common.deleteSuccess'));
     loadData();
   } catch { /* cancelled */ }
 }
@@ -57,31 +59,31 @@ onMounted(() => loadData());
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center gap-2">
-        <Input v-model="searchForm.name" placeholder="字典名称" style="width: 150px" clearable />
-        <Input v-model="searchForm.code" placeholder="字典编码" style="width: 150px" clearable />
-        <Select v-model="searchForm.status" placeholder="状态" style="width: 120px" clearable>
-          <Option label="启用" :value="1" />
-          <Option label="停用" :value="0" />
+        <Input v-model="searchForm.name" :placeholder="$t('page.dict.dictName')" style="width: 150px" clearable />
+        <Input v-model="searchForm.code" :placeholder="$t('page.dict.dictType')" style="width: 150px" clearable />
+        <Select v-model="searchForm.status" :placeholder="$t('page.common.status')" style="width: 120px" clearable>
+          <Option :label="$t('page.common.enable')" :value="1" />
+          <Option :label="$t('page.common.disable')" :value="0" />
         </Select>
-        <Button type="primary" @click="handleSearch">搜索</Button>
-        <Button @click="handleReset">重置</Button>
+        <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
+        <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
       </div>
       <Table v-loading="loading" :data="dataSource" border size="small" style="width: 100%">
-        <TableColumn prop="name" label="字典名称" width="150" />
-        <TableColumn prop="code" label="字典编码" width="200" />
-        <TableColumn prop="remark" label="备注" show-overflow-tooltip min-width="200" />
-        <TableColumn label="状态" width="80">
+        <TableColumn prop="name" :label="$t('page.dict.dictName')" width="150" />
+        <TableColumn prop="code" :label="$t('page.dict.dictType')" width="200" />
+        <TableColumn prop="remark" :label="$t('page.common.remark')" show-overflow-tooltip min-width="200" />
+        <TableColumn :label="$t('page.common.status')" width="80">
           <template #default="{ row }">
-            <Tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? '启用' : '停用' }}</Tag>
+            <Tag :type="row.status === 1 ? 'success' : 'danger'">{{ row.status === 1 ? $t('page.common.enable') : $t('page.common.disable') }}</Tag>
           </template>
         </TableColumn>
-        <TableColumn prop="createTime" label="创建时间" width="180">
+        <TableColumn prop="createTime" :label="$t('page.common.createTime')" width="180">
           <template #default="{ row }">{{ row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}</template>
         </TableColumn>
-        <TableColumn label="操作" width="150" fixed="right">
+        <TableColumn :label="$t('page.common.action')" width="150" fixed="right">
           <template #default="{ row }">
-            <Button type="primary" link size="small" @click="handleEdit(row)">编辑</Button>
-            <Button type="danger" link size="small" @click="handleDelete(row)">删除</Button>
+            <Button type="primary" link size="small" @click="handleEdit(row)">{{ $t('page.common.edit') }}</Button>
+            <Button type="danger" link size="small" @click="handleDelete(row)">{{ $t('page.common.delete') }}</Button>
           </template>
         </TableColumn>
       </Table>

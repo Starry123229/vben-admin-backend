@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { h, ref } from 'vue';
+import { computed, h, ref } from 'vue';
 import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
 
-import { Button, Input, message, Select, Space, Table, Tag } from 'antdv-next';
+import { Button, Input, message, Select, Space, Table, Tag } from 'ant-design-vue';
 
-import { clearLoginLogs, getLoginLogList } from '#/api/system/log';
+import { clearLoginLogs, exportLoginLog, getLoginLogList } from '#/api/system/log';
+import { $t } from '#/locales';
 
 defineOptions({ name: 'LoginLog' });
 
@@ -20,38 +21,25 @@ const searchForm = ref({
   status: undefined as number | undefined,
 });
 
-const columns = [
-  { title: '登录用户', dataIndex: 'username', width: 120 },
-  { title: 'IP地址', dataIndex: 'ip', width: 140 },
-  { title: '浏览器', dataIndex: 'browser', width: 120, ellipsis: true },
-  { title: '操作系统', dataIndex: 'os', width: 120, ellipsis: true },
+const columns = computed(() => [
+  { title: $t('page.log.username'), dataIndex: 'username', width: 120 },
+  { title: $t('page.log.ip'), dataIndex: 'ip', width: 140 },
+  { title: $t('page.log.location'), dataIndex: 'location', width: 120 },
+  { title: $t('page.log.browser'), dataIndex: 'browser', width: 120, ellipsis: true },
+  { title: $t('page.log.os'), dataIndex: 'os', width: 120, ellipsis: true },
   {
-    title: '登录方式',
-    dataIndex: 'loginType',
-    width: 100,
-    render: (text: any) => {
-      const map: Record<string, string> = {
-        account: '账号密码',
-        phone: '手机验证码',
-        qrcode: '扫码登录',
-        oauth: '第三方',
-      };
-      return map[text] || text || '-';
-    },
-  },
-  {
-    title: '状态',
+    title: $t('page.log.status'),
     dataIndex: 'status',
     width: 80,
-    render: (_: any, record: any) => {
+    customRender: ({ record }: any) => {
       return record.status === 1
-        ? h(Tag, { color: 'green' }, () => '成功')
-        : h(Tag, { color: 'red' }, () => '失败');
+        ? h(Tag, { color: 'green' }, () => $t('page.log.success'))
+        : h(Tag, { color: 'red' }, () => $t('page.log.fail'));
     },
   },
-  { title: '提示消息', dataIndex: 'message', width: 200, ellipsis: true },
-  { title: '登录时间', dataIndex: 'createTime', width: 180, render: (text: any) => (text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-') },
-];
+  { title: $t('page.log.errorMsg'), dataIndex: 'message', width: 200, ellipsis: true },
+  { title: $t('page.log.loginTime'), dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+]);
 
 async function loadData() {
   loading.value = true;
@@ -81,8 +69,19 @@ function handleReset() {
 
 async function handleClear() {
   await clearLoginLogs();
-  message.success('登录日志已清空');
+  message.success($t('page.common.operationSuccess'));
   loadData();
+}
+
+const exportLoading = ref(false);
+async function handleExport() {
+  exportLoading.value = true;
+  try {
+    await exportLoginLog(searchForm.value);
+    message.success($t('page.common.operationSuccess'));
+  } catch {
+    message.error($t('page.common.operationFailed'));
+  } finally { exportLoading.value = false; }
 }
 
 function handlePageChange(page: number, size: number) {
@@ -101,24 +100,25 @@ loadData();
       <div class="mb-4 flex flex-wrap items-center gap-2">
         <Input
           v-model:value="searchForm.username"
-          placeholder="登录用户"
+          :placeholder="$t('page.log.searchUsername')"
           style="width: 150px"
           allow-clear
         />
         <Select
           v-model:value="searchForm.status"
-          placeholder="状态"
+          :placeholder="$t('page.log.searchStatus')"
           style="width: 120px"
           allow-clear
           :options="[
-            { label: '成功', value: 1 },
-            { label: '失败', value: 0 },
+            { label: $t('page.log.success'), value: 1 },
+            { label: $t('page.log.fail'), value: 0 },
           ]"
         />
         <Space>
-          <Button type="primary" @click="handleSearch">搜索</Button>
-          <Button @click="handleReset">重置</Button>
-          <Button danger @click="handleClear">清空日志</Button>
+          <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
+          <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
+          <Button type="primary" :loading="exportLoading" @click="handleExport">{{ $t('page.common.exportExcel') }}</Button>
+          <Button danger @click="handleClear">{{ $t('page.log.clearLog') }}</Button>
         </Space>
       </div>
 
@@ -131,7 +131,7 @@ loadData();
           pageSize: pageSize,
           total: total,
           showSizeChanger: true,
-          showTotal: (t: number) => `共 ${t} 条`,
+          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
           onChange: handlePageChange,
         }"
         :scroll="{ x: 1100 }"

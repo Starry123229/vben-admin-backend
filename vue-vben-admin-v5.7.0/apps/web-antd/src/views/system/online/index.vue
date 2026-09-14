@@ -6,17 +6,19 @@ import { useAccessStore } from '@vben/stores';
 import { Button, Input, message, Modal, Table } from 'ant-design-vue';
 import { forceLogout, getOnlineList } from '#/api/system/online';
 
+import { $t } from '#/locales';
+
 defineOptions({ name: 'OnlineUser' });
 const loading = ref(false);
 const dataSource = ref<any[]>([]);
 const searchUsername = ref('');
 
 const columns = [
-  { title: '用户ID', dataIndex: 'userId', width: 80 },
-  { title: '用户名', dataIndex: 'username', width: 120 },
+  { title: $t('page.common.userId'), dataIndex: 'userId', width: 80 },
+  { title: $t('page.common.username'), dataIndex: 'username', width: 120 },
   { title: 'Token', dataIndex: 'token', ellipsis: true, width: 250 },
-  { title: '登录时间', dataIndex: 'loginTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
-  { title: '操作', key: 'action', width: 100, fixed: 'right' },
+  { title: $t('page.common.loginTime'), dataIndex: 'loginTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: $t('page.common.action'), key: 'action', width: 100, fixed: 'right' },
 ];
 
 async function loadData() {
@@ -34,14 +36,14 @@ const currentToken = computed(() => accessStore.accessToken);
 function handleForceLogout(record: any) {
   // 不允许强制下线自己
   if (record.token === currentToken.value) {
-    message.warning('不能强制下线自己，如需退出请使用退出登录功能');
+    message.warning($t('page.common.cannotForceLogoutSelf'));
     return;
   }
   Modal.confirm({
-    title: '确认下线', content: `确定要强制用户「${record.username}」下线吗？`,
+    title: $t('page.common.confirmForceOffline'), content: $t('page.common.forceOfflineConfirm', { name: record.username }),
     onOk: async () => {
       await forceLogout(record.token);
-      message.success(`已强制用户「${record.username}」下线`);
+      message.success($t('page.common.forceOfflineSuccess', { name: record.username }));
       loadData();
     },
   });
@@ -54,15 +56,15 @@ onMounted(() => loadData());
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center gap-2">
-        <Input v-model:value="searchUsername" placeholder="用户名" style="width: 150px" allow-clear @pressEnter="handleSearch" />
-        <Button type="primary" @click="handleSearch">搜索</Button>
-        <Button @click="loadData">刷新</Button>
+        <Input v-model:value="searchUsername" :placeholder="$t('page.common.username')" style="width: 150px" allow-clear @pressEnter="handleSearch" />
+        <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
+        <Button @click="loadData">{{ $t('page.common.refresh') }}</Button>
       </div>
       <Table :loading="loading" :data-source="dataSource" :columns="columns" :pagination="false"
         :scroll="{ x: 800 }" row-key="token" size="small">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'action'">
-            <Button type="link" danger size="small" @click="handleForceLogout(record)">强制下线</Button>
+            <Button type="link" danger size="small" @click="handleForceLogout(record)">{{ $t('page.common.forceOffline') }}</Button>
           </template>
         </template>
       </Table>

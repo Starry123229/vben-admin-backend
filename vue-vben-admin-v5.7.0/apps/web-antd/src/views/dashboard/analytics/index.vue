@@ -16,6 +16,8 @@ import {
 
 import { markRaw, onMounted, ref } from 'vue';
 
+import { $t } from '@vben/locales';
+
 import {
   getBrowserDistributionApi,
   getDeptDistributionApi,
@@ -33,29 +35,29 @@ import AnalyticsVisits from './analytics-visits.vue';
 const overviewItems = ref<AnalysisOverviewItem[]>([
   {
     icon: markRaw(SvgCardIcon),
-    title: '用户量',
-    totalTitle: '总用户量',
+    title: $t('page.dashboard.userCount'),
+    totalTitle: $t('page.dashboard.totalUserCount'),
     totalValue: 0,
     value: 0,
   },
   {
     icon: markRaw(SvgCakeIcon),
-    title: '角色数',
-    totalTitle: '总角色数',
+    title: $t('page.dashboard.roleCount'),
+    totalTitle: $t('page.dashboard.totalRoleCount'),
     totalValue: 0,
     value: 0,
   },
   {
     icon: markRaw(SvgDownloadIcon),
-    title: '部门数',
-    totalTitle: '总部门数',
+    title: $t('page.dashboard.deptCount'),
+    totalTitle: $t('page.dashboard.totalDeptCount'),
     totalValue: 0,
     value: 0,
   },
   {
     icon: markRaw(SvgBellIcon),
-    title: '菜单数',
-    totalTitle: '总菜单数',
+    title: $t('page.dashboard.menuCount'),
+    totalTitle: $t('page.dashboard.totalMenuCount'),
     totalValue: 0,
     value: 0,
   },
@@ -63,11 +65,11 @@ const overviewItems = ref<AnalysisOverviewItem[]>([
 
 const chartTabs: TabOption[] = [
   {
-    label: '流量趋势',
+    label: $t('page.dashboard.trafficTrends'),
     value: 'trends',
   },
   {
-    label: '月访问量',
+    label: $t('page.dashboard.monthlyVisits'),
     value: 'visits',
   },
 ];
@@ -94,29 +96,29 @@ onMounted(async () => {
     overviewItems.value = [
       {
         icon: markRaw(SvgCardIcon),
-        title: '用户量',
-        totalTitle: '总用户量',
+        title: $t('page.dashboard.userCount'),
+        totalTitle: $t('page.dashboard.totalUserCount'),
         totalValue: Number(overview.totalUsers) || 0,
         value: Number(overview.activeUsers) || 0,
       },
       {
         icon: markRaw(SvgCakeIcon),
-        title: '角色数',
-        totalTitle: '总角色数',
+        title: $t('page.dashboard.roleCount'),
+        totalTitle: $t('page.dashboard.totalRoleCount'),
         totalValue: Number(overview.totalRoles) || 0,
         value: Number(overview.totalRoles) || 0,
       },
       {
         icon: markRaw(SvgDownloadIcon),
-        title: '部门数',
-        totalTitle: '总部门数',
+        title: $t('page.dashboard.deptCount'),
+        totalTitle: $t('page.dashboard.totalDeptCount'),
         totalValue: Number(overview.totalDepts) || 0,
         value: Number(overview.totalDepts) || 0,
       },
       {
         icon: markRaw(SvgBellIcon),
-        title: '菜单数',
-        totalTitle: '总菜单数',
+        title: $t('page.dashboard.menuCount'),
+        totalTitle: $t('page.dashboard.totalMenuCount'),
         totalValue: Number(overview.totalMenus) || 0,
         value: Number(overview.totalMenus) || 0,
       },
@@ -139,7 +141,7 @@ onMounted(async () => {
       value: Number(item.value) || 0,
     }));
   } catch (error) {
-    console.error('加载仪表盘数据失败:', error);
+    console.error($t('page.dashboard.loadDashboardFailed'), error);
   }
 });
 </script>
@@ -159,17 +161,17 @@ onMounted(async () => {
     <div class="mt-5 w-full md:flex">
       <AnalysisChartCard
         class="mt-5 md:mt-0 md:mr-4 md:w-1/3"
-        title="角色分布"
+        :title="$t('page.dashboard.roleDistribution')"
       >
         <AnalyticsVisitsData :role-data="roleData" />
       </AnalysisChartCard>
       <AnalysisChartCard
         class="mt-5 md:mt-0 md:mr-4 md:w-1/3"
-        title="部门分布"
+        :title="$t('page.dashboard.deptDistribution')"
       >
         <AnalyticsVisitsSource :dept-data="deptData" />
       </AnalysisChartCard>
-      <AnalysisChartCard class="mt-5 md:mt-0 md:w-1/3" title="浏览器分布">
+      <AnalysisChartCard class="mt-5 md:mt-0 md:w-1/3" :title="$t('page.dashboard.browserDistribution')">
         <AnalyticsVisitsSales :browser-data="browserData" />
       </AnalysisChartCard>
     </div>

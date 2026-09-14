@@ -2,39 +2,41 @@ import type { VbenFormSchema } from '#/adapter/form';
 import type { OnActionClickFn, VxeTableGridColumns } from '#/adapter/vxe-table';
 import type { SystemRoleApi } from '#/api/system/role';
 
+import { $t } from '#/locales';
+
 export function useRoleFormSchema(): VbenFormSchema[] {
   return [
     {
       component: 'Input',
       fieldName: 'name',
-      label: '角色名称',
+      label: $t('page.role.name'),
       rules: 'required',
     },
     {
       component: 'Input',
       fieldName: 'code',
-      label: '角色编码',
-      help: '唯一标识，如 admin / user',
+      label: $t('page.role.code'),
+      help: $t('page.role.code'),
       rules: 'required',
     },
     {
       component: 'RadioGroup',
       fieldName: 'status',
-      label: '状态',
+      label: $t('page.common.status'),
       defaultValue: 1,
       componentProps: {
         buttonStyle: 'solid',
         optionType: 'button',
         options: [
-          { label: '启用', value: 1 },
-          { label: '停用', value: 0 },
+          { label: $t('page.common.enable'), value: 1 },
+          { label: $t('page.common.disable'), value: 0 },
         ],
       },
     },
     {
       component: 'Textarea',
       fieldName: 'remark',
-      label: '备注',
+      label: $t('page.common.remark'),
     },
     {
       component: 'Input',
@@ -51,18 +53,18 @@ export function useRoleGridFormSchema(): VbenFormSchema[] {
     {
       component: 'Input',
       fieldName: 'name',
-      label: '角色名称',
+      label: $t('page.role.name'),
     },
     {
       component: 'Select',
       fieldName: 'status',
-      label: '状态',
+      label: $t('page.common.status'),
       modelPropName: 'value',
       componentProps: {
         allowClear: true,
         options: [
-          { label: '启用', value: 1 },
-          { label: '停用', value: 0 },
+          { label: $t('page.common.enable'), value: 1 },
+          { label: $t('page.common.disable'), value: 0 },
         ],
       },
     },
@@ -76,17 +78,17 @@ export function useRoleColumns(
   return [
     {
       field: 'name',
-      title: '角色名称',
+      title: $t('page.role.name'),
       width: 160,
     },
     {
       field: 'code',
-      title: '角色编码',
+      title: $t('page.role.code'),
       width: 160,
     },
     {
       field: 'status',
-      title: '状态',
+      title: $t('page.common.status'),
       width: 100,
       cellRender: {
         name: onStatusChange ? 'CellSwitch' : 'CellTag',
@@ -96,18 +98,18 @@ export function useRoleColumns(
     },
     {
       field: 'remark',
-      title: '备注',
+      title: $t('page.common.remark'),
       minWidth: 160,
     },
     {
       field: 'createTime',
-      title: '创建时间',
+      title: $t('page.common.createTime'),
       width: 180,
       formatter: 'formatDateTime',
     },
     {
       field: 'operation',
-      title: '操作',
+      title: $t('page.common.action'),
       width: 140,
       fixed: 'right',
       align: 'center',
@@ -115,7 +117,7 @@ export function useRoleColumns(
         name: 'CellOperation',
         attrs: {
           nameField: 'name',
-          nameTitle: '角色名称',
+          nameTitle: $t('page.role.name'),
           onClick: onActionClick,
         },
         // 按钮级权限：查看角色码只开放页面；增删改统一归「编辑角色」码

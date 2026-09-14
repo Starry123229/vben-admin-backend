@@ -6,14 +6,15 @@ import type {
 import type { SystemRoleApi } from '#/api/system/role';
 
 import { Page, useVbenDrawer } from '@vben/common-ui';
-import { Plus } from '@vben/icons';
+import { Download, Plus } from '@vben/icons';
 
 import { ElButton as Button, ElMessage as message } from 'element-plus';
 import { ElMessageBox } from 'element-plus';
 
 import { useAccess } from '@vben/access';
+import { $t } from '#/locales';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteRole, getRoleList, updateRole } from '#/api/system/role';
+import { deleteRole, exportRoleList, getRoleList, updateRole } from '#/api/system/role';
 
 import { useRoleColumns, useRoleGridFormSchema } from './data';
 import Form from './modules/form.vue';
@@ -28,6 +29,7 @@ const { hasAccessByCodes } = useAccess();
 const [Grid, gridApi] = useVbenVxeGrid({
   formOptions: {
     schema: useRoleGridFormSchema(),
+    showCollapseButton: false,
     submitOnChange: true,
   },
   gridOptions: {
@@ -71,22 +73,22 @@ function onActionClick(e: OnActionClickParams<SystemRoleApi.SystemRole>) {
 
 function confirm(content: string, title: string) {
   return ElMessageBox.confirm(content, title, {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+    confirmButtonText: $t('page.common.confirmOk'),
+    cancelButtonText: $t('page.common.confirmCancel'),
     type: 'warning',
   })
     .then(() => true)
     .catch(() => {
-      throw new Error('已取消');
+      throw new Error($t('page.common.cancelled'));
     });
 }
 
 async function onStatusChange(newStatus: number, row: SystemRoleApi.SystemRole) {
-  const statusText = newStatus === 1 ? '启用' : '禁用';
+  const statusText = newStatus === 1 ? $t('page.common.enable') : $t('page.common.disable');
   try {
     await confirm(
-      `确定将【${row.name}】的状态切换为【${statusText}】吗？`,
-      '切换状态',
+      $t('page.common.switchStatusConfirm', { name: row.name, status: statusText }),
+      $t('page.common.switchStatus'),
     );
     await updateRole(row.id, { status: newStatus });
     return true;
@@ -102,13 +104,13 @@ function onEdit(row: SystemRoleApi.SystemRole) {
 async function onDelete(row: SystemRoleApi.SystemRole) {
   // ElPopconfirm 无法在 vxe 单元格内渲染，删除确认改由页面层 ElMessageBox 完成
   try {
-    await confirm(`确定删除 ${row.name} 吗？`, '删除确认');
+    await confirm($t('page.common.confirmDelete') + ' ' + row.name + '?', $t('page.common.confirmDeleteTitle'));
   } catch {
     return; // 用户取消
   }
   deleteRole(row.id)
     .then(() => {
-      message.success(`删除 ${row.name} 成功`);
+      message.success($t('page.common.deleteSuccessMsg', { name: row.name }));
       onRefresh();
     })
     .catch(() => {});
@@ -121,15 +123,28 @@ function onRefresh() {
 function onCreate() {
   formDrawerApi.setData({}).open();
 }
+
+async function onExport() {
+  try {
+    await exportRoleList();
+    message.success($t('page.common.exportSuccess'));
+  } catch {
+    message.error($t('page.common.exportFailed'));
+  }
+}
 </script>
 <template>
   <Page auto-content-height>
     <FormDrawer @success="onRefresh" />
-    <Grid :table-title="'角色管理'">
+    <Grid :table-title="$t('page.role.title')">
       <template #toolbar-tools>
         <Button v-if="hasAccessByCodes(['AC_1000002'])" type="primary" @click="onCreate">
           <Plus class="size-5" />
-          新增角色
+          {{ $t('page.common.addRole') }}
+        </Button>
+        <Button v-if="hasAccessByCodes(['AC_1000001'])" class="ml-2" @click="onExport">
+          <Download class="size-5" />
+          {{ $t('page.common.exportExcel') }}
         </Button>
       </template>
     </Grid>

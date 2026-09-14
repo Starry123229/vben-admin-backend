@@ -12,6 +12,8 @@ import {
 } from 'element-plus';
 import { forceLogout, getOnlineList } from '#/api/system/online';
 
+import { $t } from '#/locales';
+
 defineOptions({ name: 'OnlineUser' });
 const loading = ref(false);
 const dataSource = ref<any[]>([]);
@@ -28,13 +30,13 @@ function handleSearch() { loadData(); }
 
 async function handleForceLogout(record: any) {
   if (record.token === accessStore.accessToken) {
-    message.warning('不能强制下线自己，如需退出请使用退出登录功能');
+    message.warning($t('page.common.cannotForceLogoutSelf'));
     return;
   }
   try {
-    await MessageBox.confirm(`确定要强制用户「${record.username}」下线吗？`, '确认下线', { type: 'warning' });
+    await MessageBox.confirm($t('page.common.forceOfflineConfirm', { name: record.username }), $t('page.common.confirmForceOffline'), { type: 'warning' });
     await forceLogout(record.token);
-    message.success(`已强制用户「${record.username}」下线`);
+    message.success($t('page.common.forceOfflineSuccess', { name: record.username }));
     loadData();
   } catch { /* cancelled */ }
 }
@@ -46,18 +48,18 @@ onMounted(() => loadData());
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center gap-2">
-        <Input v-model="searchUsername" placeholder="用户名" style="width: 150px" clearable @keyup.enter="handleSearch" />
-        <Button type="primary" @click="handleSearch">搜索</Button>
-        <Button @click="loadData">刷新</Button>
+        <Input v-model="searchUsername" :placeholder="$t('page.common.username')" style="width: 150px" clearable @keyup.enter="handleSearch" />
+        <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
+        <Button @click="loadData">{{ $t('page.common.refresh') }}</Button>
       </div>
       <Table v-loading="loading" :data="dataSource" border size="small" style="width: 100%">
-        <TableColumn prop="userId" label="用户ID" width="80" />
-        <TableColumn prop="username" label="用户名" width="120" />
+        <TableColumn prop="userId" :label="$t('page.common.userId')" width="80" />
+        <TableColumn prop="username" :label="$t('page.common.username')" width="120" />
         <TableColumn prop="token" label="Token" show-overflow-tooltip min-width="250" />
-        <TableColumn prop="loginTime" label="登录时间" width="180" />
-        <TableColumn label="操作" width="100" fixed="right">
+        <TableColumn prop="loginTime" :label="$t('page.common.loginTime')" width="180" />
+        <TableColumn :label="$t('page.common.action')" width="100" fixed="right">
           <template #default="{ row }">
-            <Button type="danger" link size="small" @click="handleForceLogout(row)">强制下线</Button>
+            <Button type="danger" link size="small" @click="handleForceLogout(row)">{{ $t('page.common.forceOffline') }}</Button>
           </template>
         </TableColumn>
       </Table>

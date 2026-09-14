@@ -12,7 +12,7 @@ import {
   useDialog,
   useMessage,
 } from 'naive-ui';
-import { clearOperationLogs, getOperationLogList } from '#/api/system/log';
+import { clearOperationLogs, exportOperationLog, getOperationLogList } from '#/api/system/log';
 
 defineOptions({ name: 'OperationLog' });
 const message = useMessage();
@@ -57,6 +57,17 @@ function handleClear() {
 }
 
 function handlePageChange(page: number) { currentPage.value = page; loadData(); }
+
+const exportLoading = ref(false);
+async function handleExport() {
+  exportLoading.value = true;
+  try {
+    await exportOperationLog(searchForm.value);
+    message.success('导出成功');
+  } catch {
+    message.error('导出失败');
+  } finally { exportLoading.value = false; }
+}
 onMounted(() => loadData());
 </script>
 
@@ -70,6 +81,7 @@ onMounted(() => loadData());
           :options="[{label:'成功',value:1},{label:'失败',value:0}]" />
         <Button type="primary" @click="handleSearch">搜索</Button>
         <Button @click="handleReset">重置</Button>
+        <Button type="info" :loading="exportLoading" @click="handleExport">导出Excel</Button>
         <Button type="error" @click="handleClear">清空日志</Button>
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="1200"

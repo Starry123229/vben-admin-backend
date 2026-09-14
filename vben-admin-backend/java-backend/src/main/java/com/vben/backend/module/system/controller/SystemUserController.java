@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 用户管理接口（/system/user/**）。
@@ -109,7 +110,11 @@ public class SystemUserController {
     @Log(module = "用户管理", description = "重置密码")
     @PostMapping("/{id}/reset-password")
     public R<Void> resetPassword(@PathVariable Long id,
-                                 @RequestParam String newPassword) {
+                                 @RequestBody Map<String, String> body) {
+        String newPassword = body.get("newPassword");
+        if (newPassword == null || newPassword.isBlank()) {
+            newPassword = body.get("password");
+        }
         userService.resetPassword(id, newPassword);
         return R.ok();
     }

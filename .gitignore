@@ -1,43 +1,90 @@
-# Java / Maven
-target/
-*.class
-*.jar
-!.mvn/wrapper/maven-wrapper.jar
-.mvn/target/
+# ===================== 通用 =====================
+# OS 生成文件
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
 
-# Node / Nitro
-node_modules/
-dist/
-.output/
-.nitro/
-.cache/
-*.log
-
-# Env & secrets
-.env
-.env.local
-.env.*.local
-**/application-local.yml
-
-# IDE
+# IDE / 编辑器
 .idea/
 .vscode/
 *.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.factorypath
 
-# OS
-.DS_Store
-Thumbs.db
+# 日志文件
+*.log
+logs/
 
-# Runtime
-uploads/
+# 环境变量 & 敏感配置
+.env
+.env.local
+.env.*.local
+application-local.yml
+application-local.properties
 
-# MCP 配置（使用用户级 ~/.codebuddy/mcp.json，勿提交项目级配置）
-.mcp.json
+# ===================== Java 后端 =====================
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+.mvn/
+mvnw
+mvnw.cmd
 
-# CodeBuddy 工作区数据（memory 等，不纳入版本控制）
-.codebuddy/
+# 编译输出
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
 
-.test-shots/
+# 上传文件目录
+vben-admin-backend/uploads/
+!vben-admin-backend/uploads/avatar/.gitkeep
 
-# sqlsync 同步脚本生成的临时备份
-vben-admin-backend/sql/.backup-*.json
+# ===================== 前端 (Node/Vue) =====================
+# 依赖
+node_modules/
+.pnpm-store/
+
+# 构建输出
+dist/
+dist-ssr/
+*.local
+
+# 缓存
+.turbo/
+.vite/
+.cache/
+.temp/
+.eslintcache
+.stylelintcache
+
+# 测试覆盖率
+coverage/
+*.lcov
+
+# pnpm
+pnpm-lock.yaml.bak
+
+# ===================== 数据库 =====================
+*.db
+*.sqlite
+*.sql.bak
+
+# ===================== Docker =====================
+docker-compose.override.yml
+
+# ===================== 其他 =====================
+*.pid
+*.seed
+*.pid.lock

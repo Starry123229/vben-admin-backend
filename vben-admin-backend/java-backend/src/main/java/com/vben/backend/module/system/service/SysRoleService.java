@@ -35,10 +35,13 @@ public class SysRoleService {
     private final SysUserRoleMapper userRoleMapper;
 
     /** 角色分页列表 */
-    public PageResult<SysRole> listRoles(int page, int pageSize, String name) {
+    public PageResult<SysRole> listRoles(int page, int pageSize, String name, Integer status) {
         LambdaQueryWrapper<SysRole> w = new LambdaQueryWrapper<SysRole>().orderByDesc(SysRole::getId);
         if (StringUtils.hasText(name)) {
             w.like(SysRole::getName, name);
+        }
+        if (status != null) {
+            w.eq(SysRole::getStatus, status);
         }
         IPage<SysRole> p = roleMapper.selectPage(new Page<>(page, pageSize), w);
         return new PageResult<>(p.getRecords(), p.getTotal());
@@ -95,7 +98,7 @@ public class SysRoleService {
         roleMapper.updateById(role);
     }
 
-    /** 删除角色：禁止删除 super，并级联清理关联 */
+    /** 删除角色：禁止删除 super，有用户关联时拒绝删除，并级联清理菜单关联 */
     @Transactional
     public void deleteRole(Long id) {
         if (id == null) {
@@ -108,8 +111,12 @@ public class SysRoleService {
         if ("super".equals(role.getCode())) {
             throw ServiceException.badRequest("超级管理员角色不可删除");
         }
+        // 检查是否有用户关联此角色
+        long userCount = userRoleMapper.selectCount(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getRoleId, id));
+        if (userCount > 0) {
+            throw ServiceException.badRequest("该角色下存在用户，无法删除");
+        }
         roleMenuMapper.delete(new LambdaQueryWrapper<SysRoleMenu>().eq(SysRoleMenu::getRoleId, id));
-        userRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getRoleId, id));
         roleMapper.deleteById(id);
     }
 

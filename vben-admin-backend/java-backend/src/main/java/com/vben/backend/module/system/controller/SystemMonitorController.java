@@ -16,6 +16,10 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 系统监控接口（/system/monitor/**）。
@@ -28,6 +32,40 @@ import java.util.Map;
 @RequiredArgsConstructor
 @SaCheckRole(value = {"super", "admin"}, mode = SaMode.OR)
 public class SystemMonitorController {
+
+    /**
+     * 缓存 oshi 单例，避免每次请求重建实例导致 CPU tick 基准丢失。
+     */
+    private static final SystemInfo CACHED_SI = new SystemInfo();
+    private static final HardwareAbstractionLayer CACHED_HAL = CACHED_SI.getHardware();
+    private static final CentralProcessor CACHED_PROCESSOR = CACHED_HAL.getProcessor();
+
+    /**
+     * 后台定时采样 CPU 负载，避免在 HTTP 请求线程中阻塞。
+     * oshi 的 getSystemCpuLoad(delay) 需要两次 tick 之间有足够间隔，
+     * 首次调用永远返回 0（无历史基准），因此用后台线程持续采样。
+     */
+    private static final AtomicReference<Double> CACHED_CPU_LOAD = new AtomicReference<>(0.0);
+
+    static {
+        // 启动后台线程，每 2 秒采样一次 CPU 负载
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "cpu-load-sampler");
+            t.setDaemon(true);
+            return t;
+        });
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                // getSystemCpuLoad(500) 阻塞 500ms 采样两次 tick 并计算差值
+                double load = CACHED_PROCESSOR.getSystemCpuLoad(500) * 100;
+                if (load >= 0) {
+                    CACHED_CPU_LOAD.set(load);
+                }
+            } catch (Exception ignored) {
+                // 采样失败时保留上一次的值
+            }
+        }, 0, 2, TimeUnit.SECONDS);
+    }
 
     @GetMapping("/server")
     public R<Map<String, Object>> serverInfo() {
@@ -57,18 +95,15 @@ public class SystemMonitorController {
         sysInfo.put("userDir", System.getProperty("user.dir"));
         data.put("sys", sysInfo);
 
-        // 使用 oshi 获取 CPU 和内存
+        // 使用缓存的 oshi 实例获取 CPU 和内存
         try {
-            SystemInfo si = new SystemInfo();
-            HardwareAbstractionLayer hal = si.getHardware();
-            CentralProcessor processor = hal.getProcessor();
-            GlobalMemory memory = hal.getMemory();
+            GlobalMemory memory = CACHED_HAL.getMemory();
 
             Map<String, Object> cpu = new HashMap<>();
-            cpu.put("name", processor.getProcessorIdentifier().getName());
-            cpu.put("logicalCores", processor.getLogicalProcessorCount());
-            cpu.put("physicalCores", processor.getPhysicalProcessorCount());
-            cpu.put("systemLoad", String.format("%.2f", processor.getSystemCpuLoad(100) * 100));
+            cpu.put("name", CACHED_PROCESSOR.getProcessorIdentifier().getName());
+            cpu.put("logicalCores", CACHED_PROCESSOR.getLogicalProcessorCount());
+            cpu.put("physicalCores", CACHED_PROCESSOR.getPhysicalProcessorCount());
+            cpu.put("systemLoad", String.format("%.2f", CACHED_CPU_LOAD.get()));
             data.put("cpu", cpu);
 
             Map<String, Object> mem = new HashMap<>();
