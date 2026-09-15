@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
+import { $t } from '@vben/locales';
+
 import {
   Button,
   List,
@@ -59,7 +61,7 @@ async function handleMarkAllRead() {
   await markAllNoticeReadApi();
   notices.value.forEach((item) => (item.isRead = true));
   recountUnread();
-  message.success('已全部标记为已读');
+  message.success($t('page.profile.allMarkedRead'));
 }
 
 async function handleDelete(id: number | string) {
@@ -72,7 +74,7 @@ async function handleClear() {
   await clearNoticeApi();
   notices.value = [];
   recountUnread();
-  message.success('已清空全部消息');
+  message.success($t('page.profile.clearAllSuccess'));
 }
 
 onMounted(() => {
@@ -83,21 +85,21 @@ onMounted(() => {
   <div class="w-full max-w-3xl">
     <div class="mb-4 flex items-center justify-between">
       <span>
-        未读消息
+        {{ $t('page.profile.unreadNotices') }}
         <Tag v-if="unreadCount > 0" color="red">{{ unreadCount }}</Tag>
         <Tag v-else color="default">0</Tag>
       </span>
       <span class="flex gap-2">
         <Button :disabled="unreadCount === 0" @click="handleMarkAllRead">
-          全部已读
+          {{ $t('page.profile.markAllRead') }}
         </Button>
         <Popconfirm
-          title="确定清空所有消息吗？"
-          ok-text="确定"
-          cancel-text="取消"
+          :title="$t('page.profile.clearAllConfirm')"
+          :ok-text="$t('page.common.confirm')"
+          :cancel-text="$t('page.common.cancel')"
           @confirm="handleClear"
         >
-          <Button danger :disabled="notices.length === 0">清空</Button>
+          <Button danger :disabled="notices.length === 0">{{ $t('page.profile.clearAll') }}</Button>
         </Popconfirm>
       </span>
     </div>
@@ -106,7 +108,7 @@ onMounted(() => {
       item-layout="horizontal"
       :data-source="notices"
       :loading="loading"
-      :locale="{ emptyText: '暂无消息' }"
+      :locale="{ emptyText: $t('page.profile.noNotices') }"
       :pagination="{ pageSize: 8, hideOnSinglePage: true }"
     >
       <template #renderItem="{ item }">
@@ -131,22 +133,22 @@ onMounted(() => {
           </List.Item.Meta>
           <template #actions>
             <Tag :color="item.isRead ? 'default' : 'processing'">
-              {{ item.isRead ? '已读' : '未读' }}
+              {{ item.isRead ? $t('page.profile.read') : $t('page.profile.unread') }}
             </Tag>
             <Button
               v-if="!item.isRead"
               size="small"
               @click="handleMarkRead(item.id)"
             >
-              标记已读
+              {{ $t('page.profile.markRead') }}
             </Button>
             <Popconfirm
-              title="确定删除这条消息吗？"
-              ok-text="确定"
-              cancel-text="取消"
+              :title="$t('page.profile.deleteNoticeConfirm')"
+              :ok-text="$t('page.common.confirm')"
+              :cancel-text="$t('page.common.cancel')"
               @confirm="handleDelete(item.id)"
             >
-              <Button size="small" danger>删除</Button>
+              <Button size="small" danger>{{ $t('page.common.delete') }}</Button>
             </Popconfirm>
           </template>
         </List.Item>

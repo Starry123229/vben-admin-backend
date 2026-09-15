@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { Profile } from '@vben/common-ui';
+import { $t } from '@vben/locales';
 import { useUserStore } from '@vben/stores';
 import { message } from 'antdv-next';
 import { uploadAvatarApi } from '#/api/core';
@@ -15,21 +16,21 @@ const userStore = useUserStore();
 
 const tabsValue = ref<string>('basic');
 
-const tabs = ref([
+const tabs = computed(() => [
   {
-    label: '基本设置',
+    label: $t('page.profile.basicSetting'),
     value: 'basic',
   },
   {
-    label: '安全设置',
+    label: $t('page.profile.securitySetting'),
     value: 'security',
   },
   {
-    label: '修改密码',
+    label: $t('page.profile.changePassword'),
     value: 'password',
   },
   {
-    label: '新消息提醒',
+    label: $t('page.profile.notificationSetting'),
     value: 'notice',
   },
 ]);
@@ -41,7 +42,7 @@ async function handleAvatarChange(file: File) {
     if (userStore.userInfo) {
       userStore.setUserInfo({ ...userStore.userInfo, avatar });
     }
-    message.success('头像已更新');
+    message.success($t('page.profile.avatarUpdated'));
   } catch {
     // 错误提示由请求拦截器统一处理
   }
@@ -51,7 +52,7 @@ async function handleAvatarChange(file: File) {
 <template>
   <Profile
     v-model:model-value="tabsValue"
-    title="个人中心"
+    :title="$t('page.profile.title')"
     :user-info="userStore.userInfo"
     :tabs="tabs"
       @avatar-change="handleAvatarChange"

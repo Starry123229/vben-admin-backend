@@ -6,6 +6,7 @@ import type { VbenFormSchema } from '#/adapter/form';
 import { computed, onMounted, ref } from 'vue';
 
 import { ProfileBaseSetting } from '@vben/common-ui';
+import { $t } from '@vben/locales';
 import { useUserStore } from '@vben/stores';
 
 import { message } from 'antdv-next';
@@ -17,34 +18,34 @@ const userStore = useUserStore();
 const profileBaseSettingRef = ref();
 
 // 角色仅作展示（由管理员在「角色管理」中分配，个人中心不可自行修改）
-const MOCK_ROLES_OPTIONS: BasicOption[] = [
+const MOCK_ROLES_OPTIONS = computed<BasicOption[]>(() => [
   {
-    label: '超级管理员',
+    label: $t('page.profile.superAdmin'),
     value: 'super',
   },
   {
-    label: '管理员',
+    label: $t('page.profile.admin'),
     value: 'admin',
   },
   {
-    label: '用户',
+    label: $t('page.profile.user'),
     value: 'user',
   },
-];
+]);
 
 const formSchema = computed((): VbenFormSchema[] => {
   return [
     {
       fieldName: 'realName',
       component: 'Input',
-      label: '姓名',
+      label: $t('page.profile.realName'),
     },
     {
       fieldName: 'username',
       component: 'Input',
-      label: '用户名',
+      label: $t('page.profile.username'),
       componentProps: { disabled: true },
-      help: '用户名不可修改',
+      help: $t('page.profile.usernameHelp'),
     },
     {
       fieldName: 'roles',
@@ -52,17 +53,17 @@ const formSchema = computed((): VbenFormSchema[] => {
       modelPropName: 'value',
       componentProps: {
         mode: 'tags',
-        options: MOCK_ROLES_OPTIONS,
+        options: MOCK_ROLES_OPTIONS.value,
         disabled: true,
       },
-      label: '角色',
-      help: '由管理员分配，不可自行修改',
+      label: $t('page.profile.role'),
+      help: $t('page.profile.roleHelp'),
     },
     {
       fieldName: 'introduction',
       component: 'Textarea',
-      componentProps: { placeholder: '介绍一下自己吧' },
-      label: '个人简介',
+      componentProps: { placeholder: $t('page.profile.introductionPlaceholder') },
+      label: $t('page.profile.introduction'),
     },
   ];
 });
@@ -88,7 +89,7 @@ async function handleSubmit(values: Record<string, any>) {
       realName: values.realName ?? userStore.userInfo.realName,
     });
   }
-  message.success('基本信息已更新');
+  message.success($t('page.profile.basicInfoUpdated'));
 }
 </script>
 <template>
