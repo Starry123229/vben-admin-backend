@@ -118,10 +118,10 @@ function onEdit(row: SystemUserApi.SystemUser) {
 }
 
 function onResetPassword(row: SystemUserApi.SystemUser) {
-  const defaultPassword = '123456';
+  const defaultPassword = 'Admin@123456';
   Modal.confirm({
     title: '重置密码',
-    content: `确认将用户「${row.username}」的密码重置为默认密码「${defaultPassword}」？`,
+      content: `确认将用户「${row.username}」的密码重置为默认密码「${defaultPassword}」？\n\n用户首次登录后建议尽快修改密码。`,
     okText: $t('page.common.confirmOk'),
     cancelText: $t('page.common.confirmCancel'),
     onOk: async () => {
