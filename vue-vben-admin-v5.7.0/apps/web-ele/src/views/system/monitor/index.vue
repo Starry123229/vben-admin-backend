@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
-import { Button } from 'element-plus';
+import { ElButton as Button } from 'element-plus';
 import { $t } from '#/locales';
 import { getServerInfo } from '#/api/system/monitor';
 import { IconifyIcon } from '@vben/icons';

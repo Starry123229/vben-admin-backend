@@ -6,16 +6,17 @@ import { preferences } from '@vben/preferences';
 import { useUserStore } from '@vben/stores';
 
 import {
-  Button,
-  Card,
-  Form,
-  FormItem,
-  Input,
-  message,
-  RadioButton,
-  RadioGroup,
-  Select,
-  Tag,
+  ElButton as Button,
+  ElCard as Card,
+  ElForm as Form,
+  ElFormItem as FormItem,
+  ElInput as Input,
+  ElMessage as message,
+  ElOption as Option,
+  ElRadioGroup as RadioGroup,
+  ElRadioButton as RadioButton,
+  ElSelect as Select,
+  ElTag as Tag,
 } from 'element-plus';
 
 import { $t } from '#/locales';
@@ -131,6 +132,13 @@ async function handleSend() {
     sending.value = false;
   }
 }
+
+function getTagType(t: string) {
+  if (t === 'info') return 'primary';
+  if (t === 'success') return 'success';
+  if (t === 'warning') return 'warning';
+  return 'danger';
+}
 </script>
 
 <template>
@@ -140,9 +148,9 @@ async function handleSend() {
     :description="$t('page.notice.description')"
   >
     <Card class="mx-4 max-w-[720px]">
-      <Form layout="vertical" class="max-w-[560px]">
+      <Form label-position="top" class="max-w-[560px]">
         <FormItem :label="$t('page.notice.targetType')">
-          <RadioGroup v-model:value="formState.targetType">
+          <RadioGroup v-model="formState.targetType">
             <RadioButton
               v-for="opt in targetOptions"
               :key="opt.value"
@@ -159,13 +167,20 @@ async function handleSend() {
           :label="$t('page.notice.selectUser')"
         >
           <Select
-            v-model:value="formState.userIds"
-            mode="multiple"
-            allow-clear
+            v-model="formState.userIds"
+            multiple
+            clearable
+            filterable
             :placeholder="$t('page.notice.selectUserPlaceholder')"
-            :options="userOptions"
-            option-filter-prop="label"
-          />
+            style="width: 100%"
+          >
+            <Option
+              v-for="opt in userOptions"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
+          </Select>
         </FormItem>
 
         <FormItem
@@ -174,28 +189,35 @@ async function handleSend() {
           :label="$t('page.notice.selectRole')"
         >
           <Select
-            v-model:value="formState.roleIds"
-            mode="multiple"
-            allow-clear
+            v-model="formState.roleIds"
+            multiple
+            clearable
+            filterable
             :placeholder="$t('page.notice.selectRolePlaceholder')"
-            :options="roleOptions"
-            option-filter-prop="label"
-          />
+            style="width: 100%"
+          >
+            <Option
+              v-for="opt in roleOptions"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
+          </Select>
         </FormItem>
 
         <FormItem required :label="$t('page.notice.noticeTitle')">
           <Input
-            v-model:value="formState.title"
+            v-model="formState.title"
             :placeholder="$t('page.notice.enterTitle')"
             :maxlength="128"
-            show-count
+            show-word-limit
           />
         </FormItem>
 
         <FormItem :label="$t('page.notice.noticeType')">
-          <RadioGroup v-model:value="formState.type">
+          <RadioGroup v-model="formState.type">
             <RadioButton v-for="t in typeOptions" :key="t" :value="t">
-              <Tag :color="t === 'info' ? 'blue' : t === 'success' ? 'green' : t === 'warning' ? 'orange' : 'red'" class="mr-0 border-none">
+              <Tag :type="getTagType(t)" class="mr-0 border-none">
                 {{ $t(`page.notice.noticeInfo${t.charAt(0).toUpperCase() + t.slice(1)}`) }}
               </Tag>
             </RadioButton>
@@ -203,8 +225,9 @@ async function handleSend() {
         </FormItem>
 
         <FormItem :label="$t('page.notice.noticeContent')">
-          <Input.TextArea
-            v-model:value="formState.content"
+          <Input
+            v-model="formState.content"
+            type="textarea"
             :placeholder="$t('page.notice.enterContent')"
             :rows="4"
           />

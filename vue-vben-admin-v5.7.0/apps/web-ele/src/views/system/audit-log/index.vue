@@ -4,7 +4,16 @@ import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
 
-import { Button, Input, Modal, Select, Space, Table, Tag } from 'element-plus';
+import {
+  ElButton as Button,
+  ElDialog as Dialog,
+  ElInput as Input,
+  ElOption as Option,
+  ElSelect as Select,
+  ElTable as Table,
+  ElTableColumn as TableColumn,
+  ElTag as Tag,
+} from 'element-plus';
 
 import { $t } from '#/locales';
 import { getAuditLogListApi } from '#/api/system/audit-log';
@@ -26,55 +35,14 @@ const searchForm = ref({
 const detailModalVisible = ref(false);
 const detailData = ref<any>({});
 
-const columns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.auditLog.username'), dataIndex: 'username', width: 120 },
-  { title: () => $t('page.auditLog.module'), dataIndex: 'module', width: 120 },
-  {
-    title: () => $t('page.auditLog.operation'),
-    dataIndex: 'operation',
-    width: 100,
-    customRender: ({ text }: any) => {
-      const colorMap: Record<string, string> = {
-        CREATE: 'green',
-        UPDATE: 'blue',
-        DELETE: 'red',
-      };
-      return h(
-        Tag,
-        { color: colorMap[text] || 'default' },
-        () => text || '-',
-      );
-    },
-  },
-  { title: () => $t('page.auditLog.entityType'), dataIndex: 'entityType', ellipsis: true, width: 150 },
-  { title: () => $t('page.auditLog.entityId'), dataIndex: 'entityId', width: 100 },
-  { title: () => $t('page.auditLog.changedFields'), dataIndex: 'changedFields', ellipsis: true, width: 250 },
-  { title: () => $t('page.auditLog.ip'), dataIndex: 'ip', width: 120 },
-  {
-    title: () => $t('page.auditLog.createTime'),
-    dataIndex: 'createTime',
-    width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
-  },
-  {
-    title: () => $t('page.common.action'),
-    key: 'action',
-    width: 80,
-    customRender: ({ record }: any) => {
-      return h(
-        Button,
-        {
-          size: 'small',
-          type: 'link',
-          onClick: () => showDetail(record),
-        },
-        () => $t('page.attachment.detail'),
-      );
-    },
-  },
-];
+function getOperationTagType(operation: string) {
+  const colorMap: Record<string, string> = {
+    CREATE: 'success',
+    UPDATE: 'primary',
+    DELETE: 'danger',
+  };
+  return colorMap[operation] || 'info';
+}
 
 function showDetail(record: any) {
   detailData.value = record;
@@ -107,9 +75,14 @@ function handleReset() {
   loadData();
 }
 
-function handlePageChange(page: number, size: number) {
+function handlePageChange(page: number) {
   currentPage.value = page;
+  loadData();
+}
+
+function handleSizeChange(size: number) {
   pageSize.value = size;
+  currentPage.value = 1;
   loadData();
 }
 
@@ -121,59 +94,103 @@ loadData();
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center gap-2">
         <Input
-          v-model:value="searchForm.module"
+          v-model="searchForm.module"
           :placeholder="$t('page.auditLog.searchModule')"
           style="width: 150px"
-          allow-clear
-          @press-enter="handleSearch"
+          @keyup.enter="handleSearch"
         />
         <Input
-          v-model:value="searchForm.entityType"
+          v-model="searchForm.entityType"
           :placeholder="$t('page.auditLog.searchEntityType')"
           style="width: 150px"
-          allow-clear
-          @press-enter="handleSearch"
+          @keyup.enter="handleSearch"
         />
         <Select
-          v-model:value="searchForm.operation"
+          v-model="searchForm.operation"
           :placeholder="$t('page.auditLog.searchOperation')"
           style="width: 120px"
-          allow-clear
-          :options="[
-            { label: $t('page.auditLog.create'), value: 'CREATE' },
-            { label: $t('page.auditLog.update'), value: 'UPDATE' },
-            { label: $t('page.auditLog.delete'), value: 'DELETE' },
-          ]"
-        />
-        <Space>
-          <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
-          <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
-        </Space>
+          clearable
+        >
+          <Option :label="$t('page.auditLog.create')" value="CREATE" />
+          <Option :label="$t('page.auditLog.update')" value="UPDATE" />
+          <Option :label="$t('page.auditLog.delete')" value="DELETE" />
+        </Select>
+        <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
+        <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
       </div>
 
       <Table
-        :loading="loading"
-        :data-source="dataSource"
-        :columns="columns"
-        :pagination="{
-          current: currentPage,
-          pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
-          onChange: handlePageChange,
-        }"
-        :scroll="{ x: 1300 }"
+        v-loading="loading"
+        :data="dataSource"
+        style="width: 100%"
         row-key="id"
         size="small"
-      />
+      >
+        <TableColumn prop="id" label="ID" width="80" />
+        <TableColumn prop="username" :label="$t('page.auditLog.username')" width="120" />
+        <TableColumn prop="module" :label="$t('page.auditLog.module')" width="120" />
+        <TableColumn :label="$t('page.auditLog.operation')" width="100">
+          <template #default="{ row }">
+            <Tag :type="getOperationTagType(row.operation)">
+              {{ row.operation || '-' }}
+            </Tag>
+          </template>
+        </TableColumn>
+        <TableColumn prop="entityType" :label="$t('page.auditLog.entityType')" width="150" show-overflow-tooltip />
+        <TableColumn prop="entityId" :label="$t('page.auditLog.entityId')" width="100" />
+        <TableColumn prop="changedFields" :label="$t('page.auditLog.changedFields')" width="250" show-overflow-tooltip />
+        <TableColumn prop="ip" :label="$t('page.auditLog.ip')" width="120" />
+        <TableColumn :label="$t('page.auditLog.createTime')" width="180">
+          <template #default="{ row }">
+            {{ row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
+          </template>
+        </TableColumn>
+        <TableColumn :label="$t('page.common.action')" width="80">
+          <template #default="{ row }">
+            <Button type="primary" link size="small" @click="showDetail(row)">
+              {{ $t('page.attachment.detail') }}
+            </Button>
+          </template>
+        </TableColumn>
+      </Table>
+
+      <div class="mt-4 flex items-center justify-between">
+        <span>{{ $t('page.common.total') }} {{ total }} {{ $t('page.common.records') }}</span>
+        <div class="flex items-center gap-2">
+          <Select
+            :model-value="pageSize"
+            style="width: 120px"
+            @update:model-value="handleSizeChange"
+          >
+            <Option label="10条/页" :value="10" />
+            <Option label="20条/页" :value="20" />
+            <Option label="50条/页" :value="50" />
+          </Select>
+          <div class="flex items-center gap-1">
+            <Button
+              :disabled="currentPage <= 1"
+              size="small"
+              @click="handlePageChange(currentPage - 1)"
+            >
+              上一页
+            </Button>
+            <span>{{ currentPage }} / {{ Math.ceil(total / pageSize) || 1 }}</span>
+            <Button
+              :disabled="currentPage >= Math.ceil(total / pageSize)"
+              size="small"
+              @click="handlePageChange(currentPage + 1)"
+            >
+              下一页
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 详情弹窗 -->
-    <Modal
-      v-model:open="detailModalVisible"
+    <Dialog
+      v-model="detailModalVisible"
       :title="$t('page.auditLog.detailTitle')"
-      :footer="null"
       width="700px"
     >
       <div class="space-y-3">
@@ -201,6 +218,6 @@ loadData();
           <pre class="mt-1 max-h-48 overflow-auto rounded bg-gray-100 p-2 text-xs">{{ detailData.newData || '-' }}</pre>
         </div>
       </div>
-    </Modal>
+    </Dialog>
   </Page>
 </template>

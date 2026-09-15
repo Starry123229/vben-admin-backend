@@ -1,22 +1,21 @@
 <script lang="ts" setup>
-import { h, ref } from 'vue';
+import { ref } from 'vue';
 import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
 
 import {
-  Badge,
-  Button,
-  Form,
-  FormItem,
-  Input,
-  message,
-  Modal,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Textarea,
+  ElButton as Button,
+  ElDialog as Dialog,
+  ElForm as Form,
+  ElFormItem as FormItem,
+  ElInput as Input,
+  ElMessage as message,
+  ElOption as Option,
+  ElSelect as Select,
+  ElTable as Table,
+  ElTableColumn as TableColumn,
+  ElTag as Tag,
 } from 'element-plus';
 
 import { $t } from '#/locales';
@@ -36,60 +35,14 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const filterIsRead = ref<number | undefined>(undefined);
 
-const columns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.message.msgTitle'), dataIndex: 'title', ellipsis: true },
-  {
-    title: () => $t('page.message.type'),
-    dataIndex: 'type',
-    width: 100,
-    customRender: ({ text }: any) => {
-      const colorMap: Record<string, string> = {
-        notice: 'blue',
-        alert: 'orange',
-        task: 'green',
-      };
-      return h(Tag, { color: colorMap[text] || 'default' }, () => text || '-');
-    },
-  },
-  { title: () => $t('page.message.content'), dataIndex: 'content', ellipsis: true, width: 200 },
-  {
-    title: () => $t('page.message.isRead'),
-    dataIndex: 'isRead',
-    width: 80,
-    customRender: ({ text }: any) => {
-      return text === 1
-        ? h(Badge, { status: 'default', text: $t('page.message.read') })
-        : h(Badge, { status: 'processing', text: $t('page.message.unread') });
-    },
-  },
-  {
-    title: () => $t('page.message.sendTime'),
-    dataIndex: 'createTime',
-    width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
-  },
-  {
-    title: () => $t('page.common.action'),
-    key: 'action',
-    width: 120,
-    customRender: ({ record }: any) => {
-      if (record.isRead === 0) {
-        return h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => handleMarkRead(record.id),
-          },
-          () => $t('page.message.markRead'),
-        );
-      }
-      return '-';
-    },
-  },
-];
+function getTagType(type: string) {
+  const colorMap: Record<string, string> = {
+    notice: 'primary',
+    alert: 'warning',
+    task: 'success',
+  };
+  return colorMap[type] || 'info';
+}
 
 // 发送消息弹窗
 const sendModalVisible = ref(false);
@@ -160,9 +113,19 @@ async function handleMarkAllRead() {
   loadData();
 }
 
-function handlePageChange(page: number, size: number) {
+function handlePageChange(page: number) {
   currentPage.value = page;
+  loadData();
+}
+
+function handleSizeChange(size: number) {
   pageSize.value = size;
+  currentPage.value = 1;
+  loadData();
+}
+
+function handleFilterChange() {
+  currentPage.value = 1;
   loadData();
 }
 
@@ -173,86 +136,120 @@ loadData();
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Space>
-          <Select
-            v-model:value="filterIsRead"
-            :placeholder="$t('page.message.filterRead')"
-            style="width: 150px"
-            allow-clear
-            :options="[
-              { label: $t('page.message.unread'), value: 0 },
-              { label: $t('page.message.read'), value: 1 },
-            ]"
-            @change="
-              () => {
-                currentPage = 1;
-                loadData();
-              }
-            "
-          />
-        </Space>
-        <Space>
+        <Select
+          v-model="filterIsRead"
+          :placeholder="$t('page.message.filterRead')"
+          style="width: 150px"
+          clearable
+          @change="handleFilterChange"
+        >
+          <Option :label="$t('page.message.unread')" :value="0" />
+          <Option :label="$t('page.message.read')" :value="1" />
+        </Select>
+        <div class="flex gap-2">
           <Button type="primary" @click="showSendModal">{{ $t('page.message.sendMessage') }}</Button>
           <Button @click="handleMarkAllRead">{{ $t('page.message.markAllRead') }}</Button>
-        </Space>
+        </div>
       </div>
 
       <Table
-        :loading="loading"
-        :data-source="dataSource"
-        :columns="columns"
-        :pagination="{
-          current: currentPage,
-          pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
-          onChange: handlePageChange,
-        }"
+        v-loading="loading"
+        :data="dataSource"
+        style="width: 100%"
         row-key="id"
         size="small"
-      />
+      >
+        <TableColumn prop="id" label="ID" width="80" />
+        <TableColumn prop="title" :label="$t('page.message.msgTitle')" show-overflow-tooltip />
+        <TableColumn :label="$t('page.message.type')" width="100">
+          <template #default="{ row }">
+            <Tag :type="getTagType(row.type)">{{ row.type || '-' }}</Tag>
+          </template>
+        </TableColumn>
+        <TableColumn prop="content" :label="$t('page.message.content')" width="200" show-overflow-tooltip />
+        <TableColumn :label="$t('page.message.isRead')" width="80">
+          <template #default="{ row }">
+            <Tag :type="row.isRead === 1 ? 'info' : 'danger'">
+              {{ row.isRead === 1 ? $t('page.message.read') : $t('page.message.unread') }}
+            </Tag>
+          </template>
+        </TableColumn>
+        <TableColumn :label="$t('page.message.sendTime')" width="180">
+          <template #default="{ row }">
+            {{ row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
+          </template>
+        </TableColumn>
+        <TableColumn :label="$t('page.common.action')" width="120">
+          <template #default="{ row }">
+            <Button v-if="row.isRead === 0" type="primary" link size="small" @click="handleMarkRead(row.id)">
+              {{ $t('page.message.markRead') }}
+            </Button>
+            <span v-else>-</span>
+          </template>
+        </TableColumn>
+      </Table>
+
+      <div class="mt-4 flex items-center justify-between">
+        <span>{{ $t('page.common.total') }} {{ total }} {{ $t('page.common.records') }}</span>
+        <div class="flex items-center gap-2">
+          <Select
+            :model-value="pageSize"
+            style="width: 120px"
+            @update:model-value="handleSizeChange"
+          >
+            <Option label="10条/页" :value="10" />
+            <Option label="20条/页" :value="20" />
+            <Option label="50条/页" :value="50" />
+          </Select>
+          <div class="flex items-center gap-1">
+            <Button :disabled="currentPage <= 1" size="small" @click="handlePageChange(currentPage - 1)">上一页</Button>
+            <span>{{ currentPage }} / {{ Math.ceil(total / pageSize) || 1 }}</span>
+            <Button :disabled="currentPage >= Math.ceil(total / pageSize)" size="small" @click="handlePageChange(currentPage + 1)">下一页</Button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 发送消息弹窗 -->
-    <Modal
-      v-model:open="sendModalVisible"
+    <Dialog
+      v-model="sendModalVisible"
       :title="$t('page.message.sendMessage')"
       width="600px"
-      @ok="handleSend"
     >
-      <Form layout="vertical">
+      <Form label-position="top">
         <FormItem :label="$t('page.message.userIdLabel')" required>
           <Input
-            v-model:value="sendForm.userId"
+            v-model="sendForm.userId"
             :placeholder="$t('page.message.userIdPlaceholder')"
             type="number"
           />
         </FormItem>
         <FormItem :label="$t('page.message.msgTitle')" required>
-          <Input v-model:value="sendForm.title" :placeholder="$t('page.message.titlePlaceholder')" />
+          <Input v-model="sendForm.title" :placeholder="$t('page.message.titlePlaceholder')" />
         </FormItem>
         <FormItem :label="$t('page.message.content')">
-          <Textarea
-            v-model:value="sendForm.content"
+          <Input
+            v-model="sendForm.content"
+            type="textarea"
             :placeholder="$t('page.message.contentPlaceholder')"
             :rows="4"
           />
         </FormItem>
         <FormItem :label="$t('page.message.type')">
-          <Select
-            v-model:value="sendForm.type"
-            :options="[
-              { label: $t('page.message.notice'), value: 'notice' },
-              { label: $t('page.message.alert'), value: 'alert' },
-              { label: $t('page.message.task'), value: 'task' },
-            ]"
-          />
+          <Select v-model="sendForm.type" style="width: 100%">
+            <Option :label="$t('page.message.notice')" value="notice" />
+            <Option :label="$t('page.message.alert')" value="alert" />
+            <Option :label="$t('page.message.task')" value="task" />
+          </Select>
         </FormItem>
         <FormItem :label="$t('page.message.emailLabel')">
-          <Input v-model:value="sendForm.email" :placeholder="$t('page.message.emailPlaceholder')" />
+          <Input v-model="sendForm.email" :placeholder="$t('page.message.emailPlaceholder')" />
         </FormItem>
       </Form>
-    </Modal>
+      <template #footer>
+        <Button @click="sendModalVisible = false">取消</Button>
+        <Button type="primary" @click="handleSend">确认</Button>
+      </template>
+    </Dialog>
   </Page>
 </template>

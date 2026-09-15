@@ -1,22 +1,22 @@
 <script lang="ts" setup>
-import { h, ref } from 'vue';
+import { ref } from 'vue';
 import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
 
 import {
-  Button,
-  Form,
-  FormItem,
-  Input,
-  message,
-  Modal,
-  Popconfirm,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Textarea,
+  ElButton as Button,
+  ElDialog as Dialog,
+  ElForm as Form,
+  ElFormItem as FormItem,
+  ElInput as Input,
+  ElMessage as message,
+  ElMessageBox,
+  ElOption as Option,
+  ElSelect as Select,
+  ElTable as Table,
+  ElTableColumn as TableColumn,
+  ElTag as Tag,
 } from 'element-plus';
 
 import { $t } from '#/locales';
@@ -44,162 +44,25 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const filterStatus = ref<string | undefined>(undefined);
 
-const instanceColumns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.workflow.title'), dataIndex: 'title', ellipsis: true },
-  { title: () => $t('page.workflow.applicant'), dataIndex: 'applicantName', width: 100 },
-  { title: () => $t('page.workflow.workflowName'), dataIndex: 'workflowName', width: 120 },
-  {
-    title: () => $t('page.workflow.currentStep'),
-    key: 'step',
-    width: 80,
-    customRender: ({ record }: any) =>
-      `${record.currentStep + 1}/${record.totalSteps}`,
-  },
-  {
-    title: () => $t('page.workflow.status'),
-    dataIndex: 'status',
-    width: 100,
-    customRender: ({ text }: any) => {
-      const map: Record<string, { color: string; label: string }> = {
-        pending: { color: 'processing', label: $t('page.workflow.pending') },
-        approved: { color: 'green', label: $t('page.workflow.approved') },
-        rejected: { color: 'red', label: $t('page.workflow.rejected') },
-        cancelled: { color: 'default', label: $t('page.workflow.cancelled') },
-      };
-      const s = map[text] || { color: 'default', label: text };
-      return h(Tag, { color: s.color }, () => s.label);
-    },
-  },
-  {
-    title: () => $t('page.auditLog.createTime'),
-    dataIndex: 'createTime',
-    width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
-  },
-  {
-    title: () => $t('page.common.action'),
-    key: 'action',
-    width: 220,
-    customRender: ({ record }: any) => {
-      const actions: any[] = [
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => showTasksModal(record),
-          },
-          () => $t('page.workflow.tasks'),
-        ),
-      ];
-      if (record.status === 'pending') {
-        actions.push(
-          h(
-            Button,
-            {
-              size: 'small',
-              type: 'link',
-              onClick: () => showApproveModal(record, 'approve'),
-            },
-            () => $t('page.workflow.approve'),
-          ),
-          h(
-            Button,
-            {
-              size: 'small',
-              type: 'link',
-              danger: true,
-              onClick: () => showApproveModal(record, 'reject'),
-            },
-            () => $t('page.workflow.reject'),
-          ),
-          h(
-            Popconfirm,
-            {
-              title: $t('page.workflow.confirmCancel'),
-              onConfirm: () => handleCancel(record.id),
-            },
-            () =>
-              h(
-                Button,
-                { size: 'small', type: 'link' },
-                () => $t('page.workflow.cancel'),
-              ),
-          ),
-        );
-      }
-      return h(Space, {}, () => actions);
-    },
-  },
-];
+function getStatusTagType(status: string) {
+  const map: Record<string, string> = {
+    pending: 'warning',
+    approved: 'success',
+    rejected: 'danger',
+    cancelled: 'info',
+  };
+  return map[status] || 'info';
+}
 
-// 定义列表
-const defLoading = ref(false);
-const defDataSource = ref<any[]>([]);
-const defTotal = ref(0);
-const defCurrentPage = ref(1);
-const defPageSize = ref(10);
-
-const defColumns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.workflow.name'), dataIndex: 'name', ellipsis: true },
-  { title: () => $t('page.workflow.code'), dataIndex: 'code', width: 120 },
-  { title: () => $t('page.workflow.type'), dataIndex: 'type', width: 100 },
-  { title: () => $t('page.workflow.remark'), dataIndex: 'remark', ellipsis: true },
-  {
-    title: () => $t('page.workflow.status'),
-    dataIndex: 'status',
-    width: 80,
-    customRender: ({ text }: any) =>
-      h(
-        Tag,
-        { color: text === 1 ? 'green' : 'red' },
-        () => (text === 1 ? $t('page.workflow.active') : $t('page.workflow.disabled')),
-      ),
-  },
-  {
-    title: () => $t('page.common.action'),
-    key: 'action',
-    width: 250,
-    customRender: ({ record }: any) => {
-      return h(Space, {}, () => [
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => showStartModal(record),
-          },
-          () => $t('page.workflow.start'),
-        ),
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => showDefModal(record),
-          },
-          () => $t('page.common.edit'),
-        ),
-        h(
-          Popconfirm,
-          {
-            title: $t('page.workflow.confirmDeleteDef'),
-            onConfirm: () => handleDeleteDef(record.id),
-          },
-          () =>
-            h(
-              Button,
-              { size: 'small', type: 'link', danger: true },
-              () => $t('page.common.delete'),
-            ),
-        ),
-      ]);
-    },
-  },
-];
+function getStatusLabel(status: string) {
+  const map: Record<string, string> = {
+    pending: $t('page.workflow.pending'),
+    approved: $t('page.workflow.approved'),
+    rejected: $t('page.workflow.rejected'),
+    cancelled: $t('page.workflow.cancelled'),
+  };
+  return map[status] || status;
+}
 
 // 审批弹窗
 const approveModalVisible = ref(false);
@@ -271,6 +134,13 @@ async function handleStart() {
 }
 
 async function handleCancel(id: number) {
+  try {
+    await ElMessageBox.confirm($t('page.workflow.confirmCancel'), $t('page.common.confirmDeleteTitle'), {
+      type: 'warning',
+    });
+  } catch {
+    return;
+  }
   await cancelWorkflowApi(id);
   message.success($t('page.workflow.cancelled'));
   loadData();
@@ -329,10 +199,24 @@ async function handleDefSubmit() {
 }
 
 async function handleDeleteDef(id: number) {
+  try {
+    await ElMessageBox.confirm($t('page.workflow.confirmDeleteDef'), $t('page.common.confirmDeleteTitle'), {
+      type: 'warning',
+    });
+  } catch {
+    return;
+  }
   await deleteWorkflowApi(id);
   message.success($t('page.common.deleteSuccess'));
   loadData();
 }
+
+// 定义列表
+const defLoading = ref(false);
+const defDataSource = ref<any[]>([]);
+const defTotal = ref(0);
+const defCurrentPage = ref(1);
+const defPageSize = ref(10);
 
 async function loadData() {
   if (activeTab.value === 'instances') {
@@ -363,13 +247,37 @@ async function loadData() {
   }
 }
 
-function handlePageChange(page: number, size: number) {
+function handlePageChange(page: number) {
   if (activeTab.value === 'instances') {
     currentPage.value = page;
-    pageSize.value = size;
   } else {
     defCurrentPage.value = page;
+  }
+  loadData();
+}
+
+function handleSizeChange(size: number) {
+  if (activeTab.value === 'instances') {
+    pageSize.value = size;
+    currentPage.value = 1;
+  } else {
     defPageSize.value = size;
+    defCurrentPage.value = 1;
+  }
+  loadData();
+}
+
+function handleFilterChange() {
+  currentPage.value = 1;
+  loadData();
+}
+
+function switchTab(tab: 'instances' | 'definitions') {
+  activeTab.value = tab;
+  if (tab === 'instances') {
+    currentPage.value = 1;
+  } else {
+    defCurrentPage.value = 1;
   }
   loadData();
 }
@@ -381,48 +289,27 @@ loadData();
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex items-center justify-between">
-        <Space>
-          <Button
-            :type="activeTab === 'instances' ? 'primary' : 'default'"
-            @click="
-              activeTab = 'instances';
-              currentPage = 1;
-              loadData();
-            "
-          >
+        <div class="flex gap-2">
+          <Button :type="activeTab === 'instances' ? 'primary' : 'default'" @click="switchTab('instances')">
             {{ $t('page.workflow.instances') }}
           </Button>
-          <Button
-            :type="activeTab === 'definitions' ? 'primary' : 'default'"
-            @click="
-              activeTab = 'definitions';
-              defCurrentPage = 1;
-              loadData();
-            "
-          >
+          <Button :type="activeTab === 'definitions' ? 'primary' : 'default'" @click="switchTab('definitions')">
             {{ $t('page.workflow.definitions') }}
           </Button>
-        </Space>
-        <Space v-if="activeTab === 'instances'">
-          <Select
-            v-model:value="filterStatus"
-            :placeholder="$t('page.workflow.filterStatus')"
-            style="width: 150px"
-            allow-clear
-            :options="[
-              { label: $t('page.workflow.pending'), value: 'pending' },
-              { label: $t('page.workflow.approved'), value: 'approved' },
-              { label: $t('page.workflow.rejected'), value: 'rejected' },
-              { label: $t('page.workflow.cancelled'), value: 'cancelled' },
-            ]"
-            @change="
-              () => {
-                currentPage = 1;
-                loadData();
-              }
-            "
-          />
-        </Space>
+        </div>
+        <Select
+          v-if="activeTab === 'instances'"
+          v-model="filterStatus"
+          :placeholder="$t('page.workflow.filterStatus')"
+          style="width: 150px"
+          clearable
+          @change="handleFilterChange"
+        >
+          <Option :label="$t('page.workflow.pending')" value="pending" />
+          <Option :label="$t('page.workflow.approved')" value="approved" />
+          <Option :label="$t('page.workflow.rejected')" value="rejected" />
+          <Option :label="$t('page.workflow.cancelled')" value="cancelled" />
+        </Select>
         <Button
           v-if="activeTab === 'definitions'"
           type="primary"
@@ -432,157 +319,202 @@ loadData();
         </Button>
       </div>
 
-      <Table
-        v-if="activeTab === 'instances'"
-        :loading="loading"
-        :data-source="dataSource"
-        :columns="instanceColumns"
-        :pagination="{
-          current: currentPage,
-          pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
-          onChange: handlePageChange,
-        }"
-        :scroll="{ x: 1000 }"
-        row-key="id"
-        size="small"
-      />
+      <!-- 实例列表 -->
+      <template v-if="activeTab === 'instances'">
+        <Table v-loading="loading" :data="dataSource" style="width: 100%" row-key="id" size="small">
+          <TableColumn prop="id" label="ID" width="80" />
+          <TableColumn prop="title" :label="$t('page.workflow.title')" show-overflow-tooltip />
+          <TableColumn prop="applicantName" :label="$t('page.workflow.applicant')" width="100" />
+          <TableColumn prop="workflowName" :label="$t('page.workflow.workflowName')" width="120" />
+          <TableColumn :label="$t('page.workflow.currentStep')" width="80">
+            <template #default="{ row }">
+              {{ row.currentStep + 1 }}/{{ row.totalSteps }}
+            </template>
+          </TableColumn>
+          <TableColumn :label="$t('page.workflow.status')" width="100">
+            <template #default="{ row }">
+              <Tag :type="getStatusTagType(row.status)">{{ getStatusLabel(row.status) }}</Tag>
+            </template>
+          </TableColumn>
+          <TableColumn :label="$t('page.auditLog.createTime')" width="180">
+            <template #default="{ row }">
+              {{ row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
+            </template>
+          </TableColumn>
+          <TableColumn :label="$t('page.common.action')" width="220">
+            <template #default="{ row }">
+              <Button type="primary" link size="small" @click="showTasksModal(row)">{{ $t('page.workflow.tasks') }}</Button>
+              <template v-if="row.status === 'pending'">
+                <Button type="success" link size="small" @click="showApproveModal(row, 'approve')">{{ $t('page.workflow.approve') }}</Button>
+                <Button type="danger" link size="small" @click="showApproveModal(row, 'reject')">{{ $t('page.workflow.reject') }}</Button>
+                <Button link size="small" @click="handleCancel(row.id)">{{ $t('page.workflow.cancel') }}</Button>
+              </template>
+            </template>
+          </TableColumn>
+        </Table>
+        <div class="mt-4 flex items-center justify-between">
+          <span>{{ $t('page.common.total') }} {{ total }} {{ $t('page.common.records') }}</span>
+          <div class="flex items-center gap-2">
+            <Select :model-value="pageSize" style="width: 120px" @update:model-value="handleSizeChange">
+              <Option label="10条/页" :value="10" />
+              <Option label="20条/页" :value="20" />
+              <Option label="50条/页" :value="50" />
+            </Select>
+            <div class="flex items-center gap-1">
+              <Button :disabled="currentPage <= 1" size="small" @click="handlePageChange(currentPage - 1)">上一页</Button>
+              <span>{{ currentPage }} / {{ Math.ceil(total / pageSize) || 1 }}</span>
+              <Button :disabled="currentPage >= Math.ceil(total / pageSize)" size="small" @click="handlePageChange(currentPage + 1)">下一页</Button>
+            </div>
+          </div>
+        </div>
+      </template>
 
-      <Table
-        v-else
-        :loading="defLoading"
-        :data-source="defDataSource"
-        :columns="defColumns"
-        :pagination="{
-          current: defCurrentPage,
-          pageSize: defPageSize,
-          total: defTotal,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
-          onChange: handlePageChange,
-        }"
-        row-key="id"
-        size="small"
-      />
+      <!-- 定义列表 -->
+      <template v-else>
+        <Table v-loading="defLoading" :data="defDataSource" style="width: 100%" row-key="id" size="small">
+          <TableColumn prop="id" label="ID" width="80" />
+          <TableColumn prop="name" :label="$t('page.workflow.name')" show-overflow-tooltip />
+          <TableColumn prop="code" :label="$t('page.workflow.code')" width="120" />
+          <TableColumn prop="type" :label="$t('page.workflow.type')" width="100" />
+          <TableColumn prop="remark" :label="$t('page.workflow.remark')" show-overflow-tooltip />
+          <TableColumn :label="$t('page.workflow.status')" width="80">
+            <template #default="{ row }">
+              <Tag :type="row.status === 1 ? 'success' : 'danger'">
+                {{ row.status === 1 ? $t('page.workflow.active') : $t('page.workflow.disabled') }}
+              </Tag>
+            </template>
+          </TableColumn>
+          <TableColumn :label="$t('page.common.action')" width="250">
+            <template #default="{ row }">
+              <Button type="primary" link size="small" @click="showStartModal(row)">{{ $t('page.workflow.start') }}</Button>
+              <Button type="primary" link size="small" @click="showDefModal(row)">{{ $t('page.common.edit') }}</Button>
+              <Button type="danger" link size="small" @click="handleDeleteDef(row.id)">{{ $t('page.common.delete') }}</Button>
+            </template>
+          </TableColumn>
+        </Table>
+        <div class="mt-4 flex items-center justify-between">
+          <span>{{ $t('page.common.total') }} {{ defTotal }} {{ $t('page.common.records') }}</span>
+          <div class="flex items-center gap-2">
+            <Select :model-value="defPageSize" style="width: 120px" @update:model-value="handleSizeChange">
+              <Option label="10条/页" :value="10" />
+              <Option label="20条/页" :value="20" />
+              <Option label="50条/页" :value="50" />
+            </Select>
+            <div class="flex items-center gap-1">
+              <Button :disabled="defCurrentPage <= 1" size="small" @click="handlePageChange(defCurrentPage - 1)">上一页</Button>
+              <span>{{ defCurrentPage }} / {{ Math.ceil(defTotal / defPageSize) || 1 }}</span>
+              <Button :disabled="defCurrentPage >= Math.ceil(defTotal / defPageSize)" size="small" @click="handlePageChange(defCurrentPage + 1)">下一页</Button>
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
 
     <!-- 审批弹窗 -->
-    <Modal
-      v-model:open="approveModalVisible"
+    <Dialog
+      v-model="approveModalVisible"
       :title="approveAction === 'approve' ? $t('page.workflow.approve') : $t('page.workflow.reject')"
-      @ok="handleApprove"
     >
-      <Textarea
-        v-model:value="approveComment"
+      <Input
+        v-model="approveComment"
+        type="textarea"
         :placeholder="$t('page.workflow.comment')"
         :rows="4"
       />
-    </Modal>
+      <template #footer>
+        <Button @click="approveModalVisible = false">取消</Button>
+        <Button type="primary" @click="handleApprove">确认</Button>
+      </template>
+    </Dialog>
 
     <!-- 审批记录弹窗 -->
-    <Modal
-      v-model:open="tasksModalVisible"
+    <Dialog
+      v-model="tasksModalVisible"
       :title="`${$t('page.workflow.tasks')} - #${currentInstance?.id || ''}`"
-      :footer="null"
       width="700px"
     >
-      <Table
-        :loading="tasksLoading"
-        :data-source="tasksData"
-        :pagination="false"
-        :columns="[
-          { title: $t('page.workflow.currentStep'), dataIndex: 'step', width: 60 },
-          { title: $t('page.workflow.approver'), dataIndex: 'approverName', width: 100 },
-          {
-            title: $t('page.common.action'),
-            dataIndex: 'action',
-            width: 80,
-            customRender: ({ text }: any) =>
-              h(
-                Tag,
-                { color: text === 'approve' ? 'green' : 'red' },
-                () => text,
-              ),
-          },
-          { title: $t('page.workflow.comment'), dataIndex: 'comment', ellipsis: true },
-          {
-            title: $t('page.workflow.approveTime'),
-            dataIndex: 'approveTime',
-            width: 180,
-            customRender: ({ text }: any) =>
-              text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
-          },
-        ]"
-        row-key="id"
-        size="small"
-      />
-    </Modal>
+      <Table v-loading="tasksLoading" :data="tasksData" style="width: 100%" row-key="id" size="small">
+        <TableColumn prop="step" :label="$t('page.workflow.currentStep')" width="60" />
+        <TableColumn prop="approverName" :label="$t('page.workflow.approver')" width="100" />
+        <TableColumn :label="$t('page.common.action')" width="80">
+          <template #default="{ row }">
+            <Tag :type="row.action === 'approve' ? 'success' : 'danger'">{{ row.action }}</Tag>
+          </template>
+        </TableColumn>
+        <TableColumn prop="comment" :label="$t('page.workflow.comment')" show-overflow-tooltip />
+        <TableColumn :label="$t('page.workflow.approveTime')" width="180">
+          <template #default="{ row }">
+            {{ row.approveTime ? dayjs(row.approveTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
+          </template>
+        </TableColumn>
+      </Table>
+    </Dialog>
 
     <!-- 发起审批弹窗 -->
-    <Modal
-      v-model:open="startModalVisible"
+    <Dialog
+      v-model="startModalVisible"
       :title="`${$t('page.workflow.start')}: ${currentWorkflow?.name || ''}`"
-      @ok="handleStart"
     >
       <div class="mb-2">
         <label class="mb-1 block">{{ $t('page.workflow.title') }}</label>
-        <Input v-model:value="startForm.title" :placeholder="$t('page.workflow.enterTitle')" />
+        <Input v-model="startForm.title" :placeholder="$t('page.workflow.enterTitle')" />
       </div>
       <div>
         <label class="mb-1 block">{{ $t('page.workflow.content') }}</label>
-        <Textarea
-          v-model:value="startForm.content"
+        <Input
+          v-model="startForm.content"
+          type="textarea"
           :placeholder="$t('page.workflow.enterContent')"
           :rows="4"
         />
       </div>
-    </Modal>
+      <template #footer>
+        <Button @click="startModalVisible = false">取消</Button>
+        <Button type="primary" @click="handleStart">确认</Button>
+      </template>
+    </Dialog>
 
     <!-- 流程定义弹窗 -->
-    <Modal
-      v-model:open="defModalVisible"
+    <Dialog
+      v-model="defModalVisible"
       :title="defModalTitle"
       width="600px"
-      @ok="handleDefSubmit"
     >
-      <Form layout="vertical">
+      <Form label-position="top">
         <FormItem :label="$t('page.workflow.name')" required>
-          <Input v-model:value="defForm.name" :placeholder="$t('page.workflow.namePlaceholder')" />
+          <Input v-model="defForm.name" :placeholder="$t('page.workflow.namePlaceholder')" />
         </FormItem>
         <FormItem :label="$t('page.workflow.code')" required>
-          <Input v-model:value="defForm.code" :placeholder="$t('page.workflow.codePlaceholder')" />
+          <Input v-model="defForm.code" :placeholder="$t('page.workflow.codePlaceholder')" />
         </FormItem>
         <FormItem :label="$t('page.workflow.type')">
-          <Select
-            v-model:value="defForm.type"
-            :options="[
-              { label: $t('page.workflow.typeApproval'), value: 'approval' },
-              { label: $t('page.workflow.typeNotify'), value: 'notify' },
-            ]"
-          />
+          <Select v-model="defForm.type" style="width: 100%">
+            <Option :label="$t('page.workflow.typeApproval')" value="approval" />
+            <Option :label="$t('page.workflow.typeNotify')" value="notify" />
+          </Select>
         </FormItem>
         <FormItem :label="$t('page.workflow.definitionLabel')">
-          <Textarea
-            v-model:value="defForm.definition"
+          <Input
+            v-model="defForm.definition"
+            type="textarea"
             placeholder='[{"step":0,"name":"Leader","approverId":1}]'
             :rows="4"
           />
         </FormItem>
         <FormItem :label="$t('page.workflow.status')">
-          <Select
-            v-model:value="defForm.status"
-            :options="[
-              { label: $t('page.workflow.active'), value: 1 },
-              { label: $t('page.workflow.disabled'), value: 0 },
-            ]"
-          />
+          <Select v-model="defForm.status" style="width: 100%">
+            <Option :label="$t('page.workflow.active')" :value="1" />
+            <Option :label="$t('page.workflow.disabled')" :value="0" />
+          </Select>
         </FormItem>
         <FormItem :label="$t('page.workflow.remark')">
-          <Textarea v-model:value="defForm.remark" :rows="2" />
+          <Input v-model="defForm.remark" type="textarea" :rows="2" />
         </FormItem>
       </Form>
-    </Modal>
+      <template #footer>
+        <Button @click="defModalVisible = false">取消</Button>
+        <Button type="primary" @click="handleDefSubmit">确认</Button>
+      </template>
+    </Dialog>
   </Page>
 </template>

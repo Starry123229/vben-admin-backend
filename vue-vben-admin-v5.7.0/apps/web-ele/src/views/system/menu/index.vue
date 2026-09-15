@@ -12,7 +12,6 @@ import { $t } from '@vben/locales';
 import { ElButton as Button, ElMessage as message, ElMessageBox } from 'element-plus';
 
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { $t } from '#/locales';
 import { deleteMenu, getMenuList } from '#/api/system/menu';
 
 import { useMenuColumns } from './data';

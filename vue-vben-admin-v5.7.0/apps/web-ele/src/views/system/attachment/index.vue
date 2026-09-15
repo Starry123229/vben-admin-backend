@@ -1,18 +1,18 @@
 <script lang="ts" setup>
-import { h, ref } from 'vue';
+import { ref } from 'vue';
 import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
 
 import {
-  Button,
-  Input,
-  message,
-  Modal,
-  Popconfirm,
-  Space,
-  Table,
-  Upload,
+  ElButton as Button,
+  ElDialog as Dialog,
+  ElInput as Input,
+  ElMessage as message,
+  ElMessageBox,
+  ElTable as Table,
+  ElTableColumn as TableColumn,
+  ElUpload as Upload,
 } from 'element-plus';
 
 import { $t } from '#/locales';
@@ -37,72 +37,14 @@ const uploading = ref(false);
 const detailModalVisible = ref(false);
 const detailData = ref<any>({});
 
-const columns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.attachment.originalName'), dataIndex: 'originalName', ellipsis: true },
-  {
-    title: () => $t('page.attachment.fileSize'),
-    dataIndex: 'fileSize',
-    width: 100,
-    customRender: ({ text }: any) => {
-      if (!text) return '-';
-      return text < 1024
-        ? `${text} B`
-        : text < 1024 * 1024
-          ? `${(text / 1024).toFixed(1)} KB`
-          : `${(text / 1024 / 1024).toFixed(1)} MB`;
-    },
-  },
-  { title: () => $t('page.attachment.contentType'), dataIndex: 'contentType', width: 120, ellipsis: true },
-  { title: () => $t('page.attachment.fileExt'), dataIndex: 'fileExt', width: 60 },
-  { title: () => $t('page.attachment.uploader'), dataIndex: 'uploadUsername', width: 100 },
-  { title: () => $t('page.attachment.bizType'), dataIndex: 'bizType', width: 100 },
-  {
-    title: () => $t('page.attachment.url'),
-    dataIndex: 'url',
-    ellipsis: true,
-    customRender: ({ text }: any) =>
-      text ? h('a', { href: text, target: '_blank' }, text) : '-',
-  },
-  {
-    title: () => $t('page.attachment.uploadTime'),
-    dataIndex: 'createTime',
-    width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
-  },
-  {
-    title: () => $t('page.common.action'),
-    key: 'action',
-    width: 150,
-    customRender: ({ record }: any) => {
-      return h(Space, {}, () => [
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => handleViewDetail(record.id),
-          },
-          () => $t('page.attachment.detail'),
-        ),
-        h(
-          Popconfirm,
-          {
-            title: $t('page.attachment.confirmDelete'),
-            onConfirm: () => handleDelete(record.id),
-          },
-          () =>
-            h(
-              Button,
-              { size: 'small', type: 'link', danger: true },
-              () => $t('page.common.delete'),
-            ),
-        ),
-      ]);
-    },
-  },
-];
+function formatFileSize(text: number) {
+  if (!text) return '-';
+  return text < 1024
+    ? `${text} B`
+    : text < 1024 * 1024
+      ? `${(text / 1024).toFixed(1)} KB`
+      : `${(text / 1024 / 1024).toFixed(1)} MB`;
+}
 
 async function loadData() {
   loading.value = true;
@@ -131,6 +73,13 @@ function handleReset() {
 }
 
 async function handleDelete(id: number) {
+  try {
+    await ElMessageBox.confirm($t('page.attachment.confirmDelete'), $t('page.common.confirmDeleteTitle'), {
+      type: 'warning',
+    });
+  } catch {
+    return;
+  }
   await deleteAttachmentApi(id);
   message.success($t('page.common.deleteSuccess'));
   loadData();
@@ -159,9 +108,14 @@ async function handleUpload(file: File) {
   return false;
 }
 
-function handlePageChange(page: number, size: number) {
+function handlePageChange(page: number) {
   currentPage.value = page;
+  loadData();
+}
+
+function handleSizeChange(size: number) {
   pageSize.value = size;
+  currentPage.value = 1;
   loadData();
 }
 
@@ -172,56 +126,99 @@ loadData();
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Space>
+        <div class="flex flex-wrap items-center gap-2">
           <Input
-            v-model:value="searchForm.originalName"
+            v-model="searchForm.originalName"
             :placeholder="$t('page.attachment.searchFileName')"
             style="width: 200px"
-            allow-clear
-            @press-enter="handleSearch"
+            clearable
+            @keyup.enter="handleSearch"
           />
           <Input
-            v-model:value="searchForm.bizType"
+            v-model="searchForm.bizType"
             :placeholder="$t('page.attachment.searchBizType')"
             style="width: 150px"
-            allow-clear
-            @press-enter="handleSearch"
+            clearable
+            @keyup.enter="handleSearch"
           />
           <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
           <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
-        </Space>
+        </div>
         <Upload
           :before-upload="handleUpload"
-          :show-upload-list="false"
-          :max-count="1"
+          :show-file-list="false"
+          :limit="1"
         >
           <Button type="primary" :loading="uploading">{{ $t('page.attachment.upload') }}</Button>
         </Upload>
       </div>
 
       <Table
-        :loading="loading"
-        :data-source="dataSource"
-        :columns="columns"
-        :pagination="{
-          current: currentPage,
-          pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
-          onChange: handlePageChange,
-        }"
-        :scroll="{ x: 1400 }"
+        v-loading="loading"
+        :data="dataSource"
+        style="width: 100%"
         row-key="id"
         size="small"
-      />
+      >
+        <TableColumn prop="id" label="ID" width="80" />
+        <TableColumn prop="originalName" :label="$t('page.attachment.originalName')" show-overflow-tooltip />
+        <TableColumn :label="$t('page.attachment.fileSize')" width="100">
+          <template #default="{ row }">
+            {{ formatFileSize(row.fileSize) }}
+          </template>
+        </TableColumn>
+        <TableColumn prop="contentType" :label="$t('page.attachment.contentType')" width="120" show-overflow-tooltip />
+        <TableColumn prop="fileExt" :label="$t('page.attachment.fileExt')" width="60" />
+        <TableColumn prop="uploadUsername" :label="$t('page.attachment.uploader')" width="100" />
+        <TableColumn prop="bizType" :label="$t('page.attachment.bizType')" width="100" />
+        <TableColumn :label="$t('page.attachment.url')" show-overflow-tooltip>
+          <template #default="{ row }">
+            <a v-if="row.url" :href="row.url" target="_blank">{{ row.url }}</a>
+            <span v-else>-</span>
+          </template>
+        </TableColumn>
+        <TableColumn :label="$t('page.attachment.uploadTime')" width="180">
+          <template #default="{ row }">
+            {{ row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
+          </template>
+        </TableColumn>
+        <TableColumn :label="$t('page.common.action')" width="150">
+          <template #default="{ row }">
+            <Button type="primary" link size="small" @click="handleViewDetail(row.id)">
+              {{ $t('page.attachment.detail') }}
+            </Button>
+            <Button type="danger" link size="small" @click="handleDelete(row.id)">
+              {{ $t('page.common.delete') }}
+            </Button>
+          </template>
+        </TableColumn>
+      </Table>
+
+      <div class="mt-4 flex items-center justify-between">
+        <span>{{ $t('page.common.total') }} {{ total }} {{ $t('page.common.records') }}</span>
+        <div class="flex items-center gap-2">
+          <el-select
+            :model-value="pageSize"
+            style="width: 120px"
+            @update:model-value="handleSizeChange"
+          >
+            <el-option label="10条/页" :value="10" />
+            <el-option label="20条/页" :value="20" />
+            <el-option label="50条/页" :value="50" />
+          </el-select>
+          <div class="flex items-center gap-1">
+            <Button :disabled="currentPage <= 1" size="small" @click="handlePageChange(currentPage - 1)">上一页</Button>
+            <span>{{ currentPage }} / {{ Math.ceil(total / pageSize) || 1 }}</span>
+            <Button :disabled="currentPage >= Math.ceil(total / pageSize)" size="small" @click="handlePageChange(currentPage + 1)">下一页</Button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 详情弹窗 -->
-    <Modal
-      v-model:open="detailModalVisible"
+    <Dialog
+      v-model="detailModalVisible"
       :title="$t('page.attachment.detailTitle')"
-      :footer="null"
       width="600px"
     >
       <div class="space-y-2">
@@ -250,6 +247,6 @@ loadData();
           }}
         </div>
       </div>
-    </Modal>
+    </Dialog>
   </Page>
 </template>
