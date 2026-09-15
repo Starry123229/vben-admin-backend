@@ -25,11 +25,8 @@ public class SysConfigController {
         return R.ok(configService.list(page, pageSize, name, key));
     }
 
-    /** 按 key 查值（所有已登录用户可访问） */
-    @GetMapping("/key/{key}")
-    public R<String> getByKey(@PathVariable String key) {
-        return R.ok(configService.getValueByKey(key));
-    }
+    // NOTE: 按 key 查值的接口已移至 PublicConfigController，
+    // 以避免本类级 @SaCheckRole 限制普通用户访问。
 
     @Log(module = "参数配置", description = "新增参数")
     @PostMapping

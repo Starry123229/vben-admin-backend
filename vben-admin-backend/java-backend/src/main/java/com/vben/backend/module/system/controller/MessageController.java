@@ -70,7 +70,9 @@ public class MessageController {
         if (title == null || title.isBlank()) {
             throw ServiceException.badRequest("消息标题不能为空");
         }
-        messageService.send(uid, title, content, type, email);
+        // 在主线程获取 senderId，避免 @Async 线程中 Sa-Token 上下文丢失
+        long senderId = StpUtil.isLogin() ? StpUtil.getLoginIdAsLong() : 0L;
+        messageService.send(uid, senderId, title, content, type, email);
         return R.ok();
     }
 }

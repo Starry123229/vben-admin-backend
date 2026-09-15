@@ -73,11 +73,8 @@ public class SysDictController {
         return R.ok(dictService.dataList(typeId));
     }
 
-    /** 按字典编码查数据（所有已登录用户可访问，用于下拉选项） */
-    @GetMapping("/data/code/{code}")
-    public R<List<SysDictData>> dataListByCode(@PathVariable String code) {
-        return R.ok(dictService.dataListByCode(code));
-    }
+    // NOTE: 按字典编码查数据的接口已移至 PublicDictController，
+    // 以避免本类级 @SaCheckRole 限制普通用户访问。
 
     @Log(module = "字典管理", description = "新增字典数据")
     @PostMapping("/data")

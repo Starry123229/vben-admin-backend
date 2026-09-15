@@ -53,6 +53,11 @@ const [Drawer, drawerApi] = useVbenDrawer({
         formData.value = undefined;
         id.value = undefined;
       }
+      // 先设置 id 值，让 dependencies 的 triggerFields 能检测到变化
+      if (data?.id) {
+        formApi.setFieldValue('id', data.id);
+      }
+      await nextTick();
       await nextTick();
       if (data) {
         formApi.setValues(data);

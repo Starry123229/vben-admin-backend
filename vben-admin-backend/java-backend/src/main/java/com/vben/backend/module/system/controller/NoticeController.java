@@ -78,6 +78,10 @@ public class NoticeController {
     @PostMapping("/broadcast")
     @SaCheckRole(value = {"super", "admin"}, mode = SaMode.OR)
     public R<Integer> broadcast(@RequestBody BroadcastNoticeRequest req) {
+        // 兼容 content 字段名（与 sendToUser 保持一致）
+        if (req.message == null || req.message.isBlank()) {
+            req.message = req.content;
+        }
         return R.ok(noticeService.broadcastByRole(req.roleId, req.title, req.message,
                 req.avatar, req.link, req.type));
     }
@@ -99,6 +103,7 @@ public class NoticeController {
         public Long roleId;
         public String title;
         public String message;
+        public String content;
         public String avatar;
         public String link;
         public String type;

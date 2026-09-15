@@ -45,19 +45,21 @@ public class MessageService {
 
     /**
      * 发送站内信（可同时发邮件）。
+     * 由调用方在主线程提前获取 senderId，避免 @Async 线程中 Sa-Token 上下文丢失。
      *
-     * @param userId  接收人 ID（0=全员广播）
-     * @param title   标题
-     * @param content 内容
-     * @param type    类型
-     * @param email   可选邮箱（不为空且 mailEnabled 时发邮件）
+     * @param userId    接收人 ID（0=全员广播）
+     * @param senderId  发送人 ID（0=系统消息）
+     * @param title     标题
+     * @param content   内容
+     * @param type      类型
+     * @param email     可选邮箱（不为空且 mailEnabled 时发邮件）
      */
     @Async
-    public void send(Long userId, String title, String content, String type, String email) {
+    public void send(Long userId, long senderId, String title, String content, String type, String email) {
         // 保存站内信
         SysMessage msg = new SysMessage();
         msg.setUserId(userId);
-        msg.setSenderId(StpUtil.isLogin() ? StpUtil.getLoginIdAsLong() : 0L);
+        msg.setSenderId(senderId);
         msg.setTitle(title);
         msg.setContent(content);
         msg.setType(type != null ? type : "notice");
@@ -111,18 +113,15 @@ public class MessageService {
     }
 
     /**
-     * 全部标记已读。
+     * 全部标记已读（批量更新，避免逐条 update 的性能问题）。
      */
     public void markAllRead() {
         long userId = StpUtil.getLoginIdAsLong();
-        List<SysMessage> unread = messageMapper.selectList(
-                new LambdaQueryWrapper<SysMessage>()
+        messageMapper.update(null,
+                new com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper<SysMessage>()
                         .and(q -> q.eq(SysMessage::getUserId, userId).or().eq(SysMessage::getUserId, 0))
-                        .eq(SysMessage::getIsRead, 0));
-        for (SysMessage msg : unread) {
-            msg.setIsRead(1);
-            messageMapper.updateById(msg);
-        }
+                        .eq(SysMessage::getIsRead, 0)
+                        .set(SysMessage::getIsRead, 1));
     }
 
     /**

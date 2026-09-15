@@ -17,7 +17,7 @@ import { Button, message, Modal } from 'ant-design-vue';
 import { useAccess } from '@vben/access';
 import { $t } from '#/locales';
 import { useVbenVxeGrid } from '#/adapter/vxe-table';
-import { deleteUser, exportUserList, getUserList, updateUser } from '#/api/system/user';
+import { deleteUser, exportUserList, getUserList, resetUserPassword, updateUser } from '#/api/system/user';
 import { getDeptList } from '#/api/system/dept';
 
 import { useUserColumns, useUserGridFormSchema } from './data';
@@ -79,6 +79,10 @@ function onActionClick(e: OnActionClickParams<SystemUserApi.SystemUser>) {
       onEdit(e.row);
       break;
     }
+    case 'resetPassword': {
+      onResetPassword(e.row);
+      break;
+    }
   }
 }
 
@@ -111,6 +115,20 @@ async function onStatusChange(newStatus: number, row: SystemUserApi.SystemUser) 
 
 function onEdit(row: SystemUserApi.SystemUser) {
   formDrawerApi.setData(row).open();
+}
+
+function onResetPassword(row: SystemUserApi.SystemUser) {
+  const defaultPassword = '123456';
+  Modal.confirm({
+    title: '重置密码',
+    content: `确认将用户「${row.username}」的密码重置为默认密码「${defaultPassword}」？`,
+    okText: $t('page.common.confirmOk'),
+    cancelText: $t('page.common.confirmCancel'),
+    onOk: async () => {
+      await resetUserPassword(row.id, defaultPassword);
+      message.success(`用户「${row.username}」密码已重置为默认密码`);
+    },
+  });
 }
 
 function onDelete(row: SystemUserApi.SystemUser) {

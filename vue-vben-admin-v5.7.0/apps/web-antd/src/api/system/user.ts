@@ -42,8 +42,8 @@ async function deleteUser(id: number) {
 }
 
 async function resetUserPassword(id: number, newPassword: string) {
-  return requestClient.post(`/system/user/${id}/reset-password`, {}, {
-    params: { newPassword },
+  return requestClient.post(`/system/user/${id}/reset-password`, {
+    newPassword,
   });
 }
 

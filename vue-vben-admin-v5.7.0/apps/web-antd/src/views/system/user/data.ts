@@ -5,6 +5,7 @@ import { getDeptList } from '#/api/system/dept';
 import { getRoleList } from '#/api/system/role';
 
 import { $t } from '#/locales';
+import { z } from '#/adapter/form';
 
 export function useUserFormSchema(): VbenFormSchema[] {
   return [
@@ -18,7 +19,23 @@ export function useUserFormSchema(): VbenFormSchema[] {
       component: 'InputPassword',
       fieldName: 'password',
       label: $t('page.user.password'),
-      help: $t('page.user.password'),
+      help: '至少8位，含大小写字母、数字和特殊字符(@$!%*?&._-+#=)',
+      dependencies: {
+        rules(values) {
+          // 编辑模式下密码留空表示不修改
+          if (values.id && !values.password) {
+            return z.string().optional();
+          }
+          return z
+            .string()
+            .min(8, '密码至少8位')
+            .refine(
+              (v) => /[a-z]/.test(v) && /[A-Z]/.test(v) && /\d/.test(v) && /[@$!%*?&._\-+#=]/.test(v),
+              '密码必须包含大小写字母、数字和特殊字符(@$!%*?&._-+#=)',
+            );
+        },
+        triggerFields: ['id'],
+      },
     },
     {
       component: 'Input',
@@ -99,6 +116,7 @@ export function useUserColumns(
   onStatusChange?: (newStatus: any, row: SystemUserApi.SystemUser) => PromiseLike<boolean | undefined>,
   getDeptName?: (deptId: any) => string,
 ): VxeTableGridColumns<SystemUserApi.SystemUser> {
+  // 操作按钮宽度需容纳 编辑/重置密码/删除 三个按钮
   return [
     {
       field: 'username',
@@ -149,7 +167,7 @@ export function useUserColumns(
     {
       field: 'operation',
       title: $t('page.common.action'),
-      width: 160,
+      width: 220,
       fixed: 'right',
       align: 'center',
       cellRender: {
@@ -162,6 +180,7 @@ export function useUserColumns(
         // 按钮级权限：与后端 @SaCheckPermission 同一套码
         options: [
           { code: 'edit', accessCode: 'AC_100020' },
+          { code: 'resetPassword', text: '重置密码', accessCode: 'AC_100020' },
           { code: 'delete', accessCode: 'AC_100030' },
         ],
       },
