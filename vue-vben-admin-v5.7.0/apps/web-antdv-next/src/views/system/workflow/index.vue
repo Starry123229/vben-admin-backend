@@ -16,7 +16,6 @@ import {
   Space,
   Table,
   Tag,
-  Textarea,
 } from 'antdv-next';
 
 import { $t } from '#/locales';
@@ -53,85 +52,22 @@ const instanceColumns = [
     title: () => $t('page.workflow.currentStep'),
     key: 'step',
     width: 80,
-    customRender: ({ record }: any) =>
-      `${record.currentStep + 1}/${record.totalSteps}`,
   },
   {
     title: () => $t('page.workflow.status'),
-    dataIndex: 'status',
+    key: 'status',
     width: 100,
-    customRender: ({ text }: any) => {
-      const map: Record<string, { color: string; label: string }> = {
-        pending: { color: 'processing', label: $t('page.workflow.pending') },
-        approved: { color: 'green', label: $t('page.workflow.approved') },
-        rejected: { color: 'red', label: $t('page.workflow.rejected') },
-        cancelled: { color: 'default', label: $t('page.workflow.cancelled') },
-      };
-      const s = map[text] || { color: 'default', label: text };
-      return h(Tag, { color: s.color }, () => s.label);
-    },
   },
   {
     title: () => $t('page.auditLog.createTime'),
     dataIndex: 'createTime',
+    key: 'createTime',
     width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
   },
   {
     title: () => $t('page.common.action'),
     key: 'action',
     width: 220,
-    customRender: ({ record }: any) => {
-      const actions: any[] = [
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => showTasksModal(record),
-          },
-          () => $t('page.workflow.tasks'),
-        ),
-      ];
-      if (record.status === 'pending') {
-        actions.push(
-          h(
-            Button,
-            {
-              size: 'small',
-              type: 'link',
-              onClick: () => showApproveModal(record, 'approve'),
-            },
-            () => $t('page.workflow.approve'),
-          ),
-          h(
-            Button,
-            {
-              size: 'small',
-              type: 'link',
-              danger: true,
-              onClick: () => showApproveModal(record, 'reject'),
-            },
-            () => $t('page.workflow.reject'),
-          ),
-          h(
-            Popconfirm,
-            {
-              title: $t('page.workflow.confirmCancel'),
-              onConfirm: () => handleCancel(record.id),
-            },
-            () =>
-              h(
-                Button,
-                { size: 'small', type: 'link' },
-                () => $t('page.workflow.cancel'),
-              ),
-          ),
-        );
-      }
-      return h(Space, {}, () => actions);
-    },
   },
 ];
 
@@ -150,54 +86,14 @@ const defColumns = [
   { title: () => $t('page.workflow.remark'), dataIndex: 'remark', ellipsis: true },
   {
     title: () => $t('page.workflow.status'),
+    key: 'defStatus',
     dataIndex: 'status',
     width: 80,
-    customRender: ({ text }: any) =>
-      h(
-        Tag,
-        { color: text === 1 ? 'green' : 'red' },
-        () => (text === 1 ? $t('page.workflow.active') : $t('page.workflow.disabled')),
-      ),
   },
   {
     title: () => $t('page.common.action'),
-    key: 'action',
+    key: 'defAction',
     width: 250,
-    customRender: ({ record }: any) => {
-      return h(Space, {}, () => [
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => showStartModal(record),
-          },
-          () => $t('page.workflow.start'),
-        ),
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => showDefModal(record),
-          },
-          () => $t('page.common.edit'),
-        ),
-        h(
-          Popconfirm,
-          {
-            title: $t('page.workflow.confirmDeleteDef'),
-            onConfirm: () => handleDeleteDef(record.id),
-          },
-          () =>
-            h(
-              Button,
-              { size: 'small', type: 'link', danger: true },
-              () => $t('page.common.delete'),
-            ),
-        ),
-      ]);
-    },
   },
 ];
 
@@ -448,7 +344,57 @@ loadData();
         :scroll="{ x: 1000 }"
         row-key="id"
         size="small"
-      />
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'step'">
+            {{ record.currentStep + 1 }}/{{ record.totalSteps }}
+          </template>
+          <template v-else-if="column.key === 'status'">
+            <Tag
+              :color="
+                record.status === 'pending'
+                  ? 'processing'
+                  : record.status === 'approved'
+                    ? 'green'
+                    : record.status === 'rejected'
+                      ? 'red'
+                      : 'default'
+              "
+            >
+              {{
+                record.status === 'pending'
+                  ? $t('page.workflow.pending')
+                  : record.status === 'approved'
+                    ? $t('page.workflow.approved')
+                    : record.status === 'rejected'
+                      ? $t('page.workflow.rejected')
+                      : $t('page.workflow.cancelled')
+              }}
+            </Tag>
+          </template>
+          <template v-else-if="column.key === 'createTime'">
+            {{ record.createTime ? dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
+          </template>
+          <template v-else-if="column.key === 'action'">
+            <Space>
+              <Button size="small" type="link" @click="showTasksModal(record)">
+                {{ $t('page.workflow.tasks') }}
+              </Button>
+              <template v-if="record.status === 'pending'">
+                <Button size="small" type="link" @click="showApproveModal(record, 'approve')">
+                  {{ $t('page.workflow.approve') }}
+                </Button>
+                <Button size="small" type="link" danger @click="showApproveModal(record, 'reject')">
+                  {{ $t('page.workflow.reject') }}
+                </Button>
+                <Popconfirm :title="$t('page.workflow.confirmCancel')" @confirm="handleCancel(record.id)">
+                  <Button size="small" type="link">{{ $t('page.workflow.cancel') }}</Button>
+                </Popconfirm>
+              </template>
+            </Space>
+          </template>
+        </template>
+      </Table>
 
       <Table
         v-else
@@ -465,7 +411,28 @@ loadData();
         }"
         row-key="id"
         size="small"
-      />
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'defStatus'">
+            <Tag :color="record.status === 1 ? 'green' : 'red'">
+              {{ record.status === 1 ? $t('page.workflow.active') : $t('page.workflow.disabled') }}
+            </Tag>
+          </template>
+          <template v-else-if="column.key === 'defAction'">
+            <Space>
+              <Button size="small" type="link" @click="showStartModal(record)">
+                {{ $t('page.workflow.start') }}
+              </Button>
+              <Button size="small" type="link" @click="showDefModal(record)">
+                {{ $t('page.common.edit') }}
+              </Button>
+              <Popconfirm :title="$t('page.workflow.confirmDeleteDef')" @confirm="handleDeleteDef(record.id)">
+                <Button size="small" type="link" danger>{{ $t('page.common.delete') }}</Button>
+              </Popconfirm>
+            </Space>
+          </template>
+        </template>
+      </Table>
     </div>
 
     <!-- 审批弹窗 -->
@@ -474,7 +441,7 @@ loadData();
       :title="approveAction === 'approve' ? $t('page.workflow.approve') : $t('page.workflow.reject')"
       @ok="handleApprove"
     >
-      <Textarea
+      <Input.TextArea
         v-model:value="approveComment"
         :placeholder="$t('page.workflow.comment')"
         :rows="4"
@@ -532,7 +499,7 @@ loadData();
       </div>
       <div>
         <label class="mb-1 block">{{ $t('page.workflow.content') }}</label>
-        <Textarea
+        <Input.TextArea
           v-model:value="startForm.content"
           :placeholder="$t('page.workflow.enterContent')"
           :rows="4"
@@ -564,7 +531,7 @@ loadData();
           />
         </FormItem>
         <FormItem :label="$t('page.workflow.definitionLabel')">
-          <Textarea
+          <Input.TextArea
             v-model:value="defForm.definition"
             placeholder='[{"step":0,"name":"Leader","approverId":1}]'
             :rows="4"
@@ -580,7 +547,7 @@ loadData();
           />
         </FormItem>
         <FormItem :label="$t('page.workflow.remark')">
-          <Textarea v-model:value="defForm.remark" :rows="2" />
+          <Input.TextArea v-model:value="defForm.remark" :rows="2" />
         </FormItem>
       </Form>
     </Modal>

@@ -12,7 +12,7 @@ import { computed, onMounted, ref } from 'vue';
 import { Page, Tree, useVbenDrawer } from '@vben/common-ui';
 import { Download, Plus } from '@vben/icons';
 
-import { Button, message, Modal } from 'ant-design-vue';
+import { Button, message, Modal } from 'antdv-next';
 
 import { useAccess } from '@vben/access';
 import { $t } from '#/locales';

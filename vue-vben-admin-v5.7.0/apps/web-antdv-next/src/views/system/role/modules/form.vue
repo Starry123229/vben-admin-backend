@@ -6,7 +6,7 @@ import { computed, nextTick, ref } from 'vue';
 import { useVbenDrawer, useVbenForm } from '@vben/common-ui';
 import { $t } from '@vben/locales';
 
-import { Tree as ATree } from 'ant-design-vue';
+import { Tree as ATree } from 'antdv-next';
 
 import {
   assignRoleMenus,

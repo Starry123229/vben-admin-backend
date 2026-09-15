@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
 
-import { Button, Input, message, Select, Space, Table, Tag } from 'ant-design-vue';
+import { Button, Input, message, Select, Space, Table, Tag } from 'antdv-next';
 
 import { clearLoginLogs, exportLoginLog, getLoginLogList } from '#/api/system/log';
 import { $t } from '#/locales';

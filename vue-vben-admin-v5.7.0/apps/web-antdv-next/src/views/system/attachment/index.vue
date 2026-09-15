@@ -42,16 +42,8 @@ const columns = [
   { title: () => $t('page.attachment.originalName'), dataIndex: 'originalName', ellipsis: true },
   {
     title: () => $t('page.attachment.fileSize'),
-    dataIndex: 'fileSize',
+    key: 'fileSize',
     width: 100,
-    customRender: ({ text }: any) => {
-      if (!text) return '-';
-      return text < 1024
-        ? `${text} B`
-        : text < 1024 * 1024
-          ? `${(text / 1024).toFixed(1)} KB`
-          : `${(text / 1024 / 1024).toFixed(1)} MB`;
-    },
   },
   { title: () => $t('page.attachment.contentType'), dataIndex: 'contentType', width: 120, ellipsis: true },
   { title: () => $t('page.attachment.fileExt'), dataIndex: 'fileExt', width: 60 },
@@ -59,48 +51,18 @@ const columns = [
   { title: () => $t('page.attachment.bizType'), dataIndex: 'bizType', width: 100 },
   {
     title: () => $t('page.attachment.url'),
-    dataIndex: 'url',
+    key: 'url',
     ellipsis: true,
-    customRender: ({ text }: any) =>
-      text ? h('a', { href: text, target: '_blank' }, text) : '-',
   },
   {
     title: () => $t('page.attachment.uploadTime'),
-    dataIndex: 'createTime',
+    key: 'createTime',
     width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
   },
   {
     title: () => $t('page.common.action'),
     key: 'action',
     width: 150,
-    customRender: ({ record }: any) => {
-      return h(Space, {}, () => [
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => handleViewDetail(record.id),
-          },
-          () => $t('page.attachment.detail'),
-        ),
-        h(
-          Popconfirm,
-          {
-            title: $t('page.attachment.confirmDelete'),
-            onConfirm: () => handleDelete(record.id),
-          },
-          () =>
-            h(
-              Button,
-              { size: 'small', type: 'link', danger: true },
-              () => $t('page.common.delete'),
-            ),
-        ),
-      ]);
-    },
   },
 ];
 
@@ -214,7 +176,33 @@ loadData();
         :scroll="{ x: 1400 }"
         row-key="id"
         size="small"
-      />
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'fileSize'">
+            <span v-if="!record.fileSize">-</span>
+            <span v-else-if="record.fileSize < 1024">{{ record.fileSize }} B</span>
+            <span v-else-if="record.fileSize < 1024 * 1024">{{ (record.fileSize / 1024).toFixed(1) }} KB</span>
+            <span v-else>{{ (record.fileSize / 1024 / 1024).toFixed(1) }} MB</span>
+          </template>
+          <template v-else-if="column.key === 'url'">
+            <a v-if="record.url" :href="record.url" target="_blank">{{ record.url }}</a>
+            <span v-else>-</span>
+          </template>
+          <template v-else-if="column.key === 'createTime'">
+            {{ record.createTime ? dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
+          </template>
+          <template v-else-if="column.key === 'action'">
+            <Space>
+              <Button size="small" type="link" @click="handleViewDetail(record.id)">
+                {{ $t('page.attachment.detail') }}
+              </Button>
+              <Popconfirm :title="$t('page.attachment.confirmDelete')" @confirm="handleDelete(record.id)">
+                <Button size="small" type="link" danger>{{ $t('page.common.delete') }}</Button>
+              </Popconfirm>
+            </Space>
+          </template>
+        </template>
+      </Table>
     </div>
 
     <!-- 详情弹窗 -->

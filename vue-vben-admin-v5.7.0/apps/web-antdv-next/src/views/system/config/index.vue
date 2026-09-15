@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
-import { Button, Input, message, Modal, Select, Space, Table } from 'ant-design-vue';
+import { Button, Input, message, Modal, Select, Space, Table } from 'antdv-next';
 import { createConfig, deleteConfig, getConfigList, updateConfig } from '#/api/system/config';
 
 import { $t } from '#/locales';

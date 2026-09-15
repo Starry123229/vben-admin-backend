@@ -3,7 +3,7 @@ import { onMounted, ref, computed } from 'vue';
 import dayjs from 'dayjs';
 import { Page } from '@vben/common-ui';
 import { useAccessStore } from '@vben/stores';
-import { Button, Input, message, Modal, Table } from 'ant-design-vue';
+import { Button, Input, message, Modal, Table } from 'antdv-next';
 import { forceLogout, getOnlineList } from '#/api/system/online';
 
 import { $t } from '#/locales';

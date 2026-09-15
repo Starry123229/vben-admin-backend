@@ -16,7 +16,6 @@ import {
   Space,
   Table,
   Tag,
-  Textarea,
 } from 'antdv-next';
 
 import { $t } from '#/locales';
@@ -233,7 +232,7 @@ loadData();
           <Input v-model:value="sendForm.title" :placeholder="$t('page.message.titlePlaceholder')" />
         </FormItem>
         <FormItem :label="$t('page.message.content')">
-          <Textarea
+          <Input.TextArea
             v-model:value="sendForm.content"
             :placeholder="$t('page.message.contentPlaceholder')"
             :rows="4"

@@ -15,7 +15,7 @@ import {
   Space,
   Table,
   Tag,
-} from 'ant-design-vue';
+} from 'antdv-next';
 
 import {
   createDictType,
