@@ -1,0 +1,247 @@
+// Vben Admin Prisma Schema — 与 Java 端 init.sql 完全对应
+// 数据库: MySQL 8.4+，字符集 utf8mb4
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================== 用户表
+model SysUser {
+  id           BigInt   @id @default(autoincrement())
+  username     String   @unique @db.VarChar(64)
+  passwordHash String   @map("password_hash") @db.VarChar(100)
+  realName     String?  @map("real_name") @db.VarChar(64)
+  avatar       String?  @db.VarChar(255)
+  homePath     String?  @map("home_path") @db.VarChar(255)
+  phone        String?  @unique @db.VarChar(32)
+  email        String?  @unique @db.VarChar(128)
+  deptId       BigInt?  @map("dept_id")
+  status       Int      @default(1) @db.TinyInt
+  remark       String?  @db.VarChar(500)
+  intro        String?  @db.VarChar(500)
+  createTime   DateTime @default(now()) @map("create_time") @db.DateTime
+  updateTime   DateTime @default(now()) @map("update_time") @db.DateTime
+
+  userRoles    SysUserRole[]
+  refreshTokens SysRefreshToken[]
+  notices      SysNotice[]
+
+  @@index([deptId])
+
+  @@map("sys_user")
+}
+
+// ============================== 角色表
+model SysRole {
+  id         BigInt   @id @default(autoincrement())
+  name       String   @db.VarChar(64)
+  code       String   @unique @db.VarChar(64)
+  status     Int      @default(1) @db.TinyInt
+  remark     String?  @db.VarChar(500)
+  createTime DateTime @default(now()) @map("create_time") @db.DateTime
+
+  userRoles  SysUserRole[]
+  roleMenus  SysRoleMenu[]
+
+  @@map("sys_role")
+}
+
+// ============================== 用户-角色关联表
+model SysUserRole {
+  userId BigInt @map("user_id")
+  roleId BigInt @map("role_id")
+
+  user SysUser @relation(fields: [userId], references: [id])
+  role SysRole @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+  @@map("sys_user_role")
+}
+
+// ============================== 菜单表
+model SysMenu {
+  id         BigInt   @id @default(autoincrement())
+  pid        BigInt   @default(0) @map("pid")
+  name       String   @unique @db.VarChar(64)
+  type       String   @default("menu") @db.VarChar(16)
+  path       String?  @db.VarChar(255)
+  component  String?  @db.VarChar(255)
+  redirect   String?  @db.VarChar(255)
+  authCode   String?  @map("auth_code") @db.VarChar(128)
+  icon       String?  @db.VarChar(128)
+  status     Int      @default(1) @db.TinyInt
+  sort       Int      @default(0)
+  meta       Json?
+  createTime DateTime @default(now()) @map("create_time") @db.DateTime
+  updateTime DateTime @default(now()) @map("update_time") @db.DateTime
+
+  roleMenus  SysRoleMenu[]
+
+  @@map("sys_menu")
+}
+
+// ============================== 角色-菜单关联表
+model SysRoleMenu {
+  roleId BigInt @map("role_id")
+  menuId BigInt @map("menu_id")
+
+  role SysRole @relation(fields: [roleId], references: [id])
+  menu SysMenu @relation(fields: [menuId], references: [id])
+
+  @@id([roleId, menuId])
+  @@map("sys_role_menu")
+}
+
+// ============================== 部门表
+model SysDept {
+  id         BigInt   @id @default(autoincrement())
+  pid        BigInt   @default(0) @map("pid")
+  name       String   @db.VarChar(64)
+  status     Int      @default(1) @db.TinyInt
+  remark     String?  @db.VarChar(500)
+  createTime DateTime @default(now()) @map("create_time") @db.DateTime
+
+  @@map("sys_dept")
+}
+
+// ============================== 刷新令牌表
+model SysRefreshToken {
+  id        BigInt   @id @default(autoincrement())
+  userId    BigInt   @map("user_id")
+  tokenHash String   @unique @map("token_hash") @db.VarChar(128)
+  expiresAt DateTime @map("expires_at") @db.DateTime
+  revoked   Int      @default(0) @db.TinyInt
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime
+
+  user      SysUser  @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("sys_refresh_token")
+}
+
+// ============================== 通知消息表
+model SysNotice {
+  id         BigInt   @id @default(autoincrement())
+  title      String   @db.VarChar(128)
+  message    String?  @db.Text
+  avatar     String?  @db.VarChar(255)
+  link       String?  @db.VarChar(255)
+  isRead     Int      @default(0) @map("is_read") @db.TinyInt
+  userId     BigInt   @map("user_id")
+  roleId     BigInt?  @map("role_id")
+  type       String   @default("info") @db.VarChar(32)
+  createTime DateTime @default(now()) @map("create_time") @db.DateTime
+
+  user       SysUser  @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([roleId])
+  @@map("sys_notice")
+}
+
+// ============================== 系统参数配置表
+model SysConfig {
+  id         BigInt   @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  key        String   @unique @db.VarChar(100)
+  value      String   @db.Text
+  type       String   @default("string") @db.VarChar(20)
+  remark     String?  @db.VarChar(500)
+  createTime DateTime @default(now()) @map("create_time") @db.DateTime
+  updateTime DateTime @default(now()) @map("update_time") @db.DateTime
+
+  @@map("sys_config")
+}
+
+// ============================== 定时任务表
+model SysJob {
+  id           BigInt   @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  groupName    String   @default("DEFAULT") @map("group_name") @db.VarChar(50)
+  invokeTarget String   @map("invoke_target") @db.VarChar(255)
+  cron         String   @db.VarChar(100)
+  status       Int      @default(0) @db.TinyInt
+  remark       String?  @db.VarChar(500)
+  createTime   DateTime @default(now()) @map("create_time") @db.DateTime
+
+  @@map("sys_job")
+}
+
+// ============================== 数据字典类型表
+model SysDictType {
+  id         BigInt   @id @default(autoincrement())
+  name       String   @db.VarChar(100)
+  code       String   @unique @db.VarChar(100)
+  status     Int      @default(1) @db.TinyInt
+  remark     String?  @db.VarChar(500)
+  createTime DateTime @default(now()) @map("create_time") @db.DateTime
+  updateTime DateTime @default(now()) @map("update_time") @db.DateTime
+
+  dictData   SysDictData[]
+
+  @@map("sys_dict_type")
+}
+
+// ============================== 数据字典数据表
+model SysDictData {
+  id         BigInt   @id @default(autoincrement())
+  typeId     BigInt   @map("type_id")
+  label      String   @db.VarChar(100)
+  value      String   @db.VarChar(100)
+  sort       Int      @default(0)
+  status     Int      @default(1) @db.TinyInt
+  cssClass   String?  @map("css_class") @db.VarChar(100)
+  remark     String?  @db.VarChar(500)
+  createTime DateTime @default(now()) @map("create_time") @db.DateTime
+
+  dictType   SysDictType @relation(fields: [typeId], references: [id])
+
+  @@index([typeId])
+  @@map("sys_dict_data")
+}
+
+// ============================== 操作日志表
+model SysOperationLog {
+  id              BigInt   @id @default(autoincrement())
+  userId          BigInt?  @map("user_id")
+  username        String?  @db.VarChar(64)
+  module          String?  @db.VarChar(64)
+  description     String?  @db.VarChar(255)
+  method          String?  @db.VarChar(255)
+  requestUrl      String?  @map("request_url") @db.VarChar(255)
+  requestMethod   String?  @map("request_method") @db.VarChar(16)
+  requestParams   String?  @map("request_params") @db.Text
+  ip              String?  @db.VarChar(64)
+  status          Int      @default(1) @db.TinyInt
+  errorMsg        String?  @map("error_msg") @db.Text
+  costTime        BigInt?  @map("cost_time")
+  createTime      DateTime @default(now()) @map("create_time") @db.DateTime
+
+  @@index([userId])
+  @@index([createTime])
+  @@map("sys_operation_log")
+}
+
+// ============================== 登录日志表
+model SysLoginLog {
+  id         BigInt   @id @default(autoincrement())
+  userId     BigInt?  @map("user_id")
+  username   String?  @db.VarChar(64)
+  ip         String?  @db.VarChar(64)
+  location   String?  @db.VarChar(255)
+  browser    String?  @db.VarChar(128)
+  os         String?  @db.VarChar(128)
+  status     Int      @default(1) @db.TinyInt
+  message    String?  @db.VarChar(255)
+  loginType  String?  @map("login_type") @db.VarChar(32)
+  createTime DateTime @default(now()) @map("create_time") @db.DateTime
+
+  @@index([userId])
+  @@index([createTime])
+  @@map("sys_login_log")
+}

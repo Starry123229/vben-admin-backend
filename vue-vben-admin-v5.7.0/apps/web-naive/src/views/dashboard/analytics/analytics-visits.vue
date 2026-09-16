@@ -5,6 +5,8 @@ import { onMounted, ref, watch } from 'vue';
 
 import { EchartsUI, useEcharts } from '@vben/plugins/echarts';
 
+import { $t } from '@vben/locales';
+
 const props = defineProps<{
   trendData?: { month: string; count: number }[];
 }>();
@@ -51,7 +53,7 @@ function renderChart() {
       trigger: 'axis',
     },
     xAxis: {
-      data: months.length > 0 ? months : ['暂无数据'],
+      data: months.length > 0 ? months : [$t('page.dashboard.noData')],
       type: 'category',
     },
     yAxis: {

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h, onMounted, ref } from 'vue';
+import { computed, h, onMounted, ref } from 'vue';
 import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
@@ -34,11 +34,11 @@ const searchForm = ref({
 const detailModalVisible = ref(false);
 const detailData = ref<any>({});
 
-const operationOptions = [
-  { label: '新增', value: 'CREATE' },
-  { label: '修改', value: 'UPDATE' },
-  { label: '删除', value: 'DELETE' },
-];
+const operationOptions = computed(() => [
+  { label: $t('page.auditLog.create'), value: 'CREATE' },
+  { label: $t('page.auditLog.update'), value: 'UPDATE' },
+  { label: $t('page.auditLog.delete'), value: 'DELETE' },
+]);
 
 const columns = [
   { title: 'ID', key: 'id', width: 80 },

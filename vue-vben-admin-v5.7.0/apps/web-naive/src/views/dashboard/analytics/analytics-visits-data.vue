@@ -5,6 +5,8 @@ import { onMounted, ref, watch } from 'vue';
 
 import { EchartsUI, useEcharts } from '@vben/plugins/echarts';
 
+import { $t } from '@vben/locales';
+
 const props = defineProps<{
   roleData?: { name: string; value: number }[];
 }>();
@@ -28,12 +30,12 @@ function renderChart() {
   renderEcharts({
     legend: {
       bottom: 0,
-      data: data.length > 0 ? ['角色'] : [],
+      data: data.length > 0 ? [$t('page.dashboard.role')] : [],
     },
     radar: {
       indicator: data.length > 0
         ? data.map((d) => ({ name: d.name }))
-        : [{ name: '暂无数据' }],
+        : [{ name: $t('page.dashboard.noData') }],
       radius: '60%',
       splitNumber: 8,
     },
@@ -51,7 +53,7 @@ function renderChart() {
             itemStyle: {
               color: '#b6a2de',
             },
-            name: '角色',
+            name: $t('page.dashboard.role'),
             value: data.map((d) => d.value),
           },
         ],

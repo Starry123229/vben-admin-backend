@@ -46,11 +46,11 @@ const formState = ref<any>({});
 const saving = ref(false);
 
 const columns = [
-  { title: $t('page.dict.dictName'), dataIndex: 'name', width: 150 },
-  { title: $t('page.dict.dictType'), dataIndex: 'code', width: 200 },
-  { title: $t('page.common.remark'), dataIndex: 'remark', ellipsis: true, width: 200 },
+  { title: () => $t('page.dict.dictName'), dataIndex: 'name', width: 150 },
+  { title: () => $t('page.dict.dictType'), dataIndex: 'code', width: 200 },
+  { title: () => $t('page.common.remark'), dataIndex: 'remark', ellipsis: true, width: 200 },
   {
-    title: $t('page.common.status'),
+    title: () => $t('page.common.status'),
     dataIndex: 'status',
     width: 80,
     customRender: ({ record }: any) => {
@@ -59,8 +59,8 @@ const columns = [
         : h(Tag, { color: 'red' }, () => $t('page.common.disable'));
     },
   },
-  { title: $t('page.common.createTime'), dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
-  { title: $t('page.common.action'), key: 'action', width: 200, fixed: 'right' },
+  { title: () => $t('page.common.createTime'), dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: () => $t('page.common.action'), key: 'action', width: 200, fixed: 'right' },
 ];
 
 async function loadData() {

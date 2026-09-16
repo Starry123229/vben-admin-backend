@@ -493,10 +493,10 @@ loadData();
         :data-source="tasksData"
         :pagination="false"
         :columns="[
-          { title: $t('page.workflow.currentStep'), dataIndex: 'step', width: 60 },
-          { title: $t('page.workflow.approver'), dataIndex: 'approverName', width: 100 },
+          { title: () => $t('page.workflow.currentStep'), dataIndex: 'step', width: 60 },
+          { title: () => $t('page.workflow.approver'), dataIndex: 'approverName', width: 100 },
           {
-            title: $t('page.common.action'),
+            title: () => $t('page.common.action'),
             dataIndex: 'action',
             width: 80,
             customRender: ({ text }: any) =>
@@ -506,9 +506,9 @@ loadData();
                 () => text,
               ),
           },
-          { title: $t('page.workflow.comment'), dataIndex: 'comment', ellipsis: true },
+          { title: () => $t('page.workflow.comment'), dataIndex: 'comment', ellipsis: true },
           {
-            title: $t('page.workflow.approveTime'),
+            title: () => $t('page.workflow.approveTime'),
             dataIndex: 'approveTime',
             width: 180,
             customRender: ({ text }: any) =>

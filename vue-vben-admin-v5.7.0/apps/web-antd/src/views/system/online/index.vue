@@ -14,11 +14,11 @@ const dataSource = ref<any[]>([]);
 const searchUsername = ref('');
 
 const columns = [
-  { title: $t('page.common.userId'), dataIndex: 'userId', width: 80 },
-  { title: $t('page.common.username'), dataIndex: 'username', width: 120 },
+  { title: () => $t('page.common.userId'), dataIndex: 'userId', width: 80 },
+  { title: () => $t('page.common.username'), dataIndex: 'username', width: 120 },
   { title: 'Token', dataIndex: 'token', ellipsis: true, width: 250 },
-  { title: $t('page.common.loginTime'), dataIndex: 'loginTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
-  { title: $t('page.common.action'), key: 'action', width: 100, fixed: 'right' },
+  { title: () => $t('page.common.loginTime'), dataIndex: 'loginTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: () => $t('page.common.action'), key: 'action', width: 100, fixed: 'right' },
 ];
 
 async function loadData() {

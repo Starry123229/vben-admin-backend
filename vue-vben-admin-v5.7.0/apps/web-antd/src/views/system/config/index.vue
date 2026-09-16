@@ -19,12 +19,12 @@ const formState = ref<any>({});
 const saving = ref(false);
 
 const columns = [
-  { title: $t('page.config.configName'), dataIndex: 'name', width: 150 },
-  { title: $t('page.config.configKey'), dataIndex: 'key', width: 200 },
-  { title: $t('page.config.configValue'), dataIndex: 'value', ellipsis: true, width: 200 },
-  { title: $t('page.config.configType'), dataIndex: 'type', width: 80 },
-  { title: $t('page.common.remark'), dataIndex: 'remark', ellipsis: true, width: 200 },
-  { title: $t('page.common.action'), key: 'action', width: 150, fixed: 'right' },
+  { title: () => $t('page.config.configName'), dataIndex: 'name', width: 150 },
+  { title: () => $t('page.config.configKey'), dataIndex: 'key', width: 200 },
+  { title: () => $t('page.config.configValue'), dataIndex: 'value', ellipsis: true, width: 200 },
+  { title: () => $t('page.config.configType'), dataIndex: 'type', width: 80 },
+  { title: () => $t('page.common.remark'), dataIndex: 'remark', ellipsis: true, width: 200 },
+  { title: () => $t('page.common.action'), key: 'action', width: 150, fixed: 'right' },
 ];
 
 async function loadData() {

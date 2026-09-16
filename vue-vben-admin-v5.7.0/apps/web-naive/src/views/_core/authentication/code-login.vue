@@ -55,7 +55,7 @@ async function sendCode(values: Recordable<any>) {
   // 前置校验手机号：未填/格式错时不发请求、不启动倒计时
   const phone: string = values?.phoneNumber ?? '';
   if (!/^1\d{10}$/.test(phone)) {
-    message.warning('请先输入正确的 11 位手机号');
+    message.warning($t('authentication.mobileFormatError'));
     return;
   }
   try {
@@ -65,7 +65,7 @@ async function sendCode(values: Recordable<any>) {
       await codeLoginRef.value?.getFormApi()?.setFieldValue('code', res.mockCode);
       phoneLoginHint(values.phoneNumber, res.mockCode);
     } else {
-      message.success('验证码已发送');
+      message.success($t('authentication.codeSent'));
     }
   } catch {
     // 错误提示由请求拦截器统一处理
@@ -73,7 +73,7 @@ async function sendCode(values: Recordable<any>) {
 }
 
 function phoneLoginHint(_phone: string, _code: string) {
-  message.info(`开发模式验证码已自动填入 (${_phone})`);
+  message.info($t('authentication.mockCodeFilled', { email: _phone }));
 }
 
 /** 手机号 + 验证码登录 */

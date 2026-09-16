@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h, onMounted, ref } from 'vue';
+import { computed, h, onMounted, ref } from 'vue';
 import dayjs from 'dayjs';
 import { Page } from '@vben/common-ui';
 import {
@@ -12,6 +12,7 @@ import {
   useDialog,
   useMessage,
 } from 'naive-ui';
+import { $t } from '#/locales';
 import { clearLoginLogs, exportLoginLog, getLoginLogList } from '#/api/system/log';
 
 defineOptions({ name: 'LoginLog' });
@@ -24,18 +25,15 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const searchForm = ref({ username: '', status: undefined as number | undefined });
 
-const loginTypeMap: Record<string, string> = { account: '账号密码', phone: '手机验证码', qrcode: '扫码登录', oauth: '第三方' };
-
-const columns = [
-  { title: '登录用户', key: 'username', width: 120 },
-  { title: 'IP地址', key: 'ip', width: 140 },
-  { title: '浏览器', key: 'browser', width: 120, ellipsis: { tooltip: true } },
-  { title: '操作系统', key: 'os', width: 120, ellipsis: { tooltip: true } },
-  { title: '登录方式', key: 'loginType', width: 100, render: (row: any) => loginTypeMap[row.loginType] || row.loginType || '-' },
-  { title: '状态', key: 'status', width: 80, render: (row: any) => h(Tag, { type: row.status === 1 ? 'success' : 'error' }, { default: () => (row.status === 1 ? '成功' : '失败') }) },
-  { title: '提示消息', key: 'message', width: 200, ellipsis: { tooltip: true } },
-  { title: '登录时间', key: 'createTime', width: 180, render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' },
-];
+const columns = computed(() => [
+  { title: $t('page.log.username'), key: 'username', width: 120 },
+  { title: $t('page.log.ip'), key: 'ip', width: 140 },
+  { title: $t('page.log.browser'), key: 'browser', width: 120, ellipsis: { tooltip: true } },
+  { title: $t('page.log.os'), key: 'os', width: 120, ellipsis: { tooltip: true } },
+  { title: $t('page.log.status'), key: 'status', width: 80, render: (row: any) => h(Tag, { type: row.status === 1 ? 'success' : 'error' }, { default: () => (row.status === 1 ? $t('page.log.success') : $t('page.log.fail')) }) },
+  { title: $t('page.log.errorMsg'), key: 'message', width: 200, ellipsis: { tooltip: true } },
+  { title: $t('page.log.loginTime'), key: 'createTime', width: 180, render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' },
+]);
 
 async function loadData() {
   loading.value = true;
@@ -50,9 +48,9 @@ function handleReset() { searchForm.value = { username: '', status: undefined };
 
 function handleClear() {
   dialog.warning({
-    title: '确认清空', content: '确定要清空所有登录日志吗？',
-    positiveText: '确定', negativeText: '取消',
-    onPositiveClick: async () => { await clearLoginLogs(); message.success('登录日志已清空'); loadData(); },
+    title: $t('page.common.confirmDeleteTitle'), content: $t('page.log.clearLog') + '?',
+    positiveText: $t('page.common.confirmOk'), negativeText: $t('page.common.confirmCancel'),
+    onPositiveClick: async () => { await clearLoginLogs(); message.success($t('page.common.operationSuccess')); loadData(); },
   });
 }
 
@@ -63,9 +61,9 @@ async function handleExport() {
   exportLoading.value = true;
   try {
     await exportLoginLog(searchForm.value);
-    message.success('导出成功');
+    message.success($t('page.common.exportSuccess'));
   } catch {
-    message.error('导出失败');
+    message.error($t('page.common.exportFailed'));
   } finally { exportLoading.value = false; }
 }
 onMounted(() => loadData());
@@ -75,13 +73,13 @@ onMounted(() => loadData());
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center gap-2">
-        <Input v-model:value="searchForm.username" placeholder="登录用户" style="width: 150px" clearable />
-        <Select v-model:value="searchForm.status" placeholder="状态" style="width: 120px" clearable
-          :options="[{label:'成功',value:1},{label:'失败',value:0}]" />
-        <Button type="primary" @click="handleSearch">搜索</Button>
-        <Button @click="handleReset">重置</Button>
-        <Button type="info" :loading="exportLoading" @click="handleExport">导出Excel</Button>
-        <Button type="error" @click="handleClear">清空日志</Button>
+        <Input v-model:value="searchForm.username" :placeholder="$t('page.log.searchUsername')" style="width: 150px" clearable />
+        <Select v-model:value="searchForm.status" :placeholder="$t('page.log.searchStatus')" style="width: 120px" clearable
+          :options="[{label: $t('page.log.success'), value: 1}, {label: $t('page.log.fail'), value: 0}]" />
+        <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
+        <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
+        <Button type="info" :loading="exportLoading" @click="handleExport">{{ $t('page.common.exportExcel') }}</Button>
+        <Button type="error" @click="handleClear">{{ $t('page.log.clearLog') }}</Button>
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="1100"
         :pagination="false" :row-key="(row: any) => row.id" size="small">

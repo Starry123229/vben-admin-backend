@@ -15,18 +15,18 @@ const formState = ref<any>({});
 const saving = ref(false);
 
 const columns = [
-  { title: $t('page.job.name'), dataIndex: 'name', width: 150 },
-  { title: $t('page.job.group'), dataIndex: 'groupName', width: 100 },
-  { title: $t('page.job.invokeTarget'), dataIndex: 'invokeTarget', width: 200, ellipsis: true, customCell: () => ({ style: 'word-break: break-all;' }) },
-  { title: $t('page.job.cron'), dataIndex: 'cron', width: 150 },
+  { title: () => $t('page.job.name'), dataIndex: 'name', width: 150 },
+  { title: () => $t('page.job.group'), dataIndex: 'groupName', width: 100 },
+  { title: () => $t('page.job.invokeTarget'), dataIndex: 'invokeTarget', width: 200, ellipsis: true, customCell: () => ({ style: 'word-break: break-all;' }) },
+  { title: () => $t('page.job.cron'), dataIndex: 'cron', width: 150 },
   {
-    title: $t('page.job.status'), dataIndex: 'status', width: 80,
+    title: () => $t('page.job.status'), dataIndex: 'status', width: 80,
     customRender: ({ record }: any) => {
       return record.status === 1 ? h(Tag, { color: 'green' }, () => $t('page.job.running')) : h(Tag, { color: 'default' }, () => $t('page.job.paused'));
     },
   },
-  { title: $t('page.common.remark'), dataIndex: 'remark', ellipsis: true, width: 200 },
-  { title: $t('page.common.action'), key: 'action', width: 250, fixed: 'right' },
+  { title: () => $t('page.common.remark'), dataIndex: 'remark', ellipsis: true, width: 200 },
+  { title: () => $t('page.common.action'), key: 'action', width: 250, fixed: 'right' },
 ];
 
 async function loadData() {

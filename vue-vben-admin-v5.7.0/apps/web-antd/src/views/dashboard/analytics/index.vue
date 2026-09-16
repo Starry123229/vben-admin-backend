@@ -14,7 +14,7 @@ import {
   SvgDownloadIcon,
 } from '@vben/icons';
 
-import { markRaw, onMounted, ref } from 'vue';
+import { computed, markRaw, onMounted, ref } from 'vue';
 
 import { $t } from '@vben/locales';
 
@@ -32,38 +32,46 @@ import AnalyticsVisitsSales from './analytics-visits-sales.vue';
 import AnalyticsVisitsSource from './analytics-visits-source.vue';
 import AnalyticsVisits from './analytics-visits.vue';
 
-const overviewItems = ref<AnalysisOverviewItem[]>([
+const overviewData = ref({
+  totalUsers: 0,
+  activeUsers: 0,
+  totalRoles: 0,
+  totalDepts: 0,
+  totalMenus: 0,
+});
+
+const overviewItems = computed<AnalysisOverviewItem[]>(() => [
   {
     icon: markRaw(SvgCardIcon),
     title: $t('page.dashboard.userCount'),
     totalTitle: $t('page.dashboard.totalUserCount'),
-    totalValue: 0,
-    value: 0,
+    totalValue: overviewData.value.totalUsers,
+    value: overviewData.value.activeUsers,
   },
   {
     icon: markRaw(SvgCakeIcon),
     title: $t('page.dashboard.roleCount'),
     totalTitle: $t('page.dashboard.totalRoleCount'),
-    totalValue: 0,
-    value: 0,
+    totalValue: overviewData.value.totalRoles,
+    value: overviewData.value.totalRoles,
   },
   {
     icon: markRaw(SvgDownloadIcon),
     title: $t('page.dashboard.deptCount'),
     totalTitle: $t('page.dashboard.totalDeptCount'),
-    totalValue: 0,
-    value: 0,
+    totalValue: overviewData.value.totalDepts,
+    value: overviewData.value.totalDepts,
   },
   {
     icon: markRaw(SvgBellIcon),
     title: $t('page.dashboard.menuCount'),
     totalTitle: $t('page.dashboard.totalMenuCount'),
-    totalValue: 0,
-    value: 0,
+    totalValue: overviewData.value.totalMenus,
+    value: overviewData.value.totalMenus,
   },
 ]);
 
-const chartTabs: TabOption[] = [
+const chartTabs = computed<TabOption[]>(() => [
   {
     label: $t('page.dashboard.trafficTrends'),
     value: 'trends',
@@ -72,7 +80,7 @@ const chartTabs: TabOption[] = [
     label: $t('page.dashboard.monthlyVisits'),
     value: 'visits',
   },
-];
+]);
 
 // 用户增长趋势数据
 const trendData = ref<{ month: string; count: number }[]>([]);
@@ -93,36 +101,13 @@ onMounted(async () => {
       getBrowserDistributionApi(),
     ]);
 
-    overviewItems.value = [
-      {
-        icon: markRaw(SvgCardIcon),
-        title: $t('page.dashboard.userCount'),
-        totalTitle: $t('page.dashboard.totalUserCount'),
-        totalValue: Number(overview.totalUsers) || 0,
-        value: Number(overview.activeUsers) || 0,
-      },
-      {
-        icon: markRaw(SvgCakeIcon),
-        title: $t('page.dashboard.roleCount'),
-        totalTitle: $t('page.dashboard.totalRoleCount'),
-        totalValue: Number(overview.totalRoles) || 0,
-        value: Number(overview.totalRoles) || 0,
-      },
-      {
-        icon: markRaw(SvgDownloadIcon),
-        title: $t('page.dashboard.deptCount'),
-        totalTitle: $t('page.dashboard.totalDeptCount'),
-        totalValue: Number(overview.totalDepts) || 0,
-        value: Number(overview.totalDepts) || 0,
-      },
-      {
-        icon: markRaw(SvgBellIcon),
-        title: $t('page.dashboard.menuCount'),
-        totalTitle: $t('page.dashboard.totalMenuCount'),
-        totalValue: Number(overview.totalMenus) || 0,
-        value: Number(overview.totalMenus) || 0,
-      },
-    ];
+    overviewData.value = {
+      totalUsers: Number(overview.totalUsers) || 0,
+      activeUsers: Number(overview.activeUsers) || 0,
+      totalRoles: Number(overview.totalRoles) || 0,
+      totalDepts: Number(overview.totalDepts) || 0,
+      totalMenus: Number(overview.totalMenus) || 0,
+    };
 
     trendData.value = trends.map((item) => ({
       month: item.month,

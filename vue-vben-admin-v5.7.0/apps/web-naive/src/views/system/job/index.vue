@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h, onMounted, ref } from 'vue';
+import { computed, h, onMounted, ref } from 'vue';
 import { Page } from '@vben/common-ui';
 import {
   NButton as Button,
@@ -11,6 +11,7 @@ import {
   useDialog,
   useMessage,
 } from 'naive-ui';
+import { $t } from '#/locales';
 import { createJob, deleteJob, getJobList, toggleJob, updateJob } from '#/api/system/job';
 
 defineOptions({ name: 'SysJob' });
@@ -23,32 +24,32 @@ const modalTitle = ref('');
 const formState = ref<any>({});
 const saving = ref(false);
 
-const columns = [
-  { title: '任务名称', key: 'name', width: 150 },
-  { title: '分组', key: 'groupName', width: 100 },
-  { title: '调用目标', key: 'invokeTarget', width: 200 },
-  { title: 'Cron表达式', key: 'cron', width: 150 },
+const columns = computed(() => [
+  { title: $t('page.job.name'), key: 'name', width: 150 },
+  { title: $t('page.job.group'), key: 'groupName', width: 100 },
+  { title: $t('page.job.invokeTarget'), key: 'invokeTarget', width: 200 },
+  { title: $t('page.job.cron'), key: 'cron', width: 150 },
   {
-    title: '状态',
+    title: $t('page.job.status'),
     key: 'status',
     width: 80,
     render: (row: any) =>
-      h(Tag, { type: row.status === 1 ? 'success' : 'default' }, { default: () => (row.status === 1 ? '运行' : '暂停') }),
+      h(Tag, { type: row.status === 1 ? 'success' : 'default' }, { default: () => (row.status === 1 ? $t('page.job.running') : $t('page.job.paused')) }),
   },
-  { title: '备注', key: 'remark', ellipsis: { tooltip: true }, width: 200 },
+  { title: $t('page.common.remark'), key: 'remark', ellipsis: { tooltip: true }, width: 200 },
   {
-    title: '操作',
+    title: $t('page.common.action'),
     key: 'actions',
     width: 200,
     fixed: 'right' as const,
     render: (row: any) =>
       h('div', { class: 'flex items-center gap-1' }, [
-        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleToggle(row) }, { default: () => (row.status === 1 ? '暂停' : '启动') }),
-        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleEdit(row) }, { default: () => '编辑' }),
-        h(Button, { type: 'error', text: true, size: 'small', onClick: () => handleDelete(row) }, { default: () => '删除' }),
+        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleToggle(row) }, { default: () => (row.status === 1 ? $t('page.job.pause') : $t('page.job.resume')) }),
+        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleEdit(row) }, { default: () => $t('page.common.edit') }),
+        h(Button, { type: 'error', text: true, size: 'small', onClick: () => handleDelete(row) }, { default: () => $t('page.common.delete') }),
       ]),
   },
-];
+]);
 
 async function loadData() {
   loading.value = true;
@@ -56,29 +57,29 @@ async function loadData() {
   finally { loading.value = false; }
 }
 
-function handleAdd() { modalTitle.value = '新增任务'; formState.value = { groupName: 'DEFAULT', status: 0 }; modalVisible.value = true; }
-function handleEdit(record: any) { modalTitle.value = '编辑任务'; formState.value = { ...record }; modalVisible.value = true; }
+function handleAdd() { modalTitle.value = $t('page.common.addJob'); formState.value = { groupName: 'DEFAULT', status: 0 }; modalVisible.value = true; }
+function handleEdit(record: any) { modalTitle.value = $t('page.common.editJob'); formState.value = { ...record }; modalVisible.value = true; }
 
 async function handleSave() {
   saving.value = true;
   try {
     if (formState.value.id) { await updateJob(formState.value.id, formState.value); }
     else { await createJob(formState.value); }
-    message.success('保存成功'); modalVisible.value = false; loadData();
+    message.success($t('page.common.saveSuccess')); modalVisible.value = false; loadData();
   } finally { saving.value = false; }
 }
 
 function handleDelete(record: any) {
   dialog.warning({
-    title: '确认删除', content: `确定要删除任务「${record.name}」吗？`,
-    positiveText: '确定', negativeText: '取消',
-    onPositiveClick: async () => { await deleteJob(record.id); message.success('删除成功'); loadData(); },
+    title: $t('page.common.confirmDeleteTitle'), content: $t('page.common.deleteJobConfirm', { name: record.name }),
+    positiveText: $t('page.common.confirmOk'), negativeText: $t('page.common.confirmCancel'),
+    onPositiveClick: async () => { await deleteJob(record.id); message.success($t('page.common.deleteSuccess')); loadData(); },
   });
 }
 
 async function handleToggle(record: any) {
   await toggleJob(record.id);
-  message.success(record.status === 1 ? '已暂停' : '已启动');
+  message.success(record.status === 1 ? $t('page.job.pausedMsg') : $t('page.job.startedMsg'));
   loadData();
 }
 
@@ -89,23 +90,23 @@ onMounted(() => loadData());
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4">
-        <Button type="primary" @click="handleAdd">新增任务</Button>
+        <Button type="primary" @click="handleAdd">{{ $t('page.common.addJob') }}</Button>
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="900"
         :pagination="false" :row-key="(row: any) => row.id" size="small">
       </DataTable>
       <Modal v-model:show="modalVisible" preset="card" :title="modalTitle" style="width: 520px">
         <div class="space-y-3 py-4">
-          <div><label class="mb-1 block text-sm">任务名称</label><Input v-model:value="formState.name" placeholder="请输入任务名称" /></div>
-          <div><label class="mb-1 block text-sm">分组</label><Input v-model:value="formState.groupName" placeholder="如 DEFAULT" /></div>
-          <div><label class="mb-1 block text-sm">调用目标</label><Input v-model:value="formState.invokeTarget" placeholder="如 beanName.method" /></div>
-          <div><label class="mb-1 block text-sm">Cron表达式</label><Input v-model:value="formState.cron" placeholder="如 0 0 * * * ?" /></div>
-          <div><label class="mb-1 block text-sm">备注</label><Input v-model:value="formState.remark" type="textarea" :rows="2" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.job.name') }}</label><Input v-model:value="formState.name" :placeholder="$t('page.common.input')" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.job.group') }}</label><Input v-model:value="formState.groupName" placeholder="DEFAULT" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.job.invokeTarget') }}</label><Input v-model:value="formState.invokeTarget" placeholder="beanName.method" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.job.cron') }}</label><Input v-model:value="formState.cron" placeholder="0 0 * * * ?" /></div>
+          <div><label class="mb-1 block text-sm">{{ $t('page.common.remark') }}</label><Input v-model:value="formState.remark" type="textarea" :rows="2" /></div>
         </div>
         <template #footer>
           <Space>
-            <Button @click="modalVisible = false">取消</Button>
-            <Button type="primary" :loading="saving" @click="handleSave">确定</Button>
+            <Button @click="modalVisible = false">{{ $t('page.common.cancel') }}</Button>
+            <Button type="primary" :loading="saving" @click="handleSave">{{ $t('page.common.confirm') }}</Button>
           </Space>
         </template>
       </Modal>

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { h, onMounted, ref } from 'vue';
+import { computed, h, onMounted, ref } from 'vue';
 import dayjs from 'dayjs';
 import { useRouter } from 'vue-router';
 import { Page } from '@vben/common-ui';
@@ -13,6 +13,7 @@ import {
   useDialog,
   useMessage,
 } from 'naive-ui';
+import { $t } from '#/locales';
 import { deleteDictType, getDictTypeList } from '#/api/system/dict';
 
 defineOptions({ name: 'DictType' });
@@ -26,30 +27,30 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const searchForm = ref({ name: '', code: '', status: undefined as number | undefined });
 
-const columns = [
-  { title: '字典名称', key: 'name', width: 150 },
-  { title: '字典编码', key: 'code', width: 200 },
-  { title: '备注', key: 'remark', ellipsis: { tooltip: true }, width: 200 },
+const columns = computed(() => [
+  { title: $t('page.dict.dictName'), key: 'name', width: 150 },
+  { title: $t('page.dict.dictType'), key: 'code', width: 200 },
+  { title: $t('page.common.remark'), key: 'remark', ellipsis: { tooltip: true }, width: 200 },
   {
-    title: '状态',
+    title: $t('page.common.status'),
     key: 'status',
     width: 80,
     render: (row: any) =>
-      h(Tag, { type: row.status === 1 ? 'success' : 'error' }, { default: () => (row.status === 1 ? '启用' : '停用') }),
+      h(Tag, { type: row.status === 1 ? 'success' : 'error' }, { default: () => (row.status === 1 ? $t('page.common.enable') : $t('page.common.disable')) }),
   },
-  { title: '创建时间', key: 'createTime', width: 180, render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: $t('page.common.createTime'), key: 'createTime', width: 180, render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' },
   {
-    title: '操作',
+    title: $t('page.common.action'),
     key: 'actions',
     width: 150,
-    fixed: 'right',
+    fixed: 'right' as const,
     render: (row: any) =>
       h('div', { class: 'flex items-center gap-1' }, [
-        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleEdit(row) }, { default: () => '编辑' }),
-        h(Button, { type: 'error', text: true, size: 'small', onClick: () => handleDelete(row) }, { default: () => '删除' }),
+        h(Button, { type: 'primary', text: true, size: 'small', onClick: () => handleEdit(row) }, { default: () => $t('page.common.edit') }),
+        h(Button, { type: 'error', text: true, size: 'small', onClick: () => handleDelete(row) }, { default: () => $t('page.common.delete') }),
       ]),
   },
-];
+]);
 
 async function loadData() {
   loading.value = true;
@@ -65,9 +66,9 @@ function handleEdit(record: any) { router.push(`/system/tools/dict/data/${record
 
 function handleDelete(record: any) {
   dialog.warning({
-    title: '确认删除', content: `确定要删除字典「${record.name}」及其所有数据吗？`,
-    positiveText: '确定', negativeText: '取消',
-    onPositiveClick: async () => { await deleteDictType(record.id); message.success('删除成功'); loadData(); },
+    title: $t('page.common.confirmDeleteTitle'), content: $t('page.common.deleteDictConfirm', { name: record.name }),
+    positiveText: $t('page.common.confirmOk'), negativeText: $t('page.common.confirmCancel'),
+    onPositiveClick: async () => { await deleteDictType(record.id); message.success($t('page.common.deleteSuccess')); loadData(); },
   });
 }
 
@@ -79,12 +80,12 @@ onMounted(() => loadData());
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center gap-2">
-        <Input v-model:value="searchForm.name" placeholder="字典名称" style="width: 150px" clearable />
-        <Input v-model:value="searchForm.code" placeholder="字典编码" style="width: 150px" clearable />
-        <Select v-model:value="searchForm.status" placeholder="状态" style="width: 120px" clearable
-          :options="[{label:'启用',value:1},{label:'停用',value:0}]" />
-        <Button type="primary" @click="handleSearch">搜索</Button>
-        <Button @click="handleReset">重置</Button>
+        <Input v-model:value="searchForm.name" :placeholder="$t('page.dict.dictName')" style="width: 150px" clearable />
+        <Input v-model:value="searchForm.code" :placeholder="$t('page.dict.dictType')" style="width: 150px" clearable />
+        <Select v-model:value="searchForm.status" :placeholder="$t('page.common.status')" style="width: 120px" clearable
+          :options="[{label: $t('page.common.enable'), value: 1}, {label: $t('page.common.disable'), value: 0}]" />
+        <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
+        <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
       </div>
       <DataTable :loading="loading" :data="dataSource" :columns="columns" :scroll-x="900"
         :pagination="false" :row-key="(row: any) => row.id" size="small">

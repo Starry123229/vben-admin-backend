@@ -39,11 +39,11 @@ const formState = ref<any>({});
 const saving = ref(false);
 
 const columns = [
-  { title: $t('page.dict.dictLabel'), dataIndex: 'label', width: 150 },
-  { title: $t('page.dict.dictValue'), dataIndex: 'value', width: 150 },
-  { title: $t('page.dict.dictSort'), dataIndex: 'sort', width: 80 },
+  { title: () => $t('page.dict.dictLabel'), dataIndex: 'label', width: 150 },
+  { title: () => $t('page.dict.dictValue'), dataIndex: 'value', width: 150 },
+  { title: () => $t('page.dict.dictSort'), dataIndex: 'sort', width: 80 },
   {
-    title: $t('page.common.status'),
+    title: () => $t('page.common.status'),
     dataIndex: 'status',
     width: 80,
     customRender: ({ record }: any) => {
@@ -52,9 +52,9 @@ const columns = [
         : h(Tag, { color: 'red' }, () => $t('page.common.disable'));
     },
   },
-  { title: $t('page.dict.cssClass'), dataIndex: 'cssClass', width: 100 },
-  { title: $t('page.common.remark'), dataIndex: 'remark', ellipsis: true, width: 200 },
-  { title: $t('page.common.action'), key: 'action', width: 150, fixed: 'right' },
+  { title: () => $t('page.dict.cssClass'), dataIndex: 'cssClass', width: 100 },
+  { title: () => $t('page.common.remark'), dataIndex: 'remark', ellipsis: true, width: 200 },
+  { title: () => $t('page.common.action'), key: 'action', width: 150, fixed: 'right' },
 ];
 
 async function loadData() {

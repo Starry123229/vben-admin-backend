@@ -5,6 +5,8 @@ import { onMounted, ref, watch } from 'vue';
 
 import { EchartsUI, useEcharts } from '@vben/plugins/echarts';
 
+import { $t } from '@vben/locales';
+
 const props = defineProps<{
   deptData?: { name: string; value: number }[];
 }>();
@@ -37,8 +39,8 @@ function renderChart() {
         color: ['#5ab1ef', '#b6a2de', '#67e0e3', '#2ec7c9', '#fa6e86', '#ff9f7f'],
         data: data.length > 0
           ? data.toSorted((a, b) => a.value - b.value)
-          : [{ name: '暂无数据', value: 1 }],
-        name: '部门占比',
+          : [{ name: $t('page.dashboard.noData'), value: 1 }],
+        name: $t('page.dashboard.deptProportion'),
         radius: '80%',
         roseType: 'radius',
         type: 'pie',

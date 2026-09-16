@@ -22,13 +22,13 @@ const searchForm = ref({
 });
 
 const columns = computed(() => [
-  { title: $t('page.log.username'), dataIndex: 'username', width: 120 },
-  { title: $t('page.log.ip'), dataIndex: 'ip', width: 140 },
-  { title: $t('page.log.location'), dataIndex: 'location', width: 120 },
-  { title: $t('page.log.browser'), dataIndex: 'browser', width: 120, ellipsis: true },
-  { title: $t('page.log.os'), dataIndex: 'os', width: 120, ellipsis: true },
+  { title: () => $t('page.log.username'), dataIndex: 'username', width: 120 },
+  { title: () => $t('page.log.ip'), dataIndex: 'ip', width: 140 },
+  { title: () => $t('page.log.location'), dataIndex: 'location', width: 120 },
+  { title: () => $t('page.log.browser'), dataIndex: 'browser', width: 120, ellipsis: true },
+  { title: () => $t('page.log.os'), dataIndex: 'os', width: 120, ellipsis: true },
   {
-    title: $t('page.log.status'),
+    title: () => $t('page.log.status'),
     dataIndex: 'status',
     width: 80,
     customRender: ({ record }: any) => {
@@ -37,8 +37,8 @@ const columns = computed(() => [
         : h(Tag, { color: 'red' }, () => $t('page.log.fail'));
     },
   },
-  { title: $t('page.log.errorMsg'), dataIndex: 'message', width: 200, ellipsis: true },
-  { title: $t('page.log.loginTime'), dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: () => $t('page.log.errorMsg'), dataIndex: 'message', width: 200, ellipsis: true },
+  { title: () => $t('page.log.loginTime'), dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
 ]);
 
 async function loadData() {

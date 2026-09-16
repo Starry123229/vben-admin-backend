@@ -23,15 +23,15 @@ const searchForm = ref({
 });
 
 const columns = computed(() => [
-  { title: $t('page.log.username'), dataIndex: 'username', width: 120 },
-  { title: $t('page.log.module'), dataIndex: 'module', width: 100 },
-  { title: $t('page.log.description'), dataIndex: 'description', width: 150 },
-  { title: $t('page.log.requestMethod'), dataIndex: 'requestMethod', width: 80 },
-  { title: $t('page.log.requestUrl'), dataIndex: 'requestUrl', ellipsis: true, width: 200 },
-  { title: $t('page.log.ip'), dataIndex: 'ip', width: 120 },
-  { title: $t('page.log.costTime'), dataIndex: 'costTime', width: 90 },
+  { title: () => $t('page.log.username'), dataIndex: 'username', width: 120 },
+  { title: () => $t('page.log.module'), dataIndex: 'module', width: 100 },
+  { title: () => $t('page.log.description'), dataIndex: 'description', width: 150 },
+  { title: () => $t('page.log.requestMethod'), dataIndex: 'requestMethod', width: 80 },
+  { title: () => $t('page.log.requestUrl'), dataIndex: 'requestUrl', ellipsis: true, width: 200 },
+  { title: () => $t('page.log.ip'), dataIndex: 'ip', width: 120 },
+  { title: () => $t('page.log.costTime'), dataIndex: 'costTime', width: 90 },
   {
-    title: $t('page.log.status'),
+    title: () => $t('page.log.status'),
     dataIndex: 'status',
     width: 80,
     customRender: ({ record }: any) => {
@@ -40,8 +40,8 @@ const columns = computed(() => [
         : h(Tag, { color: 'red' }, () => $t('page.log.fail'));
     },
   },
-  { title: $t('page.log.errorMsg'), dataIndex: 'errorMsg', ellipsis: true, width: 200 },
-  { title: $t('page.common.createTime'), dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
+  { title: () => $t('page.log.errorMsg'), dataIndex: 'errorMsg', ellipsis: true, width: 200 },
+  { title: () => $t('page.common.createTime'), dataIndex: 'createTime', width: 180, customRender: ({ text }: any) => text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-' },
 ]);
 
 async function loadData() {

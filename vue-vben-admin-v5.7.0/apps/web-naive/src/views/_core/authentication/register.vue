@@ -94,9 +94,9 @@ const formSchema = computed((): VbenFormSchema[] => {
 
 function showTerms() {
   dialog.info({
-    title: '隐私政策 & 条款',
-    content: '本系统为演示项目：注册即表示同意仅将本系统用于学习与测试，请勿提交任何真实敏感数据。',
-    positiveText: '知道了',
+    title: $t('authentication.termsTitle'),
+    content: $t('authentication.termsContent'),
+    positiveText: $t('authentication.termsConfirm'),
   });
 }
 

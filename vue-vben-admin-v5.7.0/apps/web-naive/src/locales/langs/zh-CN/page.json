@@ -48,7 +48,11 @@
     "roleDistribution": "角色分布",
     "deptDistribution": "部门分布",
     "browserDistribution": "浏览器分布",
-    "loadDashboardFailed": "加载仪表盘数据失败"
+    "loadDashboardFailed": "加载仪表盘数据失败",
+    "noData": "暂无数据",
+    "role": "角色",
+    "deptProportion": "部门占比",
+    "deptDistLabel": "部门分布"
   },
   "systemMonitor": {
     "title": "系统监控"

@@ -48,7 +48,11 @@
     "roleDistribution": "Role Distribution",
     "deptDistribution": "Dept Distribution",
     "browserDistribution": "Browser Distribution",
-    "loadDashboardFailed": "Failed to load dashboard data"
+    "loadDashboardFailed": "Failed to load dashboard data",
+    "noData": "No Data",
+    "role": "Role",
+    "deptProportion": "Dept Proportion",
+    "deptDistLabel": "Dept Distribution"
   },
   "systemMonitor": {
     "title": "System Monitor"

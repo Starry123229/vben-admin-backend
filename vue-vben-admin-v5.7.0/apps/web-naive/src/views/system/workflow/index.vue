@@ -44,11 +44,11 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const filterStatus = ref<string | undefined>(undefined);
 
-const statusMap: Record<string, { type: string; label: string }> = {
-  pending: { type: 'info', label: '待审批' },
-  approved: { type: 'success', label: '已通过' },
-  rejected: { type: 'error', label: '已拒绝' },
-  cancelled: { type: 'default', label: '已取消' },
+const statusMap: Record<string, { type: string; label: () => string }> = {
+  pending: { type: 'info', label: () => $t('page.workflow.pending') },
+  approved: { type: 'success', label: () => $t('page.workflow.approved') },
+  rejected: { type: 'error', label: () => $t('page.workflow.rejected') },
+  cancelled: { type: 'default', label: () => $t('page.workflow.cancelled') },
 };
 
 const instanceColumns = [
@@ -67,8 +67,8 @@ const instanceColumns = [
     key: 'status',
     width: 100,
     render: (row: any) => {
-      const s = statusMap[row.status] || { type: 'default', label: row.status };
-      return h(Tag, { type: s.type as any }, { default: () => s.label });
+      const s = statusMap[row.status] || { type: 'default', label: () => row.status };
+      return h(Tag, { type: s.type as any }, { default: () => s.label() });
     },
   },
   {
@@ -175,17 +175,17 @@ async function showTasksModal(record: any) {
 }
 
 const taskColumns = [
-  { title: $t('page.workflow.currentStep'), key: 'step', width: 60 },
-  { title: $t('page.workflow.approver'), key: 'approverName', width: 100 },
+  { title: () => $t('page.workflow.currentStep'), key: 'step', width: 60 },
+  { title: () => $t('page.workflow.approver'), key: 'approverName', width: 100 },
   {
-    title: $t('page.common.action'),
+    title: () => $t('page.common.action'),
     key: 'action',
     width: 80,
     render: (row: any) => h(Tag, { type: row.action === 'approve' ? 'success' : 'error' }, { default: () => row.action }),
   },
-  { title: $t('page.workflow.comment'), key: 'comment', ellipsis: { tooltip: true } },
+  { title: () => $t('page.workflow.comment'), key: 'comment', ellipsis: { tooltip: true } },
   {
-    title: $t('page.workflow.approveTime'),
+    title: () => $t('page.workflow.approveTime'),
     key: 'approveTime',
     width: 180,
     render: (row: any) => row.approveTime ? dayjs(row.approveTime).format('YYYY-MM-DD HH:mm:ss') : '-',
