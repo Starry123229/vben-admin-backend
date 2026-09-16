@@ -1,10 +1,18 @@
 <script lang="ts" setup>
-import { h, ref } from 'vue';
+import { h, onMounted, ref } from 'vue';
 import dayjs from 'dayjs';
 
 import { Page } from '@vben/common-ui';
 
-import { Button, Input, Modal, Select, Space, Table, Tag } from 'naive-ui';
+import {
+  NButton as Button,
+  NDataTable as DataTable,
+  NInput as Input,
+  NModal as Modal,
+  NSelect as Select,
+  NSpace as Space,
+  NTag as Tag,
+} from 'naive-ui';
 
 import { $t } from '#/locales';
 import { getAuditLogListApi } from '#/api/system/audit-log';
@@ -26,51 +34,58 @@ const searchForm = ref({
 const detailModalVisible = ref(false);
 const detailData = ref<any>({});
 
+const operationOptions = [
+  { label: '新增', value: 'CREATE' },
+  { label: '修改', value: 'UPDATE' },
+  { label: '删除', value: 'DELETE' },
+];
+
 const columns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.auditLog.username'), dataIndex: 'username', width: 120 },
-  { title: () => $t('page.auditLog.module'), dataIndex: 'module', width: 120 },
+  { title: 'ID', key: 'id', width: 80 },
+  { title: () => $t('page.auditLog.username'), key: 'username', width: 120 },
+  { title: () => $t('page.auditLog.module'), key: 'module', width: 120 },
   {
     title: () => $t('page.auditLog.operation'),
-    dataIndex: 'operation',
+    key: 'operation',
     width: 100,
-    customRender: ({ text }: any) => {
+    render(row: any) {
       const colorMap: Record<string, string> = {
-        CREATE: 'green',
-        UPDATE: 'blue',
-        DELETE: 'red',
+        CREATE: 'success',
+        UPDATE: 'info',
+        DELETE: 'error',
       };
-      return h(
-        Tag,
-        { color: colorMap[text] || 'default' },
-        () => text || '-',
-      );
+      const type = colorMap[row.operation] || 'default';
+      return h(Tag, { type }, { default: () => row.operation || '-' });
     },
   },
-  { title: () => $t('page.auditLog.entityType'), dataIndex: 'entityType', ellipsis: true, width: 150 },
-  { title: () => $t('page.auditLog.entityId'), dataIndex: 'entityId', width: 100 },
-  { title: () => $t('page.auditLog.changedFields'), dataIndex: 'changedFields', ellipsis: true, width: 250 },
-  { title: () => $t('page.auditLog.ip'), dataIndex: 'ip', width: 120 },
+  { title: () => $t('page.auditLog.entityType'), key: 'entityType', ellipsis: { tooltip: true }, width: 150 },
+  { title: () => $t('page.auditLog.entityId'), key: 'entityId', width: 100 },
+  { title: () => $t('page.auditLog.changedFields'), key: 'changedFields', ellipsis: { tooltip: true }, width: 250 },
+  { title: () => $t('page.auditLog.ip'), key: 'ip', width: 120 },
   {
     title: () => $t('page.auditLog.createTime'),
-    dataIndex: 'createTime',
+    key: 'createTime',
     width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
+    render(row: any) {
+      return row.createTime
+        ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss')
+        : '-';
+    },
   },
   {
     title: () => $t('page.common.action'),
     key: 'action',
     width: 80,
-    customRender: ({ record }: any) => {
+    render(row: any) {
       return h(
         Button,
         {
           size: 'small',
-          type: 'link',
-          onClick: () => showDetail(record),
+          type: 'primary',
+          quaternary: true,
+          onClick: () => showDetail(row),
         },
-        () => $t('page.attachment.detail'),
+        { default: () => $t('page.attachment.detail') },
       );
     },
   },
@@ -107,13 +122,18 @@ function handleReset() {
   loadData();
 }
 
-function handlePageChange(page: number, size: number) {
+function handlePageChange(page: number) {
   currentPage.value = page;
-  pageSize.value = size;
   loadData();
 }
 
-loadData();
+function handlePageSizeChange(size: number) {
+  pageSize.value = size;
+  currentPage.value = 1;
+  loadData();
+}
+
+onMounted(() => loadData());
 </script>
 
 <template>
@@ -124,26 +144,22 @@ loadData();
           v-model:value="searchForm.module"
           :placeholder="$t('page.auditLog.searchModule')"
           style="width: 150px"
-          allow-clear
-          @press-enter="handleSearch"
+          clearable
+          @keyup.enter="handleSearch"
         />
         <Input
           v-model:value="searchForm.entityType"
           :placeholder="$t('page.auditLog.searchEntityType')"
           style="width: 150px"
-          allow-clear
-          @press-enter="handleSearch"
+          clearable
+          @keyup.enter="handleSearch"
         />
         <Select
           v-model:value="searchForm.operation"
           :placeholder="$t('page.auditLog.searchOperation')"
           style="width: 120px"
-          allow-clear
-          :options="[
-            { label: $t('page.auditLog.create'), value: 'CREATE' },
-            { label: $t('page.auditLog.update'), value: 'UPDATE' },
-            { label: $t('page.auditLog.delete'), value: 'DELETE' },
-          ]"
+          clearable
+          :options="operationOptions"
         />
         <Space>
           <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
@@ -151,56 +167,57 @@ loadData();
         </Space>
       </div>
 
-      <Table
+      <DataTable
         :loading="loading"
-        :data-source="dataSource"
+        :data="dataSource"
         :columns="columns"
+        :scroll-x="1300"
         :pagination="{
-          current: currentPage,
+          page: currentPage,
           pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
+          itemCount: total,
+          showSizePicker: true,
+          pageSizes: [10, 20, 50],
           onChange: handlePageChange,
+          onUpdatePageSize: handlePageSizeChange,
         }"
-        :scroll="{ x: 1300 }"
-        row-key="id"
+        :row-key="(row: any) => row.id"
         size="small"
       />
-    </div>
 
-    <!-- 详情弹窗 -->
-    <Modal
-      v-model:open="detailModalVisible"
-      :title="$t('page.auditLog.detailTitle')"
-      :footer="null"
-      width="700px"
-    >
-      <div class="space-y-3">
-        <div><strong>ID:</strong> {{ detailData.id }}</div>
-        <div><strong>{{ $t('page.auditLog.username') }}:</strong> {{ detailData.username }} (ID: {{ detailData.userId }})</div>
-        <div><strong>{{ $t('page.auditLog.module') }}:</strong> {{ detailData.module }}</div>
-        <div><strong>{{ $t('page.auditLog.operation') }}:</strong> {{ detailData.operation }}</div>
-        <div><strong>{{ $t('page.auditLog.entityType') }}:</strong> {{ detailData.entityType }}</div>
-        <div><strong>{{ $t('page.auditLog.entityId') }}:</strong> {{ detailData.entityId }}</div>
-        <div><strong>{{ $t('page.auditLog.ip') }}:</strong> {{ detailData.ip }}</div>
-        <div>
-          <strong>{{ $t('page.auditLog.createTime') }}:</strong>
-          {{ detailData.createTime ? dayjs(detailData.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
+      <!-- 详情弹窗 -->
+      <Modal
+        v-model:show="detailModalVisible"
+        :title="$t('page.auditLog.detailTitle')"
+        preset="card"
+        style="width: 700px"
+      >
+        <div class="space-y-3">
+          <div><strong>ID:</strong> {{ detailData.id }}</div>
+          <div><strong>{{ $t('page.auditLog.username') }}:</strong> {{ detailData.username }} (ID: {{ detailData.userId }})</div>
+          <div><strong>{{ $t('page.auditLog.module') }}:</strong> {{ detailData.module }}</div>
+          <div><strong>{{ $t('page.auditLog.operation') }}:</strong> {{ detailData.operation }}</div>
+          <div><strong>{{ $t('page.auditLog.entityType') }}:</strong> {{ detailData.entityType }}</div>
+          <div><strong>{{ $t('page.auditLog.entityId') }}:</strong> {{ detailData.entityId }}</div>
+          <div><strong>{{ $t('page.auditLog.ip') }}:</strong> {{ detailData.ip }}</div>
+          <div>
+            <strong>{{ $t('page.auditLog.createTime') }}:</strong>
+            {{ detailData.createTime ? dayjs(detailData.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
+          </div>
+          <div>
+            <strong>{{ $t('page.auditLog.changedFields') }}:</strong>
+            <pre class="mt-1 rounded bg-gray-100 p-2 text-xs dark:bg-gray-800">{{ detailData.changedFields || '-' }}</pre>
+          </div>
+          <div>
+            <strong>{{ $t('page.auditLog.oldData') }}:</strong>
+            <pre class="mt-1 max-h-48 overflow-auto rounded bg-gray-100 p-2 text-xs dark:bg-gray-800">{{ detailData.oldData || '-' }}</pre>
+          </div>
+          <div>
+            <strong>{{ $t('page.auditLog.newData') }}:</strong>
+            <pre class="mt-1 max-h-48 overflow-auto rounded bg-gray-100 p-2 text-xs dark:bg-gray-800">{{ detailData.newData || '-' }}</pre>
+          </div>
         </div>
-        <div>
-          <strong>{{ $t('page.auditLog.changedFields') }}:</strong>
-          <pre class="mt-1 rounded bg-gray-100 p-2 text-xs">{{ detailData.changedFields || '-' }}</pre>
-        </div>
-        <div>
-          <strong>{{ $t('page.auditLog.oldData') }}:</strong>
-          <pre class="mt-1 max-h-48 overflow-auto rounded bg-gray-100 p-2 text-xs">{{ detailData.oldData || '-' }}</pre>
-        </div>
-        <div>
-          <strong>{{ $t('page.auditLog.newData') }}:</strong>
-          <pre class="mt-1 max-h-48 overflow-auto rounded bg-gray-100 p-2 text-xs">{{ detailData.newData || '-' }}</pre>
-        </div>
-      </div>
-    </Modal>
+      </Modal>
+    </div>
   </Page>
 </template>

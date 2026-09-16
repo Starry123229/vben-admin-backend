@@ -5,18 +5,17 @@ import dayjs from 'dayjs';
 import { Page } from '@vben/common-ui';
 
 import {
-  Button,
-  Form,
-  FormItem,
-  Input,
-  message,
-  Modal,
-  Popconfirm,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Textarea,
+  NButton as Button,
+  NDataTable as DataTable,
+  NForm as Form,
+  NFormItem as FormItem,
+  NInput as Input,
+  NModal as Modal,
+  NPopconfirm as Popconfirm,
+  NSelect as Select,
+  NSpace as Space,
+  NTag as Tag,
+  useMessage as useNaiveMessage,
 } from 'naive-ui';
 
 import { $t } from '#/locales';
@@ -34,6 +33,7 @@ import {
 
 defineOptions({ name: 'Workflow' });
 
+const message = useNaiveMessage();
 const activeTab = ref<'instances' | 'definitions'>('instances');
 
 // 实例列表
@@ -44,93 +44,58 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const filterStatus = ref<string | undefined>(undefined);
 
+const statusMap: Record<string, { type: string; label: string }> = {
+  pending: { type: 'info', label: '待审批' },
+  approved: { type: 'success', label: '已通过' },
+  rejected: { type: 'error', label: '已拒绝' },
+  cancelled: { type: 'default', label: '已取消' },
+};
+
 const instanceColumns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.workflow.title'), dataIndex: 'title', ellipsis: true },
-  { title: () => $t('page.workflow.applicant'), dataIndex: 'applicantName', width: 100 },
-  { title: () => $t('page.workflow.workflowName'), dataIndex: 'workflowName', width: 120 },
+  { title: 'ID', key: 'id', width: 80 },
+  { title: () => $t('page.workflow.title'), key: 'title', ellipsis: { tooltip: true } },
+  { title: () => $t('page.workflow.applicant'), key: 'applicantName', width: 100 },
+  { title: () => $t('page.workflow.workflowName'), key: 'workflowName', width: 120 },
   {
     title: () => $t('page.workflow.currentStep'),
     key: 'step',
     width: 80,
-    customRender: ({ record }: any) =>
-      `${record.currentStep + 1}/${record.totalSteps}`,
+    render: (row: any) => `${row.currentStep + 1}/${row.totalSteps}`,
   },
   {
     title: () => $t('page.workflow.status'),
-    dataIndex: 'status',
+    key: 'status',
     width: 100,
-    customRender: ({ text }: any) => {
-      const map: Record<string, { color: string; label: string }> = {
-        pending: { color: 'processing', label: $t('page.workflow.pending') },
-        approved: { color: 'green', label: $t('page.workflow.approved') },
-        rejected: { color: 'red', label: $t('page.workflow.rejected') },
-        cancelled: { color: 'default', label: $t('page.workflow.cancelled') },
-      };
-      const s = map[text] || { color: 'default', label: text };
-      return h(Tag, { color: s.color }, () => s.label);
+    render: (row: any) => {
+      const s = statusMap[row.status] || { type: 'default', label: row.status };
+      return h(Tag, { type: s.type as any }, { default: () => s.label });
     },
   },
   {
     title: () => $t('page.auditLog.createTime'),
-    dataIndex: 'createTime',
+    key: 'createTime',
     width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
+    render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-',
   },
   {
     title: () => $t('page.common.action'),
     key: 'action',
     width: 220,
-    customRender: ({ record }: any) => {
+    render: (row: any) => {
       const actions: any[] = [
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => showTasksModal(record),
-          },
-          () => $t('page.workflow.tasks'),
-        ),
+        h(Button, { size: 'small', type: 'primary', quaternary: true, onClick: () => showTasksModal(row) }, { default: () => $t('page.workflow.tasks') }),
       ];
-      if (record.status === 'pending') {
+      if (row.status === 'pending') {
         actions.push(
-          h(
-            Button,
-            {
-              size: 'small',
-              type: 'link',
-              onClick: () => showApproveModal(record, 'approve'),
-            },
-            () => $t('page.workflow.approve'),
-          ),
-          h(
-            Button,
-            {
-              size: 'small',
-              type: 'link',
-              danger: true,
-              onClick: () => showApproveModal(record, 'reject'),
-            },
-            () => $t('page.workflow.reject'),
-          ),
-          h(
-            Popconfirm,
-            {
-              title: $t('page.workflow.confirmCancel'),
-              onConfirm: () => handleCancel(record.id),
-            },
-            () =>
-              h(
-                Button,
-                { size: 'small', type: 'link' },
-                () => $t('page.workflow.cancel'),
-              ),
-          ),
+          h(Button, { size: 'small', type: 'success', quaternary: true, onClick: () => showApproveModal(row, 'approve') }, { default: () => $t('page.workflow.approve') }),
+          h(Button, { size: 'small', type: 'error', quaternary: true, onClick: () => showApproveModal(row, 'reject') }, { default: () => $t('page.workflow.reject') }),
+          h(Popconfirm, { onPositiveClick: () => handleCancel(row.id) }, {
+            trigger: () => h(Button, { size: 'small', type: 'default', quaternary: true }, { default: () => $t('page.workflow.cancel') }),
+            default: () => $t('page.workflow.confirmCancel'),
+          }),
         );
       }
-      return h(Space, {}, () => actions);
+      return h(Space, {}, { default: () => actions });
     },
   },
 ];
@@ -143,60 +108,32 @@ const defCurrentPage = ref(1);
 const defPageSize = ref(10);
 
 const defColumns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.workflow.name'), dataIndex: 'name', ellipsis: true },
-  { title: () => $t('page.workflow.code'), dataIndex: 'code', width: 120 },
-  { title: () => $t('page.workflow.type'), dataIndex: 'type', width: 100 },
-  { title: () => $t('page.workflow.remark'), dataIndex: 'remark', ellipsis: true },
+  { title: 'ID', key: 'id', width: 80 },
+  { title: () => $t('page.workflow.name'), key: 'name', ellipsis: { tooltip: true } },
+  { title: () => $t('page.workflow.code'), key: 'code', width: 120 },
+  { title: () => $t('page.workflow.type'), key: 'type', width: 100 },
+  { title: () => $t('page.workflow.remark'), key: 'remark', ellipsis: { tooltip: true } },
   {
     title: () => $t('page.workflow.status'),
-    dataIndex: 'status',
+    key: 'status',
     width: 80,
-    customRender: ({ text }: any) =>
-      h(
-        Tag,
-        { color: text === 1 ? 'green' : 'red' },
-        () => (text === 1 ? $t('page.workflow.active') : $t('page.workflow.disabled')),
-      ),
+    render: (row: any) => h(Tag, { type: row.status === 1 ? 'success' : 'error' }, { default: () => (row.status === 1 ? $t('page.workflow.active') : $t('page.workflow.disabled')) }),
   },
   {
     title: () => $t('page.common.action'),
     key: 'action',
     width: 250,
-    customRender: ({ record }: any) => {
-      return h(Space, {}, () => [
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => showStartModal(record),
-          },
-          () => $t('page.workflow.start'),
-        ),
-        h(
-          Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => showDefModal(record),
-          },
-          () => $t('page.common.edit'),
-        ),
-        h(
-          Popconfirm,
-          {
-            title: $t('page.workflow.confirmDeleteDef'),
-            onConfirm: () => handleDeleteDef(record.id),
-          },
-          () =>
-            h(
-              Button,
-              { size: 'small', type: 'link', danger: true },
-              () => $t('page.common.delete'),
-            ),
-        ),
-      ]);
+    render: (row: any) => {
+      return h(Space, {}, {
+        default: () => [
+          h(Button, { size: 'small', type: 'primary', quaternary: true, onClick: () => showStartModal(row) }, { default: () => $t('page.workflow.start') }),
+          h(Button, { size: 'small', type: 'info', quaternary: true, onClick: () => showDefModal(row) }, { default: () => $t('page.common.edit') }),
+          h(Popconfirm, { onPositiveClick: () => handleDeleteDef(row.id) }, {
+            trigger: () => h(Button, { size: 'small', type: 'error', quaternary: true }, { default: () => $t('page.common.delete') }),
+            default: () => $t('page.workflow.confirmDeleteDef'),
+          }),
+        ],
+      });
     },
   },
 ];
@@ -215,14 +152,8 @@ function showApproveModal(record: any, action: 'approve' | 'reject') {
 }
 
 async function handleApprove() {
-  await approveWorkflowApi(
-    currentInstance.value.id,
-    approveAction.value,
-    approveComment.value,
-  );
-  message.success(
-    approveAction.value === 'approve' ? $t('page.workflow.approved') : $t('page.workflow.rejected'),
-  );
+  await approveWorkflowApi(currentInstance.value.id, approveAction.value, approveComment.value);
+  message.success(approveAction.value === 'approve' ? $t('page.workflow.approved') : $t('page.workflow.rejected'));
   approveModalVisible.value = false;
   loadData();
 }
@@ -242,6 +173,24 @@ async function showTasksModal(record: any) {
     tasksLoading.value = false;
   }
 }
+
+const taskColumns = [
+  { title: $t('page.workflow.currentStep'), key: 'step', width: 60 },
+  { title: $t('page.workflow.approver'), key: 'approverName', width: 100 },
+  {
+    title: $t('page.common.action'),
+    key: 'action',
+    width: 80,
+    render: (row: any) => h(Tag, { type: row.action === 'approve' ? 'success' : 'error' }, { default: () => row.action }),
+  },
+  { title: $t('page.workflow.comment'), key: 'comment', ellipsis: { tooltip: true } },
+  {
+    title: $t('page.workflow.approveTime'),
+    key: 'approveTime',
+    width: 180,
+    render: (row: any) => row.approveTime ? dayjs(row.approveTime).format('YYYY-MM-DD HH:mm:ss') : '-',
+  },
+];
 
 // 发起审批弹窗
 const startModalVisible = ref(false);
@@ -295,15 +244,7 @@ function showDefModal(record?: any) {
     defForm.value = { ...record };
   } else {
     defModalTitle.value = $t('page.workflow.newWorkflow');
-    defForm.value = {
-      id: undefined,
-      name: '',
-      code: '',
-      type: 'approval',
-      definition: '',
-      status: 1,
-      remark: '',
-    };
+    defForm.value = { id: undefined, name: '', code: '', type: 'approval', definition: '', status: 1, remark: '' };
   }
   defModalVisible.value = true;
 }
@@ -363,14 +304,38 @@ async function loadData() {
   }
 }
 
-function handlePageChange(page: number, size: number) {
+function handlePageChange(page: number) {
   if (activeTab.value === 'instances') {
     currentPage.value = page;
-    pageSize.value = size;
   } else {
     defCurrentPage.value = page;
-    defPageSize.value = size;
   }
+  loadData();
+}
+
+function handlePageSizeChange(size: number) {
+  if (activeTab.value === 'instances') {
+    pageSize.value = size;
+    currentPage.value = 1;
+  } else {
+    defPageSize.value = size;
+    defCurrentPage.value = 1;
+  }
+  loadData();
+}
+
+function switchTab(tab: 'instances' | 'definitions') {
+  activeTab.value = tab;
+  if (tab === 'instances') {
+    currentPage.value = 1;
+  } else {
+    defCurrentPage.value = 1;
+  }
+  loadData();
+}
+
+function handleFilterChange() {
+  currentPage.value = 1;
   loadData();
 }
 
@@ -384,45 +349,31 @@ loadData();
         <Space>
           <Button
             :type="activeTab === 'instances' ? 'primary' : 'default'"
-            @click="
-              activeTab = 'instances';
-              currentPage = 1;
-              loadData();
-            "
+            @click="switchTab('instances')"
           >
             {{ $t('page.workflow.instances') }}
           </Button>
           <Button
             :type="activeTab === 'definitions' ? 'primary' : 'default'"
-            @click="
-              activeTab = 'definitions';
-              defCurrentPage = 1;
-              loadData();
-            "
+            @click="switchTab('definitions')"
           >
             {{ $t('page.workflow.definitions') }}
           </Button>
         </Space>
-        <Space v-if="activeTab === 'instances'">
-          <Select
-            v-model:value="filterStatus"
-            :placeholder="$t('page.workflow.filterStatus')"
-            style="width: 150px"
-            allow-clear
-            :options="[
-              { label: $t('page.workflow.pending'), value: 'pending' },
-              { label: $t('page.workflow.approved'), value: 'approved' },
-              { label: $t('page.workflow.rejected'), value: 'rejected' },
-              { label: $t('page.workflow.cancelled'), value: 'cancelled' },
-            ]"
-            @change="
-              () => {
-                currentPage = 1;
-                loadData();
-              }
-            "
-          />
-        </Space>
+        <Select
+          v-if="activeTab === 'instances'"
+          v-model:value="filterStatus"
+          :placeholder="$t('page.workflow.filterStatus')"
+          style="width: 150px"
+          clearable
+          :options="[
+            { label: $t('page.workflow.pending'), value: 'pending' },
+            { label: $t('page.workflow.approved'), value: 'approved' },
+            { label: $t('page.workflow.rejected'), value: 'rejected' },
+            { label: $t('page.workflow.cancelled'), value: 'cancelled' },
+          ]"
+          @update:value="handleFilterChange"
+        />
         <Button
           v-if="activeTab === 'definitions'"
           type="primary"
@@ -432,50 +383,56 @@ loadData();
         </Button>
       </div>
 
-      <Table
+      <DataTable
         v-if="activeTab === 'instances'"
         :loading="loading"
-        :data-source="dataSource"
+        :data="dataSource"
         :columns="instanceColumns"
+        :scroll-x="1000"
         :pagination="{
-          current: currentPage,
+          page: currentPage,
           pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
+          itemCount: total,
+          showSizePicker: true,
+          pageSizes: [10, 20, 50],
           onChange: handlePageChange,
+          onUpdatePageSize: handlePageSizeChange,
         }"
-        :scroll="{ x: 1000 }"
-        row-key="id"
+        :row-key="(row: any) => row.id"
         size="small"
       />
 
-      <Table
+      <DataTable
         v-else
         :loading="defLoading"
-        :data-source="defDataSource"
+        :data="defDataSource"
         :columns="defColumns"
         :pagination="{
-          current: defCurrentPage,
+          page: defCurrentPage,
           pageSize: defPageSize,
-          total: defTotal,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
+          itemCount: defTotal,
+          showSizePicker: true,
+          pageSizes: [10, 20, 50],
           onChange: handlePageChange,
+          onUpdatePageSize: handlePageSizeChange,
         }"
-        row-key="id"
+        :row-key="(row: any) => row.id"
         size="small"
       />
     </div>
 
     <!-- 审批弹窗 -->
     <Modal
-      v-model:open="approveModalVisible"
+      v-model:show="approveModalVisible"
       :title="approveAction === 'approve' ? $t('page.workflow.approve') : $t('page.workflow.reject')"
-      @ok="handleApprove"
+      preset="dialog"
+      :positive-text="$t('page.common.confirmOk')"
+      :negative-text="$t('page.common.confirmCancel')"
+      @positive-click="handleApprove"
     >
-      <Textarea
+      <Input
         v-model:value="approveComment"
+        type="textarea"
         :placeholder="$t('page.workflow.comment')"
         :rows="4"
       />
@@ -483,48 +440,29 @@ loadData();
 
     <!-- 审批记录弹窗 -->
     <Modal
-      v-model:open="tasksModalVisible"
+      v-model:show="tasksModalVisible"
       :title="`${$t('page.workflow.tasks')} - #${currentInstance?.id || ''}`"
-      :footer="null"
-      width="700px"
+      preset="card"
+      style="width: 700px"
     >
-      <Table
+      <DataTable
         :loading="tasksLoading"
-        :data-source="tasksData"
+        :data="tasksData"
+        :columns="taskColumns"
         :pagination="false"
-        :columns="[
-          { title: $t('page.workflow.currentStep'), dataIndex: 'step', width: 60 },
-          { title: $t('page.workflow.approver'), dataIndex: 'approverName', width: 100 },
-          {
-            title: $t('page.common.action'),
-            dataIndex: 'action',
-            width: 80,
-            customRender: ({ text }: any) =>
-              h(
-                Tag,
-                { color: text === 'approve' ? 'green' : 'red' },
-                () => text,
-              ),
-          },
-          { title: $t('page.workflow.comment'), dataIndex: 'comment', ellipsis: true },
-          {
-            title: $t('page.workflow.approveTime'),
-            dataIndex: 'approveTime',
-            width: 180,
-            customRender: ({ text }: any) =>
-              text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
-          },
-        ]"
-        row-key="id"
+        :row-key="(row: any) => row.id"
         size="small"
       />
     </Modal>
 
     <!-- 发起审批弹窗 -->
     <Modal
-      v-model:open="startModalVisible"
+      v-model:show="startModalVisible"
       :title="`${$t('page.workflow.start')}: ${currentWorkflow?.name || ''}`"
-      @ok="handleStart"
+      preset="dialog"
+      :positive-text="$t('page.common.confirmOk')"
+      :negative-text="$t('page.common.confirmCancel')"
+      @positive-click="handleStart"
     >
       <div class="mb-2">
         <label class="mb-1 block">{{ $t('page.workflow.title') }}</label>
@@ -532,8 +470,9 @@ loadData();
       </div>
       <div>
         <label class="mb-1 block">{{ $t('page.workflow.content') }}</label>
-        <Textarea
+        <Input
           v-model:value="startForm.content"
+          type="textarea"
           :placeholder="$t('page.workflow.enterContent')"
           :rows="4"
         />
@@ -542,12 +481,15 @@ loadData();
 
     <!-- 流程定义弹窗 -->
     <Modal
-      v-model:open="defModalVisible"
+      v-model:show="defModalVisible"
       :title="defModalTitle"
-      width="600px"
-      @ok="handleDefSubmit"
+      preset="dialog"
+      style="width: 600px"
+      :positive-text="$t('page.common.confirmOk')"
+      :negative-text="$t('page.common.confirmCancel')"
+      @positive-click="handleDefSubmit"
     >
-      <Form layout="vertical">
+      <Form label-placement="top">
         <FormItem :label="$t('page.workflow.name')" required>
           <Input v-model:value="defForm.name" :placeholder="$t('page.workflow.namePlaceholder')" />
         </FormItem>
@@ -564,8 +506,9 @@ loadData();
           />
         </FormItem>
         <FormItem :label="$t('page.workflow.definitionLabel')">
-          <Textarea
+          <Input
             v-model:value="defForm.definition"
+            type="textarea"
             placeholder='[{"step":0,"name":"Leader","approverId":1}]'
             :rows="4"
           />
@@ -580,7 +523,7 @@ loadData();
           />
         </FormItem>
         <FormItem :label="$t('page.workflow.remark')">
-          <Textarea v-model:value="defForm.remark" :rows="2" />
+          <Input v-model:value="defForm.remark" type="textarea" :rows="2" />
         </FormItem>
       </Form>
     </Modal>

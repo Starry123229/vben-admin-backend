@@ -5,14 +5,15 @@ import dayjs from 'dayjs';
 import { Page } from '@vben/common-ui';
 
 import {
-  Button,
-  Input,
-  message,
-  Modal,
-  Popconfirm,
-  Space,
-  Table,
-  Upload,
+  NButton as Button,
+  NDataTable as DataTable,
+  NInput as Input,
+  NModal as Modal,
+  NPopconfirm as Popconfirm,
+  NSpace as Space,
+  NTag as Tag,
+  NUpload as Upload,
+  useMessage as useNaiveMessage,
 } from 'naive-ui';
 
 import { $t } from '#/locales';
@@ -25,6 +26,7 @@ import {
 
 defineOptions({ name: 'Attachment' });
 
+const message = useNaiveMessage();
 const loading = ref(false);
 const dataSource = ref<any[]>([]);
 const total = ref(0);
@@ -37,67 +39,58 @@ const uploading = ref(false);
 const detailModalVisible = ref(false);
 const detailData = ref<any>({});
 
+function formatFileSize(bytes: number) {
+  if (!bytes) return '-';
+  return bytes < 1024
+    ? `${bytes} B`
+    : bytes < 1024 * 1024
+      ? `${(bytes / 1024).toFixed(1)} KB`
+      : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
 const columns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.attachment.originalName'), dataIndex: 'originalName', ellipsis: true },
+  { title: 'ID', key: 'id', width: 80 },
+  { title: () => $t('page.attachment.originalName'), key: 'originalName', ellipsis: { tooltip: true } },
   {
     title: () => $t('page.attachment.fileSize'),
-    dataIndex: 'fileSize',
+    key: 'fileSize',
     width: 100,
-    customRender: ({ text }: any) => {
-      if (!text) return '-';
-      return text < 1024
-        ? `${text} B`
-        : text < 1024 * 1024
-          ? `${(text / 1024).toFixed(1)} KB`
-          : `${(text / 1024 / 1024).toFixed(1)} MB`;
-    },
+    render: (row: any) => formatFileSize(row.fileSize),
   },
-  { title: () => $t('page.attachment.contentType'), dataIndex: 'contentType', width: 120, ellipsis: true },
-  { title: () => $t('page.attachment.fileExt'), dataIndex: 'fileExt', width: 60 },
-  { title: () => $t('page.attachment.uploader'), dataIndex: 'uploadUsername', width: 100 },
-  { title: () => $t('page.attachment.bizType'), dataIndex: 'bizType', width: 100 },
+  { title: () => $t('page.attachment.contentType'), key: 'contentType', width: 120, ellipsis: { tooltip: true } },
+  { title: () => $t('page.attachment.fileExt'), key: 'fileExt', width: 60 },
+  { title: () => $t('page.attachment.uploader'), key: 'uploadUsername', width: 100 },
+  { title: () => $t('page.attachment.bizType'), key: 'bizType', width: 100 },
   {
     title: () => $t('page.attachment.url'),
-    dataIndex: 'url',
-    ellipsis: true,
-    customRender: ({ text }: any) =>
-      text ? h('a', { href: text, target: '_blank' }, text) : '-',
+    key: 'url',
+    ellipsis: { tooltip: true },
+    render: (row: any) => row.url ? h('a', { href: row.url, target: '_blank' }, row.url) : '-',
   },
   {
     title: () => $t('page.attachment.uploadTime'),
-    dataIndex: 'createTime',
+    key: 'createTime',
     width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
+    render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-',
   },
   {
     title: () => $t('page.common.action'),
     key: 'action',
     width: 150,
-    customRender: ({ record }: any) => {
+    render: (row: any) => {
       return h(Space, {}, () => [
         h(
           Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => handleViewDetail(record.id),
-          },
-          () => $t('page.attachment.detail'),
+          { size: 'small', type: 'primary', quaternary: true, onClick: () => handleViewDetail(row.id) },
+          { default: () => $t('page.attachment.detail') },
         ),
         h(
           Popconfirm,
+          { onPositiveClick: () => handleDelete(row.id) },
           {
-            title: $t('page.attachment.confirmDelete'),
-            onConfirm: () => handleDelete(record.id),
+            trigger: () => h(Button, { size: 'small', type: 'error', quaternary: true }, { default: () => $t('page.common.delete') }),
+            default: () => $t('page.attachment.confirmDelete'),
           },
-          () =>
-            h(
-              Button,
-              { size: 'small', type: 'link', danger: true },
-              () => $t('page.common.delete'),
-            ),
         ),
       ]);
     },
@@ -145,10 +138,10 @@ async function handleViewDetail(id: number) {
   }
 }
 
-async function handleUpload(file: File) {
+async function handleUpload({ file }: { file: { file: File } }) {
   uploading.value = true;
   try {
-    await uploadAttachmentApi(file);
+    await uploadAttachmentApi(file.file);
     message.success($t('page.attachment.uploadSuccess'));
     loadData();
   } catch {
@@ -156,12 +149,16 @@ async function handleUpload(file: File) {
   } finally {
     uploading.value = false;
   }
-  return false;
 }
 
-function handlePageChange(page: number, size: number) {
+function handlePageChange(page: number) {
   currentPage.value = page;
+  loadData();
+}
+
+function handlePageSizeChange(size: number) {
   pageSize.value = size;
+  currentPage.value = 1;
   loadData();
 }
 
@@ -177,52 +174,49 @@ loadData();
             v-model:value="searchForm.originalName"
             :placeholder="$t('page.attachment.searchFileName')"
             style="width: 200px"
-            allow-clear
-            @press-enter="handleSearch"
+            clearable
+            @keyup.enter="handleSearch"
           />
           <Input
             v-model:value="searchForm.bizType"
             :placeholder="$t('page.attachment.searchBizType')"
             style="width: 150px"
-            allow-clear
-            @press-enter="handleSearch"
+            clearable
+            @keyup.enter="handleSearch"
           />
           <Button type="primary" @click="handleSearch">{{ $t('page.common.search') }}</Button>
           <Button @click="handleReset">{{ $t('page.common.reset') }}</Button>
         </Space>
-        <Upload
-          :before-upload="handleUpload"
-          :show-upload-list="false"
-          :max-count="1"
-        >
+        <Upload :show-file-list="false" :max="1" :custom-request="handleUpload">
           <Button type="primary" :loading="uploading">{{ $t('page.attachment.upload') }}</Button>
         </Upload>
       </div>
 
-      <Table
+      <DataTable
         :loading="loading"
-        :data-source="dataSource"
+        :data="dataSource"
         :columns="columns"
+        :scroll-x="1400"
         :pagination="{
-          current: currentPage,
+          page: currentPage,
           pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
+          itemCount: total,
+          showSizePicker: true,
+          pageSizes: [10, 20, 50],
           onChange: handlePageChange,
+          onUpdatePageSize: handlePageSizeChange,
         }"
-        :scroll="{ x: 1400 }"
-        row-key="id"
+        :row-key="(row: any) => row.id"
         size="small"
       />
     </div>
 
     <!-- 详情弹窗 -->
     <Modal
-      v-model:open="detailModalVisible"
+      v-model:show="detailModalVisible"
       :title="$t('page.attachment.detailTitle')"
-      :footer="null"
-      width="600px"
+      preset="card"
+      style="width: 600px"
     >
       <div class="space-y-2">
         <div><strong>ID:</strong> {{ detailData.id }}</div>
@@ -236,18 +230,12 @@ loadData();
         <div><strong>{{ $t('page.attachment.bizId') }}:</strong> {{ detailData.bizId || '-' }}</div>
         <div>
           <strong>{{ $t('page.attachment.url') }}:</strong>
-          <a v-if="detailData.url" :href="detailData.url" target="_blank">
-            {{ detailData.url }}
-          </a>
+          <a v-if="detailData.url" :href="detailData.url" target="_blank">{{ detailData.url }}</a>
           <span v-else>-</span>
         </div>
         <div>
           <strong>{{ $t('page.attachment.uploadTime') }}:</strong>
-          {{
-            detailData.createTime
-              ? dayjs(detailData.createTime).format('YYYY-MM-DD HH:mm:ss')
-              : '-'
-          }}
+          {{ detailData.createTime ? dayjs(detailData.createTime).format('YYYY-MM-DD HH:mm:ss') : '-' }}
         </div>
       </div>
     </Modal>

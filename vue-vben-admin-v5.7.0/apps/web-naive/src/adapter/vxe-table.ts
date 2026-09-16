@@ -191,11 +191,12 @@ setupVbenVxeTable({
         });
 
         function renderBtn(opt: Recordable<any>, listen = true) {
+          const { text: _text, code: _code, accessCode: _accessCode, show: _show, ...btnProps } = opt;
           return h(
             NButton,
             {
               ...props,
-              ...opt,
+              ...btnProps,
               onClick: listen
                 ? () =>
                     attrs?.onClick?.({
@@ -209,11 +210,11 @@ setupVbenVxeTable({
         }
 
         function renderConfirm(opt: Recordable<any>) {
+          const { text: _text, code: _code, accessCode: _accessCode, show: _show, ...popProps } = opt;
           return h(
             NPopconfirm,
             {
-              ...props,
-              ...opt,
+              ...popProps,
               onPositiveClick: () => {
                 attrs?.onClick?.({
                   code: opt.code,

@@ -6,16 +6,16 @@ import { preferences } from '@vben/preferences';
 import { useUserStore } from '@vben/stores';
 
 import {
-  Button,
-  Card,
-  Form,
-  FormItem,
-  Input,
-  message,
-  RadioButton,
-  RadioGroup,
-  Select,
-  Tag,
+  NButton as Button,
+  NCard as Card,
+  NForm as Form,
+  NFormItem as FormItem,
+  NInput as Input,
+  NRadioButton as RadioButton,
+  NRadioGroup as RadioGroup,
+  NSelect as Select,
+  NTag as Tag,
+  useMessage as useNaiveMessage,
 } from 'naive-ui';
 
 import { $t } from '#/locales';
@@ -24,6 +24,7 @@ import { broadcastNoticeToRoleApi, sendNoticeToUserApi } from '#/api/system/noti
 import { getUserList } from '#/api/system/user';
 
 const userStore = useUserStore();
+const message = useNaiveMessage();
 const sending = ref(false);
 
 const targetOptions = computed(() => [
@@ -140,7 +141,7 @@ async function handleSend() {
     :description="$t('page.notice.description')"
   >
     <Card class="mx-4 max-w-[720px]">
-      <Form layout="vertical" class="max-w-[560px]">
+      <Form label-placement="top" class="max-w-[560px]">
         <FormItem :label="$t('page.notice.targetType')">
           <RadioGroup v-model:value="formState.targetType">
             <RadioButton
@@ -160,11 +161,11 @@ async function handleSend() {
         >
           <Select
             v-model:value="formState.userIds"
-            mode="multiple"
-            allow-clear
+            multiple
+            clearable
             :placeholder="$t('page.notice.selectUserPlaceholder')"
             :options="userOptions"
-            option-filter-prop="label"
+            filterable
           />
         </FormItem>
 
@@ -175,11 +176,11 @@ async function handleSend() {
         >
           <Select
             v-model:value="formState.roleIds"
-            mode="multiple"
-            allow-clear
+            multiple
+            clearable
             :placeholder="$t('page.notice.selectRolePlaceholder')"
             :options="roleOptions"
-            option-filter-prop="label"
+            filterable
           />
         </FormItem>
 
@@ -188,14 +189,17 @@ async function handleSend() {
             v-model:value="formState.title"
             :placeholder="$t('page.notice.enterTitle')"
             :maxlength="128"
-            show-count
           />
         </FormItem>
 
         <FormItem :label="$t('page.notice.noticeType')">
           <RadioGroup v-model:value="formState.type">
             <RadioButton v-for="t in typeOptions" :key="t" :value="t">
-              <Tag :color="t === 'info' ? 'blue' : t === 'success' ? 'green' : t === 'warning' ? 'orange' : 'red'" class="mr-0 border-none">
+              <Tag
+                :type="t === 'info' ? 'info' : t === 'success' ? 'success' : t === 'warning' ? 'warning' : 'error'"
+                :bordered="false"
+                class="mr-0"
+              >
                 {{ $t(`page.notice.noticeInfo${t.charAt(0).toUpperCase() + t.slice(1)}`) }}
               </Tag>
             </RadioButton>
@@ -203,8 +207,9 @@ async function handleSend() {
         </FormItem>
 
         <FormItem :label="$t('page.notice.noticeContent')">
-          <Input.TextArea
+          <Input
             v-model:value="formState.content"
+            type="textarea"
             :placeholder="$t('page.notice.enterContent')"
             :rows="4"
           />

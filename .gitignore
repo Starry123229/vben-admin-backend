@@ -48,7 +48,7 @@ hs_err_pid*
 replay_pid*
 
 # 上传文件目录
-vben-admin-backend/uploads/
+vben-admin-backend/java-backend/uploads/
 !vben-admin-backend/uploads/avatar/.gitkeep
 
 # ===================== 前端 (Node/Vue) =====================

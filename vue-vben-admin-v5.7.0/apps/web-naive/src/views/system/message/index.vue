@@ -5,18 +5,16 @@ import dayjs from 'dayjs';
 import { Page } from '@vben/common-ui';
 
 import {
-  Badge,
-  Button,
-  Form,
-  FormItem,
-  Input,
-  message,
-  Modal,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Textarea,
+  NButton as Button,
+  NDataTable as DataTable,
+  NForm as Form,
+  NFormItem as FormItem,
+  NInput as Input,
+  NModal as Modal,
+  NSelect as Select,
+  NSpace as Space,
+  NTag as Tag,
+  useMessage as useNaiveMessage,
 } from 'naive-ui';
 
 import { $t } from '#/locales';
@@ -29,6 +27,7 @@ import {
 
 defineOptions({ name: 'Message' });
 
+const message = useNaiveMessage();
 const loading = ref(false);
 const dataSource = ref<any[]>([]);
 const total = ref(0);
@@ -36,54 +35,45 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const filterIsRead = ref<number | undefined>(undefined);
 
+const typeColorMap: Record<string, string> = {
+  notice: 'info',
+  alert: 'warning',
+  task: 'success',
+};
+
 const columns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: () => $t('page.message.msgTitle'), dataIndex: 'title', ellipsis: true },
+  { title: 'ID', key: 'id', width: 80 },
+  { title: () => $t('page.message.msgTitle'), key: 'title', ellipsis: { tooltip: true } },
   {
     title: () => $t('page.message.type'),
-    dataIndex: 'type',
+    key: 'type',
     width: 100,
-    customRender: ({ text }: any) => {
-      const colorMap: Record<string, string> = {
-        notice: 'blue',
-        alert: 'orange',
-        task: 'green',
-      };
-      return h(Tag, { color: colorMap[text] || 'default' }, () => text || '-');
-    },
+    render: (row: any) => h(Tag, { type: typeColorMap[row.type] || 'default' }, { default: () => row.type || '-' }),
   },
-  { title: () => $t('page.message.content'), dataIndex: 'content', ellipsis: true, width: 200 },
+  { title: () => $t('page.message.content'), key: 'content', ellipsis: { tooltip: true }, width: 200 },
   {
     title: () => $t('page.message.isRead'),
-    dataIndex: 'isRead',
+    key: 'isRead',
     width: 80,
-    customRender: ({ text }: any) => {
-      return text === 1
-        ? h(Badge, { status: 'default', text: $t('page.message.read') })
-        : h(Badge, { status: 'processing', text: $t('page.message.unread') });
-    },
+    render: (row: any) =>
+      row.isRead === 1 ? $t('page.message.read') : $t('page.message.unread'),
   },
   {
     title: () => $t('page.message.sendTime'),
-    dataIndex: 'createTime',
+    key: 'createTime',
     width: 180,
-    customRender: ({ text }: any) =>
-      text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : '-',
+    render: (row: any) => row.createTime ? dayjs(row.createTime).format('YYYY-MM-DD HH:mm:ss') : '-',
   },
   {
     title: () => $t('page.common.action'),
     key: 'action',
     width: 120,
-    customRender: ({ record }: any) => {
-      if (record.isRead === 0) {
+    render: (row: any) => {
+      if (row.isRead === 0) {
         return h(
           Button,
-          {
-            size: 'small',
-            type: 'link',
-            onClick: () => handleMarkRead(record.id),
-          },
-          () => $t('page.message.markRead'),
+          { size: 'small', type: 'primary', quaternary: true, onClick: () => handleMarkRead(row.id) },
+          { default: () => $t('page.message.markRead') },
         );
       }
       return '-';
@@ -102,13 +92,7 @@ const sendForm = ref({
 });
 
 function showSendModal() {
-  sendForm.value = {
-    userId: undefined,
-    title: '',
-    content: '',
-    type: 'notice',
-    email: '',
-  };
+  sendForm.value = { userId: undefined, title: '', content: '', type: 'notice', email: '' };
   sendModalVisible.value = true;
 }
 
@@ -160,9 +144,19 @@ async function handleMarkAllRead() {
   loadData();
 }
 
-function handlePageChange(page: number, size: number) {
+function handlePageChange(page: number) {
   currentPage.value = page;
+  loadData();
+}
+
+function handlePageSizeChange(size: number) {
   pageSize.value = size;
+  currentPage.value = 1;
+  loadData();
+}
+
+function handleFilterChange() {
+  currentPage.value = 1;
   loadData();
 }
 
@@ -173,55 +167,53 @@ loadData();
   <Page auto-content-height>
     <div class="overflow-hidden">
       <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <Space>
-          <Select
-            v-model:value="filterIsRead"
-            :placeholder="$t('page.message.filterRead')"
-            style="width: 150px"
-            allow-clear
-            :options="[
-              { label: $t('page.message.unread'), value: 0 },
-              { label: $t('page.message.read'), value: 1 },
-            ]"
-            @change="
-              () => {
-                currentPage = 1;
-                loadData();
-              }
-            "
-          />
-        </Space>
+        <Select
+          v-model:value="filterIsRead"
+          :placeholder="$t('page.message.filterRead')"
+          style="width: 150px"
+          clearable
+          :options="[
+            { label: $t('page.message.unread'), value: 0 },
+            { label: $t('page.message.read'), value: 1 },
+          ]"
+          @update:value="handleFilterChange"
+        />
         <Space>
           <Button type="primary" @click="showSendModal">{{ $t('page.message.sendMessage') }}</Button>
           <Button @click="handleMarkAllRead">{{ $t('page.message.markAllRead') }}</Button>
         </Space>
       </div>
 
-      <Table
+      <DataTable
         :loading="loading"
-        :data-source="dataSource"
+        :data="dataSource"
         :columns="columns"
+        :scroll-x="900"
         :pagination="{
-          current: currentPage,
+          page: currentPage,
           pageSize: pageSize,
-          total: total,
-          showSizeChanger: true,
-          showTotal: (t: number) => `${$t('page.common.total')} ${t} ${$t('page.common.records')}`,
+          itemCount: total,
+          showSizePicker: true,
+          pageSizes: [10, 20, 50],
           onChange: handlePageChange,
+          onUpdatePageSize: handlePageSizeChange,
         }"
-        row-key="id"
+        :row-key="(row: any) => row.id"
         size="small"
       />
     </div>
 
     <!-- 发送消息弹窗 -->
     <Modal
-      v-model:open="sendModalVisible"
+      v-model:show="sendModalVisible"
       :title="$t('page.message.sendMessage')"
-      width="600px"
-      @ok="handleSend"
+      preset="dialog"
+      style="width: 600px"
+      :positive-text="$t('page.common.confirmOk')"
+      :negative-text="$t('page.common.confirmCancel')"
+      @positive-click="handleSend"
     >
-      <Form layout="vertical">
+      <Form label-placement="top">
         <FormItem :label="$t('page.message.userIdLabel')" required>
           <Input
             v-model:value="sendForm.userId"
@@ -233,8 +225,9 @@ loadData();
           <Input v-model:value="sendForm.title" :placeholder="$t('page.message.titlePlaceholder')" />
         </FormItem>
         <FormItem :label="$t('page.message.content')">
-          <Textarea
+          <Input
             v-model:value="sendForm.content"
+            type="textarea"
             :placeholder="$t('page.message.contentPlaceholder')"
             :rows="4"
           />
