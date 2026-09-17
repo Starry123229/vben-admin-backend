@@ -14,15 +14,15 @@ export class RoleSaveDto {
   @IsOptional()
   id?: string;
 
-  @ApiProperty({ description: '角色名称' })
+  @ApiPropertyOptional({ description: '角色名称' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  name?: string;
 
-  @ApiProperty({ description: '角色编码（super/admin/user 等，唯一）' })
+  @ApiPropertyOptional({ description: '角色编码（super/admin/user 等，唯一）' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  code: string;
+  code?: string;
 
   @ApiPropertyOptional({ description: '状态：0 停用 / 1 启用' })
   @IsOptional()

@@ -38,6 +38,12 @@ export class SystemConfigController {
     return R.ok(await this.configService.keyExists(key, id));
   }
 
+  @Get('key/:key')
+  @ApiOperation({ summary: '按 key 查参数值' })
+  async getByKey(@Param('key') key: string) {
+    return R.ok(await this.configService.getByKey(key));
+  }
+
   @Post()
   @ApiOperation({ summary: '新增参数' })
   async create(@Body() dto: SystemConfigSaveDto) {

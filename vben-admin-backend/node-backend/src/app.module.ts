@@ -16,6 +16,10 @@ import { SystemLogModule } from './modules/system/system-log/system-log.module';
 import { OnlineModule } from './modules/online/online.module';
 import { MonitorModule } from './modules/monitor/monitor.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { SystemMessageModule } from './modules/system/system-message/system-message.module';
+import { SystemAttachmentModule } from './modules/system/system-attachment/system-attachment.module';
+import { SystemAuditLogModule } from './modules/system/system-audit-log/system-audit-log.module';
+import { SystemWorkflowModule } from './modules/system/system-workflow/system-workflow.module';
 
 @Module({
   imports: [
@@ -36,6 +40,10 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     OnlineModule,
     MonitorModule,
     DashboardModule,
+    SystemMessageModule,
+    SystemAttachmentModule,
+    SystemAuditLogModule,
+    SystemWorkflowModule,
   ],
   providers: [],
 })

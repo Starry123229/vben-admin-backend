@@ -47,6 +47,33 @@ export class SystemLogController {
     return R.ok(await this.logService.loginList(parseInt(page) || 1, parseInt(pageSize) || 10, username, status !== undefined ? parseInt(status) : undefined, startTime, endTime));
   }
 
+  @Get('operation/export')
+  @ApiOperation({ summary: '导出操作日志' })
+  @ApiQuery({ name: 'username', required: false, description: '操作用户名' })
+  @ApiQuery({ name: 'module', required: false, description: '模块名' })
+  @ApiQuery({ name: 'status', required: false, description: '操作状态' })
+  @ApiQuery({ name: 'startTime', required: false, description: '开始时间' })
+  @ApiQuery({ name: 'endTime', required: false, description: '结束时间' })
+  async exportOperationLogs(
+    @Query('username') username?: string, @Query('module') module?: string,
+    @Query('status') status?: string, @Query('startTime') startTime?: string, @Query('endTime') endTime?: string,
+  ) {
+    return R.ok(await this.logService.exportOperationLogs(username, module, status !== undefined ? parseInt(status) : undefined, startTime, endTime));
+  }
+
+  @Get('login/export')
+  @ApiOperation({ summary: '导出登录日志' })
+  @ApiQuery({ name: 'username', required: false, description: '登录用户名' })
+  @ApiQuery({ name: 'status', required: false, description: '登录状态' })
+  @ApiQuery({ name: 'startTime', required: false, description: '开始时间' })
+  @ApiQuery({ name: 'endTime', required: false, description: '结束时间' })
+  async exportLoginLogs(
+    @Query('username') username?: string, @Query('status') status?: string,
+    @Query('startTime') startTime?: string, @Query('endTime') endTime?: string,
+  ) {
+    return R.ok(await this.logService.exportLoginLogs(username, status !== undefined ? parseInt(status) : undefined, startTime, endTime));
+  }
+
   @Delete('operation')
   @ApiOperation({ summary: '清空操作日志' })
   async clearOperation() { await this.logService.clearOperationLogs(); return R.ok(); }

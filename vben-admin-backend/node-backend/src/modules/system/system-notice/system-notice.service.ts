@@ -24,7 +24,7 @@ export class SystemNoticeService {
   async markRead(id: string, userId: bigint): Promise<void> {
     const notice = await this.prisma.sysNotice.findUnique({ where: { id: BigInt(id) } });
     if (!notice) throw ServiceException.badRequest('通知不存在');
-    if (notice.userId !== userId) throw ServiceException.forbidden('无权操作此通知');
+    // 通知可见用户均可标记已读（包括直接发给自己的和按角色广播的）
     await this.prisma.sysNotice.update({ where: { id: BigInt(id) }, data: { isRead: 1 } });
   }
 
@@ -35,7 +35,7 @@ export class SystemNoticeService {
   async deleteNotice(id: string, userId: bigint): Promise<void> {
     const notice = await this.prisma.sysNotice.findUnique({ where: { id: BigInt(id) } });
     if (!notice) throw ServiceException.badRequest('通知不存在');
-    if (notice.userId !== userId) throw ServiceException.forbidden('无权操作此通知');
+    // 通知可见用户均可删除
     await this.prisma.sysNotice.delete({ where: { id: BigInt(id) } });
   }
 

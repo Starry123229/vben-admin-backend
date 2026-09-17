@@ -4,6 +4,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 import { AppModule } from './app.module';
 
 // 全局 BigInt JSON 序列化支持（Prisma 返回的 id 是 BigInt）
@@ -23,7 +25,9 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
+      transformOptions: { enableImplicitConversion: true },
       whitelist: true,
+      forbidNonWhitelisted: false,
     }),
   );
 
@@ -37,8 +41,13 @@ async function bootstrap() {
 
   // 全局前缀 /api（与 Java 端 context-path: /api 一致）
   app.setGlobalPrefix('api', {
-    exclude: [],
+    exclude: ['uploads'],
   });
+
+  // 静态文件服务（头像/附件）
+  const uploadDir = process.env.UPLOAD_DIR || './uploads';
+  if (!existsSync(uploadDir)) mkdirSync(uploadDir, { recursive: true });
+  app.useStaticAssets(join(process.cwd(), uploadDir), { prefix: '/uploads/' });
 
   // 全局异常过滤器
   app.useGlobalFilters(new AllExceptionsFilter());

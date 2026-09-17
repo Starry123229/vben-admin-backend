@@ -8,25 +8,25 @@ export class SystemJobSaveDto {
   @IsString()
   id?: string;
 
-  @ApiProperty({ description: '任务名称' })
+  @ApiPropertyOptional({ description: '任务名称' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  name?: string;
 
   @ApiPropertyOptional({ description: '任务分组', default: 'DEFAULT' })
   @IsOptional()
   @IsString()
   groupName?: string;
 
-  @ApiProperty({ description: '调用目标（类名#方法名）' })
+  @ApiPropertyOptional({ description: '调用目标（类名#方法名）' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  invokeTarget: string;
+  invokeTarget?: string;
 
-  @ApiProperty({ description: 'cron 表达式', example: '0/5 * * * * ?' })
+  @ApiPropertyOptional({ description: 'cron 表达式', example: '0/5 * * * * ?' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  cron: string;
+  cron?: string;
 
   @ApiPropertyOptional({ description: '状态：0 停用 / 1 启用', default: 0 })
   @IsOptional()

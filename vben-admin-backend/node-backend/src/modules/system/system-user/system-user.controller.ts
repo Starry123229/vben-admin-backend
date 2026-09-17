@@ -82,9 +82,12 @@ export class SystemUserController {
   @Permissions('AC_100020')
   async resetPassword(
     @Param('id') id: string,
-    @Body() dto: ResetPasswordDto,
+    @Query('newPassword') newPasswordFromQuery?: string,
+    @Body() dto?: ResetPasswordDto,
   ) {
-    await this.userService.resetPassword(id, dto.newPassword);
+    const newPassword = newPasswordFromQuery || dto?.newPassword;
+    if (!newPassword) throw new Error('新密码不能为空');
+    await this.userService.resetPassword(id, newPassword);
     return R.ok();
   }
 

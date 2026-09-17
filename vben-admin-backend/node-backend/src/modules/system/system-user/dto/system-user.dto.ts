@@ -14,10 +14,10 @@ export class SystemUserSaveDto {
   @IsOptional()
   id?: string;
 
-  @ApiProperty({ description: '登录名' })
+  @ApiPropertyOptional({ description: '登录名' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  username: string;
+  username?: string;
 
   @ApiPropertyOptional({ description: '密码（新建必填；更新时为空表示不修改）' })
   @IsOptional()
@@ -63,8 +63,8 @@ export class SystemUserSaveDto {
 
 /** 重置密码请求体 */
 export class ResetPasswordDto {
-  @ApiProperty({ description: '新密码' })
+  @ApiPropertyOptional({ description: '新密码' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  newPassword: string;
+  newPassword?: string;
 }

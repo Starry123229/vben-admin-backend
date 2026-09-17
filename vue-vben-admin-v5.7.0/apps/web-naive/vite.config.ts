@@ -9,8 +9,8 @@ export default defineConfig(async () => {
           '/api': {
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
-            // 自建 Java 后端（Spring Boot, context-path=/api）
-            target: 'http://localhost:8080/api',
+            // Node.js 后端（NestJS, 全局前缀 /api）
+            target: 'http://localhost:3000/api',
             ws: true,
           },
         },

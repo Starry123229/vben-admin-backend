@@ -8,15 +8,15 @@ export class DictTypeSaveDto {
   @IsString()
   id?: string;
 
-  @ApiProperty({ description: '字典名称' })
+  @ApiPropertyOptional({ description: '字典名称' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  name?: string;
 
-  @ApiProperty({ description: '字典编码（唯一）' })
+  @ApiPropertyOptional({ description: '字典编码（唯一）' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  code: string;
+  code?: string;
 
   @ApiPropertyOptional({ description: '状态：0 停用 / 1 启用', default: 1 })
   @IsOptional()
@@ -37,20 +37,20 @@ export class DictDataSaveDto {
   @IsString()
   id?: string;
 
-  @ApiProperty({ description: '字典类型 ID' })
+  @ApiPropertyOptional({ description: '字典类型 ID' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  typeId: string;
+  typeId?: string;
 
-  @ApiProperty({ description: '字典标签' })
+  @ApiPropertyOptional({ description: '字典标签' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  label: string;
+  label?: string;
 
-  @ApiProperty({ description: '字典值' })
+  @ApiPropertyOptional({ description: '字典值' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  value: string;
+  value?: string;
 
   @ApiPropertyOptional({ description: '排序（小在前）', default: 0 })
   @IsOptional()

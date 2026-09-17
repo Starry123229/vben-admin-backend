@@ -8,15 +8,15 @@ export class SystemConfigSaveDto {
   @IsString()
   id?: string;
 
-  @ApiProperty({ description: '参数名称' })
+  @ApiPropertyOptional({ description: '参数名称' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  name?: string;
 
-  @ApiProperty({ description: '参数键（唯一）' })
+  @ApiPropertyOptional({ description: '参数键（唯一）' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  key: string;
+  key?: string;
 
   @ApiPropertyOptional({ description: '参数值', default: '' })
   @IsOptional()

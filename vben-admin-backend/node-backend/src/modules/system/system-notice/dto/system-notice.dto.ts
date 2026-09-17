@@ -1,17 +1,16 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /** 发送通知给指定用户 */
 export class SendNoticeDto {
   @ApiProperty({ description: '接收用户 ID' })
-  @IsString()
-  @IsNotEmpty()
-  userId: string;
+  @IsOptional()
+  userId?: any;
 
   @ApiProperty({ description: '通知标题' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  title: string;
+  title?: string;
 
   @ApiPropertyOptional({ description: '通知内容' })
   @IsOptional()
@@ -37,14 +36,13 @@ export class SendNoticeDto {
 /** 按角色广播通知 */
 export class BroadcastNoticeDto {
   @ApiProperty({ description: '角色 ID' })
-  @IsString()
-  @IsNotEmpty()
-  roleId: string;
+  @IsOptional()
+  roleId?: any;
 
   @ApiProperty({ description: '通知标题' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  title: string;
+  title?: string;
 
   @ApiPropertyOptional({ description: '通知内容' })
   @IsOptional()

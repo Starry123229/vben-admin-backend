@@ -18,15 +18,15 @@ export class MenuSaveDto {
   @IsString()
   pid?: string;
 
-  @ApiProperty({ description: '路由名（唯一）' })
+  @ApiPropertyOptional({ description: '路由名（唯一）' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  name?: string;
 
-  @ApiProperty({ description: '类型：catalog/menu/button/embedded/link' })
+  @ApiPropertyOptional({ description: '类型：catalog/menu/button/embedded/link' })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  type: string;
+  type?: string;
 
   @ApiPropertyOptional({ description: '路由路径' })
   @IsOptional()

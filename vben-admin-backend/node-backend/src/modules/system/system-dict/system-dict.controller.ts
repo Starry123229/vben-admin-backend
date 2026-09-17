@@ -73,6 +73,12 @@ export class SystemDictController {
     return R.ok(await this.dictService.dataList(typeId));
   }
 
+  @Get('data/code/:code')
+  @ApiOperation({ summary: '按编码查字典数据（公开接口）' })
+  async dataByCode(@Param('code') code: string) {
+    return R.ok(await this.dictService.dataByCode(code));
+  }
+
   @Post('data')
   @ApiOperation({ summary: '新增字典数据' })
   async createData(@Body() dto: DictDataSaveDto) {

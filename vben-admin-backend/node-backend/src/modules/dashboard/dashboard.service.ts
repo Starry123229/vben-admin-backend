@@ -8,20 +8,22 @@ export class DashboardService {
 
   /** 概览统计 */
   async overview(): Promise<any> {
-    const [userCount, roleCount, menuCount, deptCount, noticeCount] = await Promise.all([
+    const [totalUsers, activeUsers, disabledUsers, totalRoles, totalMenus, totalDepts] = await Promise.all([
       this.prisma.sysUser.count(),
+      this.prisma.sysUser.count({ where: { status: 1 } }),
+      this.prisma.sysUser.count({ where: { status: 0 } }),
       this.prisma.sysRole.count(),
       this.prisma.sysMenu.count(),
       this.prisma.sysDept.count(),
-      this.prisma.sysNotice.count(),
     ]);
 
     return {
-      userCount: userCount.toString(),
-      roleCount: roleCount.toString(),
-      menuCount: menuCount.toString(),
-      deptCount: deptCount.toString(),
-      noticeCount: noticeCount.toString(),
+      totalUsers,
+      activeUsers,
+      disabledUsers,
+      totalRoles,
+      totalDepts,
+      totalMenus,
     };
   }
 
@@ -35,7 +37,7 @@ export class DashboardService {
       const count = await this.prisma.sysUser.count({
         where: { createTime: { gte: start, lte: end } },
       });
-      result.push({ date: date.format('YYYY-MM-DD'), count });
+      result.push({ month: date.format('YYYY-MM'), count });
     }
     return result;
   }
