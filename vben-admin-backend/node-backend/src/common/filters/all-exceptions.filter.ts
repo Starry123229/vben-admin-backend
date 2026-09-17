@@ -5,8 +5,8 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import type { Request, Response } from 'express';
-import { R, ServiceException } from '../result';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import { R, ServiceException } from '../result.js';
 
 /**
  * 全局异常过滤器（对标 Java 端 GlobalExceptionHandler）
@@ -18,22 +18,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const response = ctx.getResponse<FastifyReply>();
+    const request = ctx.getRequest<FastifyRequest>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = '服务器内部错误';
     let logged = false;
 
     if (exception instanceof ServiceException) {
-      // 业务异常：按携带的状态码返回
       status = exception.status;
       message = exception.message;
     } else if (exception instanceof Error) {
-      // 参数校验等
       const errName = exception.constructor.name;
       if (exception['response']) {
-        // class-validator 的 ValidationException
         status = HttpStatus.BAD_REQUEST;
         const resp = exception['response'];
         message = typeof resp === 'string' ? resp : (resp.message?.[0] || '参数校验失败');
@@ -57,6 +54,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     }
 
-    response.status(status).json(R.fail(message));
+    response.status(status).send(R.fail(message));
   }
 }

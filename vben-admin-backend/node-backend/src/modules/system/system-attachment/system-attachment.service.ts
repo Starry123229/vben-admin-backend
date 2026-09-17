@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { PageResult, ServiceException } from '../../../common/result';
-import dayjs = require('dayjs');
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PageResult, ServiceException } from '../../../common/result.js';
+import { FastifyFile } from '../../../common/interceptors/fastify-file.interceptor.js';
+import dayjs from 'dayjs';
 import { createHash } from 'crypto';
 import { join } from 'path';
 import { mkdirSync, existsSync } from 'fs';
@@ -58,7 +59,7 @@ export class SystemAttachmentService {
     };
   }
 
-  async upload(file: Express.Multer.File, uploadUserId: bigint, uploadUsername: string, bizType?: string, bizId?: string) {
+  async upload(file: FastifyFile, uploadUserId: bigint, uploadUsername: string, bizType?: string, bizId?: string) {
     if (!file) throw ServiceException.badRequest('缺少上传文件');
     const uploadDir = process.env.UPLOAD_DIR || './uploads';
     const attachmentDir = join(uploadDir, 'attachments');

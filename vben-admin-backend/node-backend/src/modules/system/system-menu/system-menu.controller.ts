@@ -10,12 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { SystemMenuService } from './system-menu.service';
-import { MenuSaveDto } from './dto/system-menu.dto';
-import { R } from '../../../common/result';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../common/guards/permission.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
+import { SystemMenuService } from './system-menu.service.js';
+import { MenuSaveDto } from './dto/system-menu.dto.js';
+import { R } from '../../../common/result.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../../common/guards/permission.guard.js';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
 
 @ApiTags('系统-菜单管理')
 @ApiBearerAuth('JWT')

@@ -10,12 +10,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { SystemRoleService } from './system-role.service';
-import { RoleSaveDto, AssignMenuDto } from './dto/system-role.dto';
-import { R } from '../../../common/result';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../common/guards/permission.guard';
-import { Permissions } from '../../../common/decorators/permissions.decorator';
+import { SystemRoleService } from './system-role.service.js';
+import { RoleSaveDto, AssignMenuDto } from './dto/system-role.dto.js';
+import { R } from '../../../common/result.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../../common/guards/permission.guard.js';
+import { Permissions } from '../../../common/decorators/permissions.decorator.js';
 
 @ApiTags('系统-角色管理')
 @ApiBearerAuth()

@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Put, Delete, Body, Query, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { SystemDictService } from './system-dict.service';
-import { DictTypeSaveDto, DictDataSaveDto } from './dto/system-dict.dto';
-import { R } from '../../../common/result';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../common/guards/permission.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
+import { SystemDictService } from './system-dict.service.js';
+import { DictTypeSaveDto, DictDataSaveDto } from './dto/system-dict.dto.js';
+import { R } from '../../../common/result.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../../common/guards/permission.guard.js';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
 
 @ApiTags('系统-字典管理')
 @ApiBearerAuth('JWT')

@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Put, Delete, Query, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { SystemWorkflowService } from './system-workflow.service';
-import { R } from '../../../common/result';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../common/guards/permission.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import { SystemWorkflowService } from './system-workflow.service.js';
+import { R } from '../../../common/result.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../../common/guards/permission.guard.js';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 
 @ApiTags('系统-工作流')
 @ApiBearerAuth('JWT')

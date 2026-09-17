@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { PageResult } from '../../../common/result';
-import dayjs = require('dayjs');
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PageResult } from '../../../common/result.js';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class SystemLogService {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { PageResult, ServiceException } from '../../../common/result';
-import { RoleSaveDto, AssignMenuDto } from './dto/system-role.dto';
-import dayjs = require('dayjs');
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PageResult, ServiceException } from '../../../common/result.js';
+import { RoleSaveDto, AssignMenuDto } from './dto/system-role.dto.js';
+import dayjs from 'dayjs';
 
 /**
  * 系统角色管理服务（对标 Java 端 SysRoleService）

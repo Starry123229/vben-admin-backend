@@ -1,10 +1,10 @@
 import { Controller, Get, Delete, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { SystemLogService } from './system-log.service';
-import { R } from '../../../common/result';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../common/guards/permission.guard';
-import { Roles } from '../../../common/decorators/roles.decorator';
+import { SystemLogService } from './system-log.service.js';
+import { R } from '../../../common/result.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../../common/guards/permission.guard.js';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
 
 @ApiTags('系统-日志管理')
 @ApiBearerAuth('JWT')

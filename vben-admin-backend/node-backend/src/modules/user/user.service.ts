@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { AuthService } from '../auth/auth.service';
-import { ServiceException } from '../../common/result';
-import { comparePassword, hashPassword } from '../../common/utils/password';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { AuthService } from '../auth/auth.service.js';
+import { ServiceException } from '../../common/result.js';
+import { comparePassword, hashPassword } from '../../common/utils/password.js';
+import { FastifyFile } from '../../common/interceptors/fastify-file.interceptor.js';
 import * as path from 'path';
 import * as fs from 'fs';
-import dayjs = require('dayjs');
+import dayjs from 'dayjs';
 
 /**
  * 用户服务（对标 Java 端 UserController + SysUserService）
@@ -83,7 +84,7 @@ export class UserService {
   }
 
   /** POST /user/avatar：上传头像 */
-  async saveAvatar(userId: bigint, file: Express.Multer.File): Promise<string> {
+  async saveAvatar(userId: bigint, file: FastifyFile): Promise<string> {
     // 校验文件类型
     const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml'];
     if (!allowedTypes.includes(file.mimetype)) {

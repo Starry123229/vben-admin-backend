@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { OnlineController } from './online.controller';
-import { OnlineUserService } from './online.service';
+import { OnlineController } from './online.controller.js';
+import { OnlineUserService } from './online.service.js';
 
 @Module({
   imports: [JwtModule.register({ secret: process.env.JWT_ACCESS_SECRET || 'dev_secret' })],

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { MenuController } from './menu.controller';
-import { MenuService } from './menu.service';
+import { MenuController } from './menu.controller.js';
+import { MenuService } from './menu.service.js';
 
 @Module({
   imports: [

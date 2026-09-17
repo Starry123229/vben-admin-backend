@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { SystemMenuController } from './system-menu.controller';
-import { SystemMenuService } from './system-menu.service';
+import { SystemMenuController } from './system-menu.controller.js';
+import { SystemMenuService } from './system-menu.service.js';
 
 @Module({
   imports: [

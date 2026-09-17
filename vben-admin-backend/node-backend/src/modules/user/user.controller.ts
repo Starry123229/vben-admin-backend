@@ -6,15 +6,15 @@ import {
   Body,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
-import { UserService } from './user.service';
-import { ChangePasswordDto, ProfileUpdateDto } from './dto/user.dto';
-import { R, ServiceException } from '../../common/result';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UserService } from './user.service.js';
+import { ChangePasswordDto, ProfileUpdateDto } from './dto/user.dto.js';
+import { R, ServiceException } from '../../common/result.js';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
+import { FastifyFileInterceptor, FastifyFile } from '../../common/interceptors/fastify-file.interceptor.js';
+import { FastifyFileDecorator } from '../../common/decorators/fastify-file.decorator.js';
 
 @ApiTags('用户')
 @ApiBearerAuth('JWT')
@@ -64,7 +64,7 @@ export class UserController {
   /** POST /user/avatar */
   @Post('avatar')
   @ApiOperation({ summary: '上传头像' })
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  @UseInterceptors(new FastifyFileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -74,7 +74,7 @@ export class UserController {
   })
   async uploadAvatar(
     @CurrentUser('id') userId: string,
-    @UploadedFile() file: Express.Multer.File,
+    @FastifyFileDecorator() file: FastifyFile,
   ) {
     if (!file) throw ServiceException.badRequest('缺少上传文件: file');
     const avatar = await this.userService.saveAvatar(BigInt(userId), file);

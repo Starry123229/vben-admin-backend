@@ -1,11 +1,11 @@
 import { Controller, Get, Delete, Query, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { OnlineUserService } from './online.service';
-import { R, ServiceException } from '../../common/result';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../common/guards/permission.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { OnlineUserService } from './online.service.js';
+import { R, ServiceException } from '../../common/result.js';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../common/guards/permission.guard.js';
+import { Roles } from '../../common/decorators/roles.decorator.js';
+import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 
 @ApiTags('系统-在线用户')
 @ApiBearerAuth('JWT')

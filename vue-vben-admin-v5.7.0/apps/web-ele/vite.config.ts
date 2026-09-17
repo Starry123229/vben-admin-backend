@@ -16,7 +16,7 @@ export default defineConfig(async () => {
           '/api': {
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
-            // 自建 Java 后端（Spring Boot, context-path=/api）
+            // Node.js 后端（NestJS + Fastify, 全局前缀 /api）
             target: 'http://localhost:8080/api',
             ws: true,
           },

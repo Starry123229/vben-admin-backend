@@ -61,6 +61,9 @@ dist/
 dist-ssr/
 *.local
 
+# TypeScript 增量编译缓存
+*.tsbuildinfo
+
 # 缓存
 .turbo/
 .vite/

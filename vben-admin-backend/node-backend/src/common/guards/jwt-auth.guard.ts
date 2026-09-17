@@ -4,8 +4,8 @@ import {
   ExecutionContext,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ServiceException } from '../result';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { ServiceException } from '../result.js';
 
 /**
  * JWT 鉴权 Guard（对标 Java 端 SaInterceptor）

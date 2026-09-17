@@ -9,8 +9,8 @@ import * as jwt from 'jsonwebtoken';
 export function signAccessToken(userId: string | bigint): string {
   return jwt.sign(
     { userId: userId.toString() },
-    process.env.JWT_ACCESS_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || '2h' },
+    process.env.JWT_ACCESS_SECRET as jwt.Secret,
+    { expiresIn: (process.env.ACCESS_TOKEN_EXPIRES || '2h') as any },
   );
 }
 

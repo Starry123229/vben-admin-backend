@@ -10,19 +10,19 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import type { Request, Response } from 'express';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import { AuthService } from './auth.service.js';
+import { LoginDto } from './dto/login.dto.js';
 import {
   RegisterDto,
   SendSmsDto,
   PhoneLoginDto,
   SendResetCodeDto,
   ForgotResetDto,
-} from './dto/auth-ext.dto';
-import { R } from '../../common/result';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+} from './dto/auth-ext.dto.js';
+import { R } from '../../common/result.js';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 
 @ApiTags('认证')
 @Controller('auth')
@@ -45,8 +45,8 @@ export class AuthController {
   @ApiOperation({ summary: '账号密码登录' })
   async login(
     @Body() dto: LoginDto,
-    @Req() request: Request,
-    @Res({ passthrough: true }) reply: Response,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     const accessToken = await this.authService.login(
       dto.username,
@@ -60,18 +60,18 @@ export class AuthController {
   @Post('refresh')
   @ApiOperation({ summary: '刷新 accessToken（Cookie 中的 refreshToken）' })
   async refresh(
-    @Req() request: Request,
-    @Res({ passthrough: true }) reply: Response,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     const token = await this.authService.refresh(request, reply);
-    reply.type('text/plain').send(token);
+    reply.header('Content-Type', 'text/plain').send(token);
   }
 
   @Post('logout')
   @ApiOperation({ summary: '退出登录' })
   async logout(
-    @Req() request: Request,
-    @Res({ passthrough: true }) reply: Response,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     await this.authService.logout(request, reply);
     return R.ok('');
@@ -91,8 +91,8 @@ export class AuthController {
   @ApiOperation({ summary: '注册并自动登录' })
   async register(
     @Body() dto: RegisterDto,
-    @Req() request: Request,
-    @Res({ passthrough: true }) reply: Response,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     if (process.env.LOGIN_METHODS_REGISTER !== 'true') {
       throw new Error('注册已关闭');
@@ -114,8 +114,8 @@ export class AuthController {
   @ApiOperation({ summary: '手机号验证码登录' })
   async phoneLogin(
     @Body() dto: PhoneLoginDto,
-    @Req() request: Request,
-    @Res({ passthrough: true }) reply: Response,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     if (process.env.LOGIN_METHODS_PHONE !== 'true') {
       throw new Error('手机号登录已关闭');
@@ -138,8 +138,8 @@ export class AuthController {
   @ApiQuery({ name: 'ticket', description: '二维码 ticket' })
   async pollQr(
     @Query('ticket') ticket: string,
-    @Req() request: Request,
-    @Res({ passthrough: true }) reply: Response,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     if (process.env.LOGIN_METHODS_QRCODE !== 'true') {
       throw new Error('扫码登录已关闭');
@@ -160,8 +160,8 @@ export class AuthController {
   @ApiOperation({ summary: 'OAuth 回调登录' })
   async oauthCallback(
     @Param('provider') provider: string,
-    @Req() request: Request,
-    @Res({ passthrough: true }) reply: Response,
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     if (process.env.LOGIN_METHODS_OAUTH !== 'true') {
       throw new Error('第三方登录已关闭');

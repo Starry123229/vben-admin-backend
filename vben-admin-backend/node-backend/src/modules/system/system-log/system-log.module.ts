@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { SystemLogController } from './system-log.controller';
-import { SystemLogService } from './system-log.service';
+import { SystemLogController } from './system-log.controller.js';
+import { SystemLogService } from './system-log.service.js';
 
 @Module({
   imports: [JwtModule.register({ secret: process.env.JWT_ACCESS_SECRET || 'dev_secret' })],

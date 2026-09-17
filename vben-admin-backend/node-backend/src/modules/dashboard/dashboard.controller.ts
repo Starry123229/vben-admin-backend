@@ -1,8 +1,8 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { DashboardService } from './dashboard.service';
-import { R } from '../../common/result';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { DashboardService } from './dashboard.service.js';
+import { R } from '../../common/result.js';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 
 @ApiTags('仪表盘')
 @ApiBearerAuth('JWT')

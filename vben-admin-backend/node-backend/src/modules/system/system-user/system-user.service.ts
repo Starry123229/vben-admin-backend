@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { PageResult, ServiceException } from '../../../common/result';
-import { hashPassword } from '../../../common/utils/password';
-import { SystemUserSaveDto } from './dto/system-user.dto';
-import dayjs = require('dayjs');
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import { PageResult, ServiceException } from '../../../common/result.js';
+import { hashPassword } from '../../../common/utils/password.js';
+import { SystemUserSaveDto } from './dto/system-user.dto.js';
+import dayjs from 'dayjs';
 
 /**
  * 系统用户管理服务（对标 Java 端 SysUserService）

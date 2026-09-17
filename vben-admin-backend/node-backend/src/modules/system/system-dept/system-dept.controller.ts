@@ -2,13 +2,13 @@ import {
   Controller, Get, Post, Put, Delete, Body, Query, Param, UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { SystemDeptService } from './system-dept.service';
-import { DeptSaveDto } from './dto/system-dept.dto';
-import { R } from '../../../common/result';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../common/guards/permission.guard';
-import { Permissions } from '../../../common/decorators/permissions.decorator';
-import { Roles } from '../../../common/decorators/roles.decorator';
+import { SystemDeptService } from './system-dept.service.js';
+import { DeptSaveDto } from './dto/system-dept.dto.js';
+import { R } from '../../../common/result.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../../common/guards/permission.guard.js';
+import { Permissions } from '../../../common/decorators/permissions.decorator.js';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
 
 @ApiTags('系统-部门管理')
 @ApiBearerAuth('JWT')

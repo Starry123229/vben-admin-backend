@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { ServiceException } from '../../../common/result';
-import { DeptSaveDto } from './dto/system-dept.dto';
-import dayjs = require('dayjs');
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import { ServiceException } from '../../../common/result.js';
+import { DeptSaveDto } from './dto/system-dept.dto.js';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class SystemDeptService {

@@ -9,8 +9,8 @@ export default defineConfig(async () => {
           '/api': {
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
-            // Node.js 后端（NestJS, 全局前缀 /api）
-            target: 'http://localhost:3000/api',
+            // Node.js 后端（NestJS + Fastify, 全局前缀 /api）
+            target: 'http://localhost:8080/api',
             ws: true,
           },
         },

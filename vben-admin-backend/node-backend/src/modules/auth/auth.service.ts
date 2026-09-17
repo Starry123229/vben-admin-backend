@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ServiceException } from '../../common/result';
-import { comparePassword, hashPassword } from '../../common/utils/password';
-import { signAccessToken, generateRefreshToken, sha256 } from '../../common/utils/jwt';
-import { setRefreshCookie, clearRefreshCookie, readRefreshCookie } from '../../common/utils/cookie';
-import { getClientIp, parseBrowser, parseOs } from '../../common/utils/ua';
-import type { Request, Response } from 'express';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { ServiceException } from '../../common/result.js';
+import { comparePassword, hashPassword } from '../../common/utils/password.js';
+import { signAccessToken, generateRefreshToken, sha256 } from '../../common/utils/jwt.js';
+import { setRefreshCookie, clearRefreshCookie, readRefreshCookie } from '../../common/utils/cookie.js';
+import { getClientIp, parseBrowser, parseOs } from '../../common/utils/ua.js';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import { randomBytes } from 'crypto';
-import dayjs = require('dayjs');
+import dayjs from 'dayjs';
 
 /**
  * 认证服务（对标 Java 端 AuthService）
@@ -22,7 +22,7 @@ export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
 
   /** 登录：校验凭据 → 签发双 token */
-  async login(username: string, password: string, request: Request, reply: Response): Promise<string> {
+  async login(username: string, password: string, request: FastifyRequest, reply: FastifyReply): Promise<string> {
     if (!username || !password) {
       throw ServiceException.badRequest('Username and password are required');
     }
@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   /** 按用户 ID 直接签发双 token（注册/手机号/二维码/第三方登录复用） */
-  async loginByUserId(userId: bigint, request: Request, reply: Response): Promise<string> {
+  async loginByUserId(userId: bigint, request: FastifyRequest, reply: FastifyReply): Promise<string> {
     const user = await this.prisma.sysUser.findUnique({ where: { id: userId } });
     if (!user) throw ServiceException.forbidden('账号不存在');
     if (user.status === 0) throw ServiceException.forbidden('该账号已被禁用，请联系管理员');
@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   /** 刷新 accessToken：校验 Cookie 中 refreshToken → 轮换 → 返回裸 token 字符串 */
-  async refresh(request: Request, reply: Response): Promise<string> {
+  async refresh(request: FastifyRequest, reply: FastifyReply): Promise<string> {
     const token = readRefreshCookie(request);
     if (!token) {
       clearRefreshCookie(reply);
@@ -84,7 +84,7 @@ export class AuthService {
   }
 
   /** 登出：作废 refresh、清理 Cookie；恒成功 */
-  async logout(request: Request, reply: Response): Promise<void> {
+  async logout(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     const token = readRefreshCookie(request);
     if (token) {
       const record = await this.prisma.sysRefreshToken.findUnique({
@@ -156,7 +156,7 @@ export class AuthService {
   // ============================== 扩展认证方法
 
   /** 注册：创建用户 → 自动分配 user 角色 → 签发双 token */
-  async register(data: { username: string; password: string; realName?: string; phone?: string; email?: string }, request: Request, reply: Response): Promise<string> {
+  async register(data: { username: string; password: string; realName?: string; phone?: string; email?: string }, request: FastifyRequest, reply: FastifyReply): Promise<string> {
     if (!data.username || !data.password) throw ServiceException.badRequest('用户名和密码不能为空');
     const dup = await this.prisma.sysUser.count({ where: { username: data.username } });
     if (dup > 0) throw ServiceException.badRequest('用户名已存在');
@@ -189,7 +189,7 @@ export class AuthService {
   }
 
   /** 手机号 + 验证码登录（新手机号自动注册） */
-  async phoneLogin(phone: string, code: string, request: Request, reply: Response): Promise<string> {
+  async phoneLogin(phone: string, code: string, request: FastifyRequest, reply: FastifyReply): Promise<string> {
     if (!phone || !code) throw ServiceException.badRequest('手机号和验证码不能为空');
     // 开发期验证码固定为 123456
     if (code !== '123456') throw ServiceException.badRequest('验证码错误');
@@ -226,7 +226,7 @@ export class AuthService {
   }
 
   /** 轮询二维码状态 */
-  async pollQrTicket(ticket: string, request: Request, reply: Response): Promise<{ ticket: string; status: string; accessToken?: string }> {
+  async pollQrTicket(ticket: string, request: FastifyRequest, reply: FastifyReply): Promise<{ ticket: string; status: string; accessToken?: string }> {
     const t = this.qrTickets.get(ticket);
     if (!t) throw ServiceException.badRequest('ticket 无效或已过期');
     if (t.status === 'pending') return { ticket, status: 'pending' };
@@ -257,7 +257,7 @@ export class AuthService {
   }
 
   /** OAuth 回调登录（mock：自动创建或绑定用户） */
-  async oauthCallback(provider: string, request: Request, reply: Response): Promise<string> {
+  async oauthCallback(provider: string, request: FastifyRequest, reply: FastifyReply): Promise<string> {
     // mock：以 oauth_{provider} 为用户名查找或创建
     const username = `oauth_${provider}`;
     let user = await this.prisma.sysUser.findFirst({ where: { username } });
@@ -297,7 +297,7 @@ export class AuthService {
   // ---------------------------------------------------------------------------- 私有方法
 
   /** 生成随机 refreshToken，SHA-256 入库，并写入 HttpOnly Cookie */
-  private async issueRefreshToken(userId: bigint, reply: Response): Promise<void> {
+  private async issueRefreshToken(userId: bigint, reply: FastifyReply): Promise<void> {
     const token = generateRefreshToken();
     const refreshDays = Number(process.env.REFRESH_TOKEN_DAYS || 7);
 
@@ -317,7 +317,7 @@ export class AuthService {
   private async recordLoginLog(
     userId: bigint | null,
     username: string,
-    request: Request,
+    request: FastifyRequest,
     loginType: string,
     status: number,
     message: string,

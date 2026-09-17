@@ -10,13 +10,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { SystemUserService } from './system-user.service';
-import { SystemUserSaveDto, ResetPasswordDto } from './dto/system-user.dto';
-import { R } from '../../../common/result';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../common/guards/permission.guard';
-import { Permissions } from '../../../common/decorators/permissions.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import { SystemUserService } from './system-user.service.js';
+import { SystemUserSaveDto, ResetPasswordDto } from './dto/system-user.dto.js';
+import { R } from '../../../common/result.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../../common/guards/permission.guard.js';
+import { Permissions } from '../../../common/decorators/permissions.decorator.js';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 
 @ApiTags('系统-用户管理')
 @ApiBearerAuth()

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { ServiceException } from '../../../common/result';
-import { MenuSaveDto } from './dto/system-menu.dto';
-import dayjs = require('dayjs');
+import { PrismaService } from '../../../prisma/prisma.service.js';
+import { ServiceException } from '../../../common/result.js';
+import { MenuSaveDto } from './dto/system-menu.dto.js';
+import dayjs from 'dayjs';
 
 /**
  * 系统菜单管理服务（对标 Java 端 SysMenuService）

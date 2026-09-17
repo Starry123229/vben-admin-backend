@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { SystemConfigController } from './system-config.controller';
-import { SystemConfigService } from './system-config.service';
+import { SystemConfigController } from './system-config.controller.js';
+import { SystemConfigService } from './system-config.service.js';
 
 @Module({
   imports: [JwtModule.register({ secret: process.env.JWT_ACCESS_SECRET || 'dev_secret' })],

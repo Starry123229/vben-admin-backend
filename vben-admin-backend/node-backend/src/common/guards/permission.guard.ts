@@ -6,9 +6,9 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ROLES_KEY } from '../decorators/roles.decorator';
+import { PERMISSIONS_KEY } from '../decorators/permissions.decorator.js';
+import { PrismaService } from '../../prisma/prisma.service.js';
+import { ROLES_KEY } from '../decorators/roles.decorator.js';
 
 /**
  * 权限 Guard（对标 Java 端 @SaCheckPermission + @SaCheckRole）

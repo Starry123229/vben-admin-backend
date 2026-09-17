@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { SystemWorkflowController } from './system-workflow.controller';
-import { SystemWorkflowService } from './system-workflow.service';
+import { SystemWorkflowController } from './system-workflow.controller.js';
+import { SystemWorkflowService } from './system-workflow.service.js';
 
 @Module({
   imports: [JwtModule.register({ secret: process.env.JWT_ACCESS_SECRET || 'dev_secret' })],

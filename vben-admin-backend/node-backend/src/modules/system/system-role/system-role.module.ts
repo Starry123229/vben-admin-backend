@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { SystemRoleController } from './system-role.controller';
-import { SystemRoleService } from './system-role.service';
+import { SystemRoleController } from './system-role.controller.js';
+import { SystemRoleService } from './system-role.service.js';
 
 @Module({
   imports: [

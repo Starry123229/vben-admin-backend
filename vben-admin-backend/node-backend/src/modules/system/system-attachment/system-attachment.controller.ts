@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Delete, Query, Param, UseGuards, UseInterceptors, UploadedFile, Body } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Controller, Get, Post, Delete, Query, Param, UseGuards, UseInterceptors, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
-import { SystemAttachmentService } from './system-attachment.service';
-import { R } from '../../../common/result';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../common/guards/permission.guard';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import { SystemAttachmentService } from './system-attachment.service.js';
+import { R } from '../../../common/result.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../../common/guards/permission.guard.js';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
+import { FastifyFileInterceptor, FastifyFile } from '../../../common/interceptors/fastify-file.interceptor.js';
+import { FastifyFileDecorator } from '../../../common/decorators/fastify-file.decorator.js';
 
 @ApiTags('系统-附件管理')
 @ApiBearerAuth('JWT')
@@ -37,7 +38,7 @@ export class SystemAttachmentController {
 
   @Post('upload')
   @ApiOperation({ summary: '上传文件' })
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 20 * 1024 * 1024 } }))
+  @UseInterceptors(new FastifyFileInterceptor('file', { limits: { fileSize: 20 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -50,7 +51,7 @@ export class SystemAttachmentController {
     },
   })
   async upload(
-    @UploadedFile() file: Express.Multer.File,
+    @FastifyFileDecorator() file: FastifyFile,
     @CurrentUser('id') userId: string,
     @CurrentUser('username') username: string,
     @Body('bizType') bizType?: string,

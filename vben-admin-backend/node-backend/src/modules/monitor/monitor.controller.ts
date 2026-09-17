@@ -1,10 +1,10 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { MonitorService } from './monitor.service';
-import { R } from '../../common/result';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../common/guards/permission.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
+import { MonitorService } from './monitor.service.js';
+import { R } from '../../common/result.js';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
+import { PermissionGuard } from '../../common/guards/permission.guard.js';
+import { Roles } from '../../common/decorators/roles.decorator.js';
 
 @ApiTags('系统-监控管理')
 @ApiBearerAuth('JWT')

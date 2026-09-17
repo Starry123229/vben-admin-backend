@@ -1,25 +1,25 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './modules/user/user.module';
-import { MenuModule } from './modules/menu/menu.module';
-import { SystemUserModule } from './modules/system/system-user/system-user.module';
-import { SystemRoleModule } from './modules/system/system-role/system-role.module';
-import { SystemMenuModule } from './modules/system/system-menu/system-menu.module';
-import { SystemDeptModule } from './modules/system/system-dept/system-dept.module';
-import { SystemDictModule } from './modules/system/system-dict/system-dict.module';
-import { SystemConfigModule } from './modules/system/system-config/system-config.module';
-import { SystemNoticeModule } from './modules/system/system-notice/system-notice.module';
-import { SystemJobModule } from './modules/system/system-job/system-job.module';
-import { SystemLogModule } from './modules/system/system-log/system-log.module';
-import { OnlineModule } from './modules/online/online.module';
-import { MonitorModule } from './modules/monitor/monitor.module';
-import { DashboardModule } from './modules/dashboard/dashboard.module';
-import { SystemMessageModule } from './modules/system/system-message/system-message.module';
-import { SystemAttachmentModule } from './modules/system/system-attachment/system-attachment.module';
-import { SystemAuditLogModule } from './modules/system/system-audit-log/system-audit-log.module';
-import { SystemWorkflowModule } from './modules/system/system-workflow/system-workflow.module';
+import { PrismaModule } from './prisma/prisma.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
+import { UserModule } from './modules/user/user.module.js';
+import { MenuModule } from './modules/menu/menu.module.js';
+import { SystemUserModule } from './modules/system/system-user/system-user.module.js';
+import { SystemRoleModule } from './modules/system/system-role/system-role.module.js';
+import { SystemMenuModule } from './modules/system/system-menu/system-menu.module.js';
+import { SystemDeptModule } from './modules/system/system-dept/system-dept.module.js';
+import { SystemDictModule } from './modules/system/system-dict/system-dict.module.js';
+import { SystemConfigModule } from './modules/system/system-config/system-config.module.js';
+import { SystemNoticeModule } from './modules/system/system-notice/system-notice.module.js';
+import { SystemJobModule } from './modules/system/system-job/system-job.module.js';
+import { SystemLogModule } from './modules/system/system-log/system-log.module.js';
+import { OnlineModule } from './modules/online/online.module.js';
+import { MonitorModule } from './modules/monitor/monitor.module.js';
+import { DashboardModule } from './modules/dashboard/dashboard.module.js';
+import { SystemMessageModule } from './modules/system/system-message/system-message.module.js';
+import { SystemAttachmentModule } from './modules/system/system-attachment/system-attachment.module.js';
+import { SystemAuditLogModule } from './modules/system/system-audit-log/system-audit-log.module.js';
+import { SystemWorkflowModule } from './modules/system/system-workflow/system-workflow.module.js';
 
 @Module({
   imports: [
