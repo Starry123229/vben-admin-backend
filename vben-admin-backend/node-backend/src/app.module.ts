@@ -20,6 +20,8 @@ import { SystemMessageModule } from './modules/system/system-message/system-mess
 import { SystemAttachmentModule } from './modules/system/system-attachment/system-attachment.module.js';
 import { SystemAuditLogModule } from './modules/system/system-audit-log/system-audit-log.module.js';
 import { SystemWorkflowModule } from './modules/system/system-workflow/system-workflow.module.js';
+import { AvatarModule } from './modules/avatar/avatar.module.js';
+import { FileModule } from './modules/file/file.module.js';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { SystemWorkflowModule } from './modules/system/system-workflow/system-wo
     SystemAttachmentModule,
     SystemAuditLogModule,
     SystemWorkflowModule,
+    AvatarModule,
+    FileModule,
   ],
   providers: [],
 })

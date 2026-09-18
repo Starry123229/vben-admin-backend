@@ -5,7 +5,7 @@ import { FastifyFile } from '../../../common/interceptors/fastify-file.intercept
 import dayjs from 'dayjs';
 import { createHash } from 'crypto';
 import { join } from 'path';
-import { mkdirSync, existsSync } from 'fs';
+import { mkdirSync, existsSync, writeFileSync, unlinkSync } from 'fs';
 
 @Injectable()
 export class SystemAttachmentService {
@@ -71,7 +71,6 @@ export class SystemAttachmentService {
     const fullPath = join(uploadDir, storagePath);
 
     // 简单写入文件（生产环境应使用对象存储）
-    const { writeFileSync } = require('fs');
     writeFileSync(fullPath, file.buffer);
 
     const attachment = await this.prisma.sysAttachment.create({
@@ -113,7 +112,6 @@ export class SystemAttachmentService {
     if (!a) throw ServiceException.badRequest('附件不存在');
     // 尝试删除物理文件
     try {
-      const { unlinkSync } = require('fs');
       const fullPath = join(process.env.UPLOAD_DIR || './uploads', a.storagePath);
       if (existsSync(fullPath)) unlinkSync(fullPath);
     } catch { /* 忽略文件删除失败 */ }

@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 /**
  * JWT 工具（对标 Java 端 AuthService 中的 token 管理）

@@ -133,6 +133,22 @@ export class AuthController {
     return R.ok(await this.authService.createQrTicket());
   }
 
+  @Post('qr/scan')
+  @ApiOperation({ summary: '已登录用户扫码确认（需 Bearer token）' })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @ApiQuery({ name: 'ticket', description: '二维码 ticket' })
+  async scanQr(
+    @Query('ticket') ticket: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    if (process.env.LOGIN_METHODS_QRCODE !== 'true') {
+      throw new Error('扫码登录已关闭');
+    }
+    await this.authService.scanQrTicket(ticket, BigInt(userId));
+    return R.ok();
+  }
+
   @Get('qr/poll')
   @ApiOperation({ summary: '轮询二维码登录状态' })
   @ApiQuery({ name: 'ticket', description: '二维码 ticket' })

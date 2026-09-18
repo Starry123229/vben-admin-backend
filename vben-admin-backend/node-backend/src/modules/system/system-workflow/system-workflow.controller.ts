@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Query, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Query, Param, UseGuards, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { SystemWorkflowService } from './system-workflow.service.js';
 import { R } from '../../../common/result.js';
@@ -30,14 +30,14 @@ export class SystemWorkflowController {
   @Post()
   @ApiOperation({ summary: '新建工作流定义' })
   @Roles('super', 'admin')
-  async create(@Query() data: any) {
+  async create(@Body() data: any) {
     return R.ok(await this.workflowService.create(data));
   }
 
   @Put(':id')
   @ApiOperation({ summary: '编辑工作流定义' })
   @Roles('super', 'admin')
-  async update(@Param('id') id: string, @Query() data: any) {
+  async update(@Param('id') id: string, @Body() data: any) {
     await this.workflowService.update(id, data);
     return R.ok();
   }
