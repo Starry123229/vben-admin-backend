@@ -99,6 +99,7 @@ public class SysMenuService {
         if (!List.of("dir", "menu", "button").contains(req.getType())) {
             throw ServiceException.badRequest("菜单类型无效，仅支持 dir/menu/button");
         }
+        checkPathRequired(req.getType(), req.getPath(), req.getComponent());
         checkUnique(req.getName(), req.getPath(), null);
         SysMenu menu = toEntity(req, null);
         menu.setCreateTime(LocalDateTime.now());
@@ -117,8 +118,28 @@ public class SysMenuService {
         if (menu == null) {
             throw ServiceException.badRequest("菜单不存在");
         }
+        String type = StringUtils.hasText(req.getType()) ? req.getType() : menu.getType();
+        String path = req.getPath() != null ? req.getPath() : menu.getPath();
+        String component = req.getComponent() != null ? req.getComponent() : menu.getComponent();
+        checkPathRequired(type, path, component);
         checkUnique(req.getName(), req.getPath(), req.getId());
         menuMapper.updateById(toEntity(req, menu));
+    }
+
+    /**
+     * 路由完整性校验：按钮无需路径；目录/菜单必须填写路由路径，菜单还需组件路径。
+     * 避免产生前端不可见、也无法在菜单树中管理的脏数据。
+     */
+    private void checkPathRequired(String type, String path, String component) {
+        if ("button".equals(type)) {
+            return;
+        }
+        if (!StringUtils.hasText(path)) {
+            throw ServiceException.badRequest("路由路径不能为空");
+        }
+        if ("menu".equals(type) && !StringUtils.hasText(component)) {
+            throw ServiceException.badRequest("组件路径不能为空");
+        }
     }
 
     /** 路由名/路径唯一性前置校验：把数据库唯一键冲突转成可读的业务提示 */
