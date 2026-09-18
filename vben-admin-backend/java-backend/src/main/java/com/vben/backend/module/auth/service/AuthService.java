@@ -17,11 +17,13 @@ import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysRoleMenuMapper;
 import com.vben.backend.module.system.mapper.SysUserMapper;
 import com.vben.backend.module.system.mapper.SysUserRoleMapper;
+import com.vben.backend.module.system.service.SysConfigService;
 import com.vben.backend.module.system.util.IpLocationUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,8 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 认证服务：双 token 方案。
@@ -43,6 +47,7 @@ import java.util.List;
  *
  * @author Starry
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -57,7 +62,15 @@ public class AuthService {
     private final SysMenuMapper menuMapper;
     private final SysRefreshTokenMapper refreshTokenMapper;
     private final SysLoginLogMapper loginLogMapper;
+    private final SysConfigService configService;
     private final BCryptPasswordEncoder passwordEncoder;
+
+    /**
+     * 按用户的登录失败计数与锁定（内存实现，单机部署）。
+     * username -> [0]失败窗口起始毫秒 [1]窗口内失败次数 [2]锁定截止毫秒（0=未锁定）
+     * 参数来自 sys_config：sys.login.max-fail-count（默认5）、sys.login.lock-minutes（默认30）。
+     */
+    private final Map<String, long[]> loginFailCache = new ConcurrentHashMap<>();
 
     @Value("${vben.auth.refresh-token-days:7}")
     private int refreshDays;
@@ -68,18 +81,69 @@ public class AuthService {
     @Value("${vben.auth.cookie-same-site:Lax}")
     private String cookieSameSite;
 
-    /** 登录：校验凭据 → 签发双 token */
+    /** 登录：校验凭据 → 签发双 token（含按用户失败锁定校验） */
     public String login(String username, String password, HttpServletResponse response) {
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
             throw ServiceException.badRequest("Username and password are required");
         }
+        checkUserLock(username);
         SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
                 .eq(SysUser::getUsername, username));
         if (user == null || !passwordEncoder.matches(password, user.getPasswordHash())) {
+            recordLoginFail(username);
             recordLoginLog(user != null ? user.getId() : null, username, getCurrentRequest(), "account", 0, "用户名或密码错误");
             throw ServiceException.forbidden("Username or password is incorrect.");
         }
+        clearLoginFail(username);
         return loginByUserId(user.getId(), response);
+    }
+
+    /**
+     * 校验账号是否处于锁定状态，锁定中则拒绝登录。
+     */
+    private void checkUserLock(String username) {
+        long[] entry = loginFailCache.get(username);
+        if (entry != null && entry[2] > System.currentTimeMillis()) {
+            long minutesLeft = (entry[2] - System.currentTimeMillis()) / 60000L + 1;
+            throw ServiceException.badRequest("失败次数过多，账号已锁定，请 " + minutesLeft + " 分钟后再试");
+        }
+    }
+
+    /**
+     * 记录一次登录失败：窗口内达到阈值则锁定该账号。
+     */
+    private void recordLoginFail(String username) {
+        int maxFail = intConfig("sys.login.max-fail-count", 5);
+        int lockMinutes = intConfig("sys.login.lock-minutes", 30);
+        long now = System.currentTimeMillis();
+        loginFailCache.compute(username, (k, v) -> {
+            if (v == null || now - v[0] > 30 * 60_000L) {
+                v = new long[]{now, 0, 0};
+            }
+            v[1]++;
+            if (v[1] >= maxFail) {
+                v[2] = now + lockMinutes * 60_000L;
+                v[1] = 0;
+                log.warn("账号 [{}] 连续登录失败达 {} 次，锁定 {} 分钟", username, maxFail, lockMinutes);
+            }
+            return v;
+        });
+    }
+
+    /**
+     * 登录成功后清除失败计数。
+     */
+    private void clearLoginFail(String username) {
+        loginFailCache.remove(username);
+    }
+
+    private int intConfig(String key, int defVal) {
+        try {
+            String v = configService.getValueByKey(key);
+            return v != null && !v.isBlank() ? Integer.parseInt(v.trim()) : defVal;
+        } catch (Exception e) {
+            return defVal;
+        }
     }
 
     /** 按用户 ID 直接签发双 token（注册/手机号/二维码/第三方登录复用）。禁用用户阻止登录。 */
