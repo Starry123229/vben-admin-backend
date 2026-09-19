@@ -1,9 +1,9 @@
 allowBuilds:
-  '@prisma/engines': set this to true or false
-  '@scarf/scarf': set this to true or false
-  '@swc/core': set this to true or false
-  esbuild: set this to true or false
-  prisma: set this to true or false
+  '@prisma/engines': true
+  '@scarf/scarf': true
+  '@swc/core': true
+  esbuild: true
+  prisma: true
 onlyBuiltDependencies:
   - "@prisma/client"
   - "@prisma/engines"

@@ -2,6 +2,7 @@ import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
+  HttpException,
   HttpStatus,
   Logger,
 } from '@nestjs/common';
@@ -28,6 +29,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof ServiceException) {
       status = exception.status;
       message = exception.message;
+    } else if (exception instanceof HttpException) {
+      // NestJS 内置 HttpException（ForbiddenException/NotFoundException/ValidationFilter 等）：
+      // 保留其真实状态码与消息，避免 403/404 被降级为 400「无」
+      status = exception.getStatus();
+      const resp = exception.getResponse() as string | Record<string, any>;
+      const raw = typeof resp === 'string' ? resp : (resp as Record<string, any>).message;
+      message = Array.isArray(raw)
+        ? (raw[0] ?? exception.message)
+        : (raw ?? exception.message);
     } else if (exception instanceof Error) {
       const errName = exception.constructor.name;
       if (exception['response']) {

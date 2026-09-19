@@ -37,6 +37,10 @@ export class SystemMenuService {
     if (!dto.type) {
       throw ServiceException.badRequest('菜单类型不能为空');
     }
+    if (!['dir', 'menu', 'button'].includes(dto.type)) {
+      throw ServiceException.badRequest('菜单类型无效，仅支持 dir/menu/button');
+    }
+    this.checkPathRequired(dto.type, dto.path, dto.component);
 
     // 唯一性校验
     await this.checkUnique(dto.name, dto.path, null);
@@ -74,6 +78,12 @@ export class SystemMenuService {
 
     // 唯一性校验
     await this.checkUnique(dto.name, dto.path, menuId);
+
+    // 路由完整性校验（部分更新时合并已有值）
+    const type = dto.type ?? menu.type;
+    const path = dto.path !== undefined ? dto.path : menu.path;
+    const component = dto.component !== undefined ? dto.component : menu.component;
+    this.checkPathRequired(type, path ?? undefined, component ?? undefined);
 
     const data: any = { updateTime: dayjs().toDate() };
     if (dto.pid !== undefined) data.pid = dto.pid ? BigInt(dto.pid) : 0n;
@@ -144,6 +154,26 @@ export class SystemMenuService {
   }
 
   // ----------------------------------------------------------------- 私有方法
+
+  /**
+   * 路由完整性校验：按钮无需路径；目录/菜单必须填写路由路径，菜单还需组件路径。
+   * 避免产生前端不可见、也无法在菜单树中管理的脏数据。
+   */
+  private checkPathRequired(
+    type: string | undefined,
+    path: string | undefined,
+    component: string | undefined,
+  ): void {
+    if (type === 'button') {
+      return;
+    }
+    if (!path) {
+      throw ServiceException.badRequest('路由路径不能为空');
+    }
+    if (type === 'menu' && !component) {
+      throw ServiceException.badRequest('组件路径不能为空');
+    }
+  }
 
   /** 唯一性校验 */
   private async checkUnique(
