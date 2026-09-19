@@ -145,6 +145,51 @@ vben/
 | JDK | 25 | 仅 Java 后端需要 |
 | Maven | 3.9+ | 仅 Java 后端需要 |
 
+### 环境安装与自检（新手必读）
+
+如果本机还没有上述工具，按以下顺序安装；已安装的可跳过，但建议执行自检命令确认版本。
+
+**1. 安装 Node.js 与 pnpm（前端 + Node 后端必需）**
+
+- Windows / macOS：前往 <https://nodejs.org> 下载 LTS 版本安装包，一路下一步；
+- 安装完成后**打开新的终端窗口**执行安装 pnpm：
+
+```bash
+npm i -g pnpm
+```
+
+**2. 安装 MySQL（数据库必需）**
+
+- Windows：前往 <https://dev.mysql.com/downloads/installer/> 下载安装器，安装时记住设置的 root 密码（本文档示例为 `123456`）；
+- macOS：`brew install mysql && brew services start mysql`；
+- Linux（Debian/Ubuntu）：`sudo apt install mysql-server && sudo systemctl start mysql`。
+
+**3. 安装 JDK 25 与 Maven（仅 Java 后端需要）**
+
+- JDK：前往 <https://jdk.java.net/25/> 下载，解压后配置 `JAVA_HOME` 环境变量；
+- Maven：前往 <https://maven.apache.org/download.cgi> 下载，解压后将其 `bin` 目录加入 `PATH`。
+
+**4. 环境自检**
+
+全部安装完成后，在终端逐一执行以下命令，确认版本号输出且**不低于要求**：
+
+```bash
+node -v      # 应输出 v20.x 或更高
+pnpm -v      # 应输出 9.x 或更高
+mysql --version   # 应输出 mysql Ver 8.x
+java -version     # 仅 Java 后端需要，应输出 25.x
+mvn -v            # 仅 Java 后端需要，应输出 3.9.x 或更高
+```
+
+> ❓ 某条命令提示「不是内部或外部命令」/「command not found」：说明对应工具未安装成功或未加入 `PATH`，请重新检查安装步骤与环境变量配置。
+
+**5. 获取代码**
+
+```bash
+git clone <仓库地址> vben
+cd vben
+```
+
 ## 快速开始
 
 ### 第 0 步：了解选型规则
@@ -160,43 +205,105 @@ vben/
 
 `init.sql` 一个文件完成**建库（vben_admin）→ 建 20 张表 → 灌入演示数据**，Java / Node 后端共用。
 
+#### 1.1 确认 MySQL 服务已运行
+
+```bash
+# Windows（管理员 PowerShell）
+Get-Service MySQL*          # Status 应为 Running；未运行则 Start-Service MySQL80
+
+# macOS / Linux
+mysqladmin -uroot -p status # 能输出 Uptime 即正常
+```
+
+#### 1.2 执行导入（三选一）
+
 **方式一：MySQL 命令行（推荐）**
+
+在**项目根目录**下执行（Windows PowerShell 用户请用方式二中的 `source` 写法，PowerShell 不支持 `<`）：
 
 ```bash
 mysql -uroot -p < vben-admin-backend/sql/init.sql
 ```
 
-或进入 mysql 交互环境执行：
+**方式二：进入 mysql 交互环境执行**
 
-```sql
-SOURCE /path/to/vben-admin-backend/sql/init.sql;
+```bash
+mysql -uroot -p
 ```
 
-**方式二：图形化工具（Navicat / DBeaver / DataGrip 等）**
+```sql
+SOURCE C:/Users/你的路径/vben-admin-backend/sql/init.sql;   -- Windows 路径用正斜杠
+-- 或
+SOURCE /path/to/vben-admin-backend/sql/init.sql;             -- macOS / Linux
+```
+
+**方式三：图形化工具（Navicat / DBeaver / DataGrip 等）**
 
 新建查询窗口，粘贴 `vben-admin-backend/sql/init.sql` 全量执行。
 
-**验证**：
+#### 1.3 验证导入结果
 
 ```sql
 USE vben_admin;
-SHOW TABLES;   -- 应看到约 20 张表（sys_user、sys_menu、sys_role 等）
-SELECT COUNT(*) FROM sys_menu;   -- 返回 20
+SHOW TABLES;                      -- 应看到约 20 张表（sys_user、sys_menu、sys_role 等）
+SELECT COUNT(*) FROM sys_menu;    -- 返回 20
+SELECT username, real_name FROM sys_user;   -- 应有 vben / admin / jack 三个账号
 ```
 
-> - 脚本内置 `CREATE DATABASE IF NOT EXISTS` 与 `USE vben_admin`，导入即强制写入 `vben_admin` 库；
-> - 重复执行安全（建表均带 `IF NOT EXISTS`，但演示数据会因主键冲突中断，因此**仅首次导入执行**）。
+三条 SQL 都符合预期，数据库即初始化完成 ✅
+
+> - 脚本内置 `CREATE DATABASE IF NOT EXISTS` 与 `USE vben_admin`，导入即强制写入 `vben_admin` 库（即使用 `-D 其他库` 指定也会覆盖）；
+> - 重复执行安全（建表均带 `IF NOT EXISTS`，但演示数据会因主键冲突中断，因此**仅首次导入执行**）；
+> - ❓ 报 `Access denied`：密码不对，确认 root 密码；❓ 报 `command not found`：mysql 未加入 `PATH`，使用完整路径（如 `"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`）。
 
 ### 第二步：启动后端（Java / Node 二选一）
 
 #### 方案 A：Java 后端（Spring Boot 4.1）
 
+**A-1. 确认 JDK 与 Maven 版本**
+
+```bash
+java -version    # 必须 25.x；低版本会编译失败
+mvn -v           # 必须 3.9+
+```
+
+**A-2. 首次编译（可选，验证环境）**
+
 ```bash
 cd vben-admin-backend/java-backend
+mvn clean compile          # 看到 BUILD SUCCESS 即环境正常
+```
+
+**A-3. 启动后端**
+
+```bash
 mvn spring-boot:run
 ```
 
-看到日志 `Started BackendApplication ... Started in x.xxx seconds` 即成功，接口前缀 `/api`。
+**A-4. 确认启动成功**
+
+终端出现以下日志即为成功（首次启动需下载依赖，可能耗时数分钟）：
+
+```
+Tomcat started on port 8080 (http) with context path '/api'
+Started BackendApplication in x.xxx seconds
+```
+
+**A-5. 验证接口连通**
+
+新开一个终端执行（返回 JSON 即正常）：
+
+```bash
+curl http://localhost:8080/api/auth/config
+# 预期输出：{"code":0,"data":{"account":true,...},"error":null,"message":"ok"}
+```
+
+> ❓ **常见失败**：
+> - `Connection refused` 于数据库相关日志 → MySQL 未启动或账号密码与 `application-dev.yml` 不符；
+> - `Port 8080 was already in use` → 8080 被占用（可能是 Node 后端在跑），先停掉或改端口；
+> - 编译报错提示 JDK 版本 → 确认 `java -version` 为 25，并检查 `JAVA_HOME` 指向 JDK 25。
+>
+> **保持这个终端窗口不要关闭**，后端以前台方式持续运行；按 `Ctrl + C` 可停止。
 
 <details>
 <summary><b>常用配置（点击展开）</b></summary>
@@ -238,14 +345,61 @@ java -jar target/vben-backend-0.0.1-SNAPSHOT.jar
 
 #### 方案 B：Node 后端（NestJS 12 + Fastify 5 + Prisma 7）
 
+**B-1. 安装依赖（首次）**
+
 ```bash
 cd vben-admin-backend/node-backend
-pnpm install          # ① 安装依赖
-pnpm db:generate      # ② 生成 Prisma Client（首次必须）
-pnpm start            # ③ 启动（运行 dist/main.js）
+pnpm install
 ```
 
-看到日志 `服务启动: http://localhost:8080` 与 `数据库连接成功` 即成功。
+预期输出末尾为 `Done in x.xs`。❓ 若报 `[ERR_PNPM_IGNORED_BUILDS]`，确认 `pnpm-workspace.yaml` 中 `allowBuilds` 各项为 `true` 后重试。
+
+**B-2. 生成 Prisma Client（首次必须，否则启动时报 PrismaClient 初始化错误）**
+
+```bash
+pnpm db:generate
+```
+
+预期输出 `✔ Generated Prisma Client`。
+
+**B-3. 检查环境配置**
+
+打开 `node-backend/.env`，重点核对 `DATABASE_URL` 的账号密码与第一步导入时使用的一致（默认 `root/123456`）。
+
+**B-4. 启动后端**
+
+```bash
+pnpm start            # 运行编译产物 dist/main.js（推荐）
+# 或开发模式（改代码自动重启）
+pnpm dev
+```
+
+**B-5. 确认启动成功**
+
+终端出现以下日志即为成功：
+
+```
+数据库连接成功
+Nest application successfully started
+服务启动: http://localhost:8080
+API 文档: http://localhost:8080/api/docs
+```
+
+**B-6. 验证接口连通**
+
+新开一个终端执行（返回 JSON 即正常）：
+
+```bash
+curl http://localhost:8080/api/auth/config
+# 预期输出：{"code":0,"data":{"account":true,...},"error":null,"message":"ok"}
+```
+
+> ❓ **常见失败**：
+> - `Cannot find module '@prisma/client'` → 漏了 B-2 步骤，执行 `pnpm db:generate`；
+> - `Can't reach database server` → MySQL 未启动或 `.env` 连接串不对；
+> - `Port 8080 is already in use` → 8080 被占用（可能是 Java 后端在跑），先停掉。
+>
+> **保持这个终端窗口不要关闭**，后端以前台方式持续运行；按 `Ctrl + C` 可停止。
 
 <details>
 <summary><b>常用配置与命令（点击展开）</b></summary>
@@ -294,15 +448,49 @@ pnpm db:studio        # Prisma 可视化数据浏览器
 | `web-ele` | Element Plus | 5777 | `@vben/web-ele` |
 | `web-naive` | Naive UI | 5888 | `@vben/web-naive` |
 
+**F-1. 安装前端依赖（首次，一次装齐 4 套应用）**
+
 ```bash
 cd vue-vben-admin-v5.7.0
-pnpm install                          # monorepo 首次安装（一次装齐 4 套应用）
+pnpm install
+```
 
-# 以 Ant Design Vue 版为例
+预期输出末尾为 `Done in x.xs`（首次安装需下载数百 MB 依赖，耐心等待）。
+
+**F-2. 启动所选 UI 应用（以 Ant Design Vue 版为例）**
+
+```bash
 pnpm --filter @vben/web-antd dev
 ```
 
-启动成功后访问 `http://localhost:5666`。换用其他 UI 仅需替换 filter 参数：
+**F-3. 确认启动成功**
+
+终端出现以下输出即为成功（首次启动需预热依赖，可能耗时 20~40 秒）：
+
+```
+VITE v8.0.13  ready in xxxx ms
+
+  ➜  Local:   http://localhost:5666/
+  ➜  Network: http://192.168.x.x:5666/
+```
+
+**F-4. 浏览器访问并登录**
+
+1. 打开浏览器访问 `http://localhost:5666`；
+2. 自动跳转到登录页，输入演示账号 `vben / 123456`；
+3. 完成滑块验证后点击「登录」；
+4. 成功登录并跳转到分析页/工作台 → **全部部署完成 🎉**
+
+> ❓ **常见失败**：
+> - `pnpm install` 卡住或超时 → 配置国内镜像：`pnpm config set registry https://registry.npmmirror.com` 后重试；
+> - 页面打开但接口报错（Network 面板 500/404）→ 后端未启动或端口不一致，回到第二步检查；
+> - 端口 5666 被占用 → 修改 `apps/web-antd/.env.development` 的 `VITE_PORT` 后重启前端。
+>
+> **保持这个终端窗口不要关闭**；按 `Ctrl + C` 可停止前端。
+
+**F-5. 换用其他 UI（可选）**
+
+4 套应用已同时安装，停止当前前端后仅替换 filter 参数即可切换（端口见对照表）：
 
 ```bash
 pnpm --filter @vben/web-ele dev       # Element Plus 版 → http://localhost:5777

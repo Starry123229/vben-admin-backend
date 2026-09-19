@@ -140,6 +140,50 @@ vben/
 | JDK | 25 | Java back-end only |
 | Maven | 3.9+ | Java back-end only |
 
+### Install & Verify the Environment (for beginners)
+
+If any tool above is missing, install it first; otherwise run the self-check commands to confirm versions.
+
+**1. Install Node.js and pnpm (required by front-end & Node back-end)**
+
+- Windows / macOS: download the LTS installer from <https://nodejs.org>; then install pnpm in a **new terminal**:
+
+```bash
+npm i -g pnpm
+```
+
+**2. Install MySQL (database)**
+
+- Windows: download from <https://dev.mysql.com/downloads/installer/> and remember the root password you set (examples below use `123456`);
+- macOS: `brew install mysql && brew services start mysql`;
+- Linux (Debian/Ubuntu): `sudo apt install mysql-server && sudo systemctl start mysql`.
+
+**3. Install JDK 25 and Maven (Java back-end only)**
+
+- JDK: download from <https://jdk.java.net/25/>, then set the `JAVA_HOME` environment variable;
+- Maven: download from <https://maven.apache.org/download.cgi> and add its `bin` directory to `PATH`.
+
+**4. Self-check**
+
+Run these commands and confirm each version meets the requirement:
+
+```bash
+node -v           # expect v20.x or higher
+pnpm -v           # expect 9.x or higher
+mysql --version   # expect mysql Ver 8.x
+java -version     # Java back-end only, expect 25.x
+mvn -v            # Java back-end only, expect 3.9.x or higher
+```
+
+> ❓ If a command reports "command not found": the tool is missing or not on `PATH`. Revisit its install step.
+
+**5. Get the code**
+
+```bash
+git clone <repo-url> vben
+cd vben
+```
+
 ## Getting Started
 
 ### Step 0: Understand the Selection Rules
@@ -155,43 +199,105 @@ Make two choices before starting:
 
 A single `init.sql` creates the database (`vben_admin`), all 20 tables, and demo data — shared by both back-ends.
 
-**Option 1: MySQL CLI (recommended)**
+#### 1.1 Make sure MySQL is running
+
+```bash
+# Windows (admin PowerShell)
+Get-Service MySQL*          # Status should be Running; otherwise Start-Service MySQL80
+
+# macOS / Linux
+mysqladmin -uroot -p status # printing Uptime means OK
+```
+
+#### 1.2 Run the import (pick one)
+
+**Option 1: MySQL CLI (recommended)** — run from the **repository root**:
 
 ```bash
 mysql -uroot -p < vben-admin-backend/sql/init.sql
 ```
 
-Or from the mysql interactive shell:
+(PowerShell users: use the `source` variant below — `<` is not supported.)
 
-```sql
-SOURCE /path/to/vben-admin-backend/sql/init.sql;
+**Option 2: mysql interactive shell**
+
+```bash
+mysql -uroot -p
 ```
 
-**Option 2: GUI tools (Navicat / DBeaver / DataGrip)**
+```sql
+SOURCE C:/your/path/vben-admin-backend/sql/init.sql;   -- Windows: use forward slashes
+-- or
+SOURCE /path/to/vben-admin-backend/sql/init.sql;        -- macOS / Linux
+```
+
+**Option 3: GUI tools (Navicat / DBeaver / DataGrip)**
 
 Open `vben-admin-backend/sql/init.sql` in a query window and execute it entirely.
 
-**Verify**:
+#### 1.3 Verify the import
 
 ```sql
 USE vben_admin;
-SHOW TABLES;   -- should list ~20 tables (sys_user, sys_menu, sys_role, ...)
-SELECT COUNT(*) FROM sys_menu;   -- returns 20
+SHOW TABLES;                      -- ~20 tables (sys_user, sys_menu, sys_role, ...)
+SELECT COUNT(*) FROM sys_menu;    -- returns 20
+SELECT username, real_name FROM sys_user;   -- vben / admin / jack
 ```
 
-> - The script contains `CREATE DATABASE IF NOT EXISTS` and `USE vben_admin`, so the import always targets the `vben_admin` database;
-> - Schema creation is safe to re-run (`IF NOT EXISTS`), but demo-data INSERTs abort on primary-key conflicts — **run the full import only once**.
+If all three match, the database is ready ✅
+
+> - The script contains `CREATE DATABASE IF NOT EXISTS` and `USE vben_admin`, so the import always targets the `vben_admin` database (even if you pass `-D another_db`);
+> - Schema creation is safe to re-run (`IF NOT EXISTS`), but demo-data INSERTs abort on primary-key conflicts — **run the full import only once**;
+> - ❓ `Access denied`: wrong password. ❓ `command not found`: add mysql to `PATH` or use the full path (e.g. `"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`).
 
 ### Step 2: Start the Backend (Java / Node, choose one)
 
 #### Option A: Java back-end (Spring Boot 4.1)
 
+**A-1. Verify JDK & Maven versions**
+
+```bash
+java -version    # must be 25.x
+mvn -v           # must be 3.9+
+```
+
+**A-2. First compile (optional, validates the toolchain)**
+
 ```bash
 cd vben-admin-backend/java-backend
+mvn clean compile          # BUILD SUCCESS means the environment is fine
+```
+
+**A-3. Start the back-end**
+
+```bash
 mvn spring-boot:run
 ```
 
-Wait for `Started BackendApplication` in the log. Endpoints are prefixed with `/api`.
+**A-4. Confirm startup**
+
+Success looks like this (the first run downloads dependencies and may take minutes):
+
+```
+Tomcat started on port 8080 (http) with context path '/api'
+Started BackendApplication in x.xxx seconds
+```
+
+**A-5. Verify connectivity**
+
+In a new terminal (JSON output means OK):
+
+```bash
+curl http://localhost:8080/api/auth/config
+# {"code":0,"data":{"account":true,...},"error":null,"message":"ok"}
+```
+
+> ❓ **Common failures**:
+> - `Connection refused` near database logs → MySQL is down or credentials in `application-dev.yml` are wrong;
+> - `Port 8080 was already in use` → something else (maybe the Node back-end) holds 8080, stop it first;
+> - Compile errors about JDK version → ensure `java -version` is 25 and `JAVA_HOME` points to JDK 25.
+>
+> **Keep this terminal open** — the back-end runs in the foreground; press `Ctrl + C` to stop it.
 
 <details>
 <summary><b>Common configuration (click to expand)</b></summary>
@@ -233,14 +339,61 @@ java -jar target/vben-backend-0.0.1-SNAPSHOT.jar
 
 #### Option B: Node back-end (NestJS 12 + Fastify 5 + Prisma 7)
 
+**B-1. Install dependencies (first time)**
+
 ```bash
 cd vben-admin-backend/node-backend
-pnpm install          # ① install dependencies
-pnpm db:generate      # ② generate the Prisma Client (required on first run)
-pnpm start            # ③ start (runs dist/main.js)
+pnpm install
 ```
 
-Wait for `服务启动: http://localhost:8080` and `数据库连接成功` in the log.
+Expected to end with `Done in x.xs`. ❓ If you see `[ERR_PNPM_IGNORED_BUILDS]`, set every `allowBuilds` entry in `pnpm-workspace.yaml` to `true` and retry.
+
+**B-2. Generate the Prisma Client (required on first run, otherwise startup fails)**
+
+```bash
+pnpm db:generate
+```
+
+Expected output: `✔ Generated Prisma Client`.
+
+**B-3. Check the environment config**
+
+Open `node-backend/.env` and make sure `DATABASE_URL` matches the credentials used in Step 1 (default `root/123456`).
+
+**B-4. Start the back-end**
+
+```bash
+pnpm start            # runs the compiled dist/main.js (recommended)
+# or dev mode (auto restart on file changes)
+pnpm dev
+```
+
+**B-5. Confirm startup**
+
+Success looks like this:
+
+```
+数据库连接成功
+Nest application successfully started
+服务启动: http://localhost:8080
+API 文档: http://localhost:8080/api/docs
+```
+
+**B-6. Verify connectivity**
+
+In a new terminal (JSON output means OK):
+
+```bash
+curl http://localhost:8080/api/auth/config
+# {"code":0,"data":{"account":true,...},"error":null,"message":"ok"}
+```
+
+> ❓ **Common failures**:
+> - `Cannot find module '@prisma/client'` → you skipped B-2; run `pnpm db:generate`;
+> - `Can't reach database server` → MySQL is down or `.env` is wrong;
+> - `Port 8080 is already in use` → something else (maybe the Java back-end) holds 8080, stop it first.
+>
+> **Keep this terminal open** — the back-end runs in the foreground; press `Ctrl + C` to stop it.
 
 <details>
 <summary><b>Configuration & commands (click to expand)</b></summary>
@@ -289,15 +442,55 @@ pnpm db:studio        # Prisma visual data browser
 | `web-ele` | Element Plus | 5777 | `@vben/web-ele` |
 | `web-naive` | Naive UI | 5888 | `@vben/web-naive` |
 
+**F-1. Install front-end dependencies (first time, installs all 4 apps)**
+
 ```bash
 cd vue-vben-admin-v5.7.0
-pnpm install                          # first install covers all 4 apps
+pnpm install
+```
 
-# Ant Design Vue version, for example
+Expected to end with `Done in x.xs` (the first install downloads hundreds of MB).
+
+**F-2. Start the chosen UI app (Ant Design Vue version, for example)**
+
+```bash
 pnpm --filter @vben/web-antd dev
 ```
 
-Open `http://localhost:5666` when ready. To use another UI, just swap the filter:
+**F-3. Confirm startup**
+
+Success looks like this (the first start warms up dependencies and may take 20–40 seconds):
+
+```
+VITE v8.0.13  ready in xxxx ms
+
+  ➜  Local:   http://localhost:5666/
+  ➜  Network: http://192.168.x.x:5666/
+```
+
+**F-4. Open the browser and sign in**
+
+1. Visit `http://localhost:5666`;
+2. You are redirected to the login page — enter demo account `vben / 123456`;
+3. Complete the slider captcha and click "登录" (Sign in);
+4. You land on the analytics/workspace page → **deployment complete 🎉**
+
+> ❓ **Common failures**:
+> - `pnpm install` hangs or times out → use a mirror: `pnpm config set registry https://registry.npmmirror.com`, then retry;
+> - The page opens but API calls fail (500/404 in the Network panel) → the back-end is down or the port differs; go back to Step 2;
+> - Port 5666 is taken → change `VITE_PORT` in `apps/web-antd/.env.development` and restart.
+>
+> **Keep this terminal open**; press `Ctrl + C` to stop the front-end.
+
+**F-5. Switch to another UI (optional)**
+
+All 4 apps are installed at once. Stop the current one and swap the filter only (ports in the table above):
+
+```bash
+pnpm --filter @vben/web-ele dev       # Element Plus → http://localhost:5777
+pnpm --filter @vben/web-naive dev     # Naive UI → http://localhost:5888
+pnpm --filter @vben/web-antdv-next dev
+```
 
 ```bash
 pnpm --filter @vben/web-ele dev       # Element Plus → http://localhost:5777
