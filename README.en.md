@@ -2,13 +2,13 @@
 
 # Vben Admin System
 
-**Enterprise admin system built with Vue 3 + Vben Admin 5.7**
+**Enterprise admin system built with Vue 3 + Vben Admin 5.7 (decoupled front-end / back-end)**
 
 [![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
-[![Java](https://img.shields.io/badge/Java-Spring%20Boot%204.1-6db33f.svg)](#option-a-java-backendspring-boot-41)
-[![Node](https://img.shields.io/badge/Node-NestJS%2012-40598f.svg)](#option-b-node-backendnestjs--fastify--prisma)
-[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](#step-1-initialize-the-database)
+[![Java](https://img.shields.io/badge/Java-Spring%20Boot%204.1-6db33f.svg)](https://spring.io)
+[![Node](https://img.shields.io/badge/Node-NestJS%2012-40598f.svg)](https://nestjs.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
 
 [简体中文](./README.md) | **English**
@@ -17,360 +17,187 @@
 
 ---
 
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Tech Stack](#tech-stack)
-- [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
-- [Feature Modules](#feature-modules)
-- [Permission Model](#permission-model)
-- [Authentication](#authentication)
-- [Production Build & Deployment](#production-build--deployment)
-- [API Documentation](#api-documentation)
-- [FAQ](#faq)
-- [Demo Accounts](#demo-accounts)
-- [License](#license)
-
----
-
 ## Introduction
 
-An enterprise admin system with a **decoupled front-end / back-end** architecture:
+- **Front-end**: based on the Vben Admin 5.7 monorepo with **4 UI framework apps**; the business code is identical — pick one;
+- **Back-end**: two fully equivalent implementations — Java (Spring Boot 4.1) and Node.js (NestJS 12) — sharing the same MySQL database and the same API contract ([`docs/api-contract.md`](./vben-admin-backend/docs/api-contract.md)). Pick either one;
+- All endpoints share the `/api` global prefix, and the frontend dev server ships with a pre-configured proxy — **zero configuration for local development**;
+- Built-in modules: authentication, users / roles / departments / menus, data dictionary, config management, scheduled jobs, notices & message center, attachments, workflow, operation/login/audit logs, online users & system monitor, profile.
 
-- **Front-end** is based on the Vben Admin 5.7 monorepo and ships with **4 UI framework apps** (Ant Design Vue / Ant Design Vue Next / Element Plus / Naive UI). The business code is identical across all of them — just pick one;
-- **Back-end** provides **two fully equivalent implementations** (Java and Node.js) sharing the same MySQL database and the same API contract (`docs/api-contract.md`). Pick either one;
-- All backend endpoints share the `/api` global prefix, and the frontend dev server ships with a pre-configured proxy — **zero configuration for local development**.
-
-```
-┌────────────────────────────┐         ┌──────────────────────────┐
-│  Front-end (choose 1 of 4) │  /api   │  Back-end (choose 1 of 2)│
-│  web-antd      :5666       │ ──────► │  Java  (Spring Boot 4.1) │
-│  web-antdv-next:6001       │  proxy  │  Node  (NestJS+Fastify)  │
-│  web-ele       :5777       │         │  both on localhost:8080  │
-│  web-naive     :5888       │         └───────────┬──────────────┘
-└────────────────────────────┘                     │
-                                                   ▼
-                                        MySQL 8.x (vben_admin)
-```
-
-## Features
-
-- **Authentication & session**: account login, dual-token scheme (accessToken + HttpOnly Cookie refreshToken), silent refresh, logout, per-user login-failure lockout (configurable threshold)
-- **User management**: pagination/search/filter, create/edit/delete, reset password, enable/disable, password strength validation, self-delete protection, Excel export
-- **Role management**: CRUD, status toggle, **menu permission assignment** (checkable tree), button-level permission codes
-- **Department management**: tree-shaped org structure, CRUD, filter users by department
-- **Menu management**: directory/menu/button three-level structure, route integrity validation, permission code maintenance
-- **Data dictionary**: two-level dictionary types & data, source for business dropdowns
-- **Config management**: system key-value parameters (default password, lockout thresholds, etc.)
-- **Scheduled jobs**: dynamic Cron scheduling engine, pause/resume/run-once/CRUD
-- **Notice management**: send in-site notices to specific users or broadcast by role
-- **Message center**: in-site messaging, unread counters, mark one/all as read
-- **Attachment center**: file upload, type & size validation, delete
-- **Workflow**: custom JSON approval chains, multi-step approval, approve/reject/withdraw, approval records
-- **System monitor**: online users (force logout), cache monitor, scheduled JVM status checks
-- **Logs**: operation log, login log (with IP location), audit log (data-change snapshots), with clear & export
-- **Profile**: maintain profile, upload avatar, change password
+| Side (choose one) | Options | Port |
+| --- | --- | --- |
+| Back-end | Java Spring Boot 4.1 / Node NestJS 12 | both on `localhost:8080` |
+| Front-end | `web-antd` / `web-antdv-next` / `web-ele` / `web-naive` | 5666 / 6001 / 5777 / 5888 |
 
 ## Project Structure
 
 ```
 vben/
-├── README.md                        # 简体中文文档
-├── README.en.md                     # This file (English)
-├── vben-admin-backend/              # Back-end projects
-│   ├── docs/
-│   │   └── api-contract.md          # API contract (single source of truth for both back-ends)
-│   ├── java-backend/                # Java implementation
-│   │   ├── pom.xml
-│   │   └── src/main/
-│   │       ├── java/com/vben/backend/
-│   │       │   ├── common/          # Unified response, exceptions, utils
-│   │       │   ├── config/          # Sa-Token, Swagger, security configs
-│   │       │   └── module/
-│   │       │       ├── auth/        # Login, dual-token, forgot password
-│   │       │       └── system/      # user/role/dept/menu/logs/jobs...
-│   │       └── resources/
-│   │           ├── application.yml      # Main config (port/auth/storage/tenant)
-│   │           └── application-dev.yml  # Dev profile (database, etc.)
-│   ├── node-backend/                # Node implementation
-│   │   ├── .env                     # Environment config (DB/port/JWT...)
-│   │   ├── .env.example             # Config template
-│   │   ├── prisma/schema.prisma     # Data model
-│   │   └── src/
-│   │       ├── common/              # Unified response, exception filter, guards
-│   │       ├── modules/
-│   │       │   ├── auth/            # Login, JWT, phone/QR/OAuth
-│   │       │   ├── menu/            # Front-end route tree (dynamic per role)
-│   │       │   ├── system/          # user/role/menu/dict/jobs/logs...
-│   │       │   └── ...
-│   │       └── main.ts
-│   └── sql/
-│       └── init.sql                 # Creates DB + all tables + demo data (single-file import)
+├── vben-admin-backend/              # Back-end
+│   ├── docs/api-contract.md         # API contract (single source of truth)
+│   ├── java-backend/                # Java implementation (Spring Boot)
+│   ├── node-backend/                # Node implementation (NestJS + Prisma)
+│   └── sql/init.sql                 # DB + 20 tables + demo data (single-file import)
 └── vue-vben-admin-v5.7.0/           # Front-end monorepo (pnpm workspace)
-    ├── apps/                        # 4 UI framework apps (identical business code)
-    │   ├── web-antd/                # Ant Design Vue 4 (port 5666)
-    │   ├── web-antdv-next/          # Ant Design Vue Next (port 6001)
-    │   ├── web-ele/                 # Element Plus (port 5777)
-    │   └── web-naive/               # Naive UI (port 5888)
+    ├── apps/                        # 4 UI apps: web-antd / web-antdv-next / web-ele / web-naive
     ├── packages/                    # Shared packages (UI, hooks, preferences...)
     ├── internal/                    # Build & lint configs
     └── scripts/                     # Script utilities
 ```
 
-## Tech Stack
+## Tech Stack & Prerequisites
 
 | Side | Technologies |
 | --- | --- |
-| Front-end | Vue 3.5 · Vite 8 · TypeScript · Pinia · Vue Router · pnpm monorepo |
+| Front-end | Vue 3.5 · Vite 8 · TypeScript · Pinia · pnpm monorepo |
 | Front-end UI (choose 1 of 4) | Ant Design Vue 4 / Ant Design Vue Next / Element Plus / Naive UI |
 | Java back-end | Spring Boot 4.1 (JDK 25) · Sa-Token 1.45 · MyBatis-Plus 3.5.17 · knife4j 5.0 |
 | Node back-end | NestJS 12 · Fastify 5 · Prisma 7 · JWT · Swagger |
 | Database | MySQL 8.x (utf8mb4) |
 
-## Prerequisites
-
 | Tool | Version | Required for |
 | --- | --- | --- |
-| Node.js | ≥ 20 | Front-end & Node back-end |
-| pnpm | ≥ 9 | Front-end & Node back-end (`npm i -g pnpm`) |
-| MySQL | 8.x (8.4+ recommended) | Both back-ends |
+| Node.js | ≥ 22.18 (24 LTS recommended) | Front-end + Node back-end |
+| pnpm | ≥ 10 (`npm i -g pnpm`) | Front-end + Node back-end |
+| MySQL | 8.x | Both back-ends |
 | JDK | 25 | Java back-end only |
 | Maven | 3.9+ | Java back-end only |
 
-### Install & Verify the Environment (for beginners)
-
-If any tool above is missing, install it first; otherwise run the self-check commands to confirm versions.
-
-**1. Install Node.js and pnpm (required by front-end & Node back-end)**
-
-- Windows / macOS: download the LTS installer from <https://nodejs.org>; then install pnpm in a **new terminal**:
+Once installed, run the self-check and make sure versions meet the requirements:
 
 ```bash
-npm i -g pnpm
-```
-
-**2. Install MySQL (database)**
-
-- Windows: download from <https://dev.mysql.com/downloads/installer/> and remember the root password you set (examples below use `123456`);
-- macOS: `brew install mysql && brew services start mysql`;
-- Linux (Debian/Ubuntu): `sudo apt install mysql-server && sudo systemctl start mysql`.
-
-**3. Install JDK 25 and Maven (Java back-end only)**
-
-- JDK: download from <https://jdk.java.net/25/>, then set the `JAVA_HOME` environment variable;
-- Maven: download from <https://maven.apache.org/download.cgi> and add its `bin` directory to `PATH`.
-
-**4. Self-check**
-
-Run these commands and confirm each version meets the requirement:
-
-```bash
-node -v           # expect v20.x or higher
-pnpm -v           # expect 9.x or higher
-mysql --version   # expect mysql Ver 8.x
-java -version     # Java back-end only, expect 25.x
-mvn -v            # Java back-end only, expect 3.9.x or higher
-```
-
-> ❓ If a command reports "command not found": the tool is missing or not on `PATH`. Revisit its install step.
-
-**5. Get the code**
-
-```bash
-git clone <repo-url> vben
-cd vben
+node -v && pnpm -v && mysql --version    # front-end + Node back-end
+java -version && mvn -v                  # Java back-end
 ```
 
 ## Getting Started
 
-### Step 0: Understand the Selection Rules
-
-Make two choices before starting:
-
-| Decision | Options | Notes |
-| --- | --- | --- |
-| Back-end | **Java** or **Node** | Fully equivalent, shared database; only one can run at a time (both use port 8080). Switching requires no data migration |
-| Front-end UI | **web-antd** / **web-antdv-next** / **web-ele** / **web-naive** | Identical business code, only the component library differs; install all, switch anytime |
-
 ### Step 1: Initialize the Database
 
-A single `init.sql` creates the database (`vben_admin`), all 20 tables, and demo data — shared by both back-ends.
+[`vben-admin-backend/sql/init.sql`](./vben-admin-backend/sql/init.sql) creates the database (`vben_admin`), all 20 tables, and demo data in one file — shared by both back-ends.
 
-#### 1.1 Make sure MySQL is running
+**1.1 Make sure MySQL is running**
 
 ```bash
-# Windows (admin PowerShell)
-Get-Service MySQL*          # Status should be Running; otherwise Start-Service MySQL80
-
-# macOS / Linux
-mysqladmin -uroot -p status # printing Uptime means OK
+Get-Service MySQL*            # Windows (admin PowerShell) — Status should be Running
+mysqladmin -uroot -p status   # macOS / Linux — printing Uptime means OK
 ```
 
-#### 1.2 Run the import (pick one)
+**1.2 Run the import**
 
-**Option 1: MySQL CLI (recommended)** — run from the **repository root**:
+From the **repository root** (recommended):
 
 ```bash
 mysql -uroot -p < vben-admin-backend/sql/init.sql
 ```
 
-(PowerShell users: use the `source` variant below — `<` is not supported.)
-
-**Option 2: mysql interactive shell**
-
-```bash
-mysql -uroot -p
-```
+Alternatives:
 
 ```sql
-SOURCE C:/your/path/vben-admin-backend/sql/init.sql;   -- Windows: use forward slashes
--- or
-SOURCE /path/to/vben-admin-backend/sql/init.sql;        -- macOS / Linux
+-- MySQL interactive shell (run after `mysql -uroot -p`; use forward slashes on Windows)
+SOURCE C:/your/path/vben-admin-backend/sql/init.sql;
 ```
 
-**Option 3: GUI tools (Navicat / DBeaver / DataGrip)**
+Or open `init.sql` in a GUI tool (Navicat / DBeaver / DataGrip) and execute it entirely.
+(PowerShell does not support `<` — use one of these two options instead.)
 
-Open `vben-admin-backend/sql/init.sql` in a query window and execute it entirely.
-
-#### 1.3 Verify the import
+**1.3 Verify the import**
 
 ```sql
 USE vben_admin;
-SHOW TABLES;                      -- ~20 tables (sys_user, sys_menu, sys_role, ...)
-SELECT COUNT(*) FROM sys_menu;    -- returns 20
-SELECT username, real_name FROM sys_user;   -- vben / admin / jack
+SHOW TABLES;                          -- ~20 tables (sys_user, sys_menu, sys_role, ...)
+SELECT COUNT(*) FROM sys_menu;        -- 20
+SELECT username FROM sys_user;        -- vben / admin / jack
 ```
 
-If all three match, the database is ready ✅
+If all three match, the database is ready.
 
-> - The script contains `CREATE DATABASE IF NOT EXISTS` and `USE vben_admin`, so the import always targets the `vben_admin` database (even if you pass `-D another_db`);
-> - Schema creation is safe to re-run (`IF NOT EXISTS`), but demo-data INSERTs abort on primary-key conflicts — **run the full import only once**;
-> - ❓ `Access denied`: wrong password. ❓ `command not found`: add mysql to `PATH` or use the full path (e.g. `"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`).
+> - The script contains `CREATE DATABASE IF NOT EXISTS` and `USE vben_admin`, so the import always targets `vben_admin`;
+> - Table creation is idempotent, but re-inserting demo data aborts on primary-key conflicts — **run the full import only once**;
+> - `Access denied` means a wrong password; `command not found` means mysql is not on `PATH` — use the full path (e.g. `"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`).
 
 ### Step 2: Start the Backend (Java / Node, choose one)
 
+> Both back-ends share port 8080 — **only one can run at a time**. The database is shared, so switching requires no migration.
+
 #### Option A: Java back-end (Spring Boot 4.1)
 
-**A-1. Verify JDK & Maven versions**
-
-```bash
-java -version    # must be 25.x
-mvn -v           # must be 3.9+
-```
-
-**A-2. First compile (optional, validates the toolchain)**
+**A-1. Start** (the first run downloads dependencies and may take minutes):
 
 ```bash
 cd vben-admin-backend/java-backend
-mvn clean compile          # BUILD SUCCESS means the environment is fine
-```
-
-**A-3. Start the back-end**
-
-```bash
 mvn spring-boot:run
 ```
 
-**A-4. Confirm startup**
-
-Success looks like this (the first run downloads dependencies and may take minutes):
+**A-2. Confirm startup** — success looks like this (keep the terminal open; `Ctrl + C` to stop):
 
 ```
 Tomcat started on port 8080 (http) with context path '/api'
 Started BackendApplication in x.xxx seconds
 ```
 
-**A-5. Verify connectivity**
-
-In a new terminal (JSON output means OK):
+**A-3. Verify connectivity** — in a new terminal (JSON output means OK):
 
 ```bash
 curl http://localhost:8080/api/auth/config
-# {"code":0,"data":{"account":true,...},"error":null,"message":"ok"}
+# expected: {"code":0,"data":{"account":true,...},"error":null,"message":"ok"}
 ```
 
-> ❓ **Common failures**:
-> - `Connection refused` near database logs → MySQL is down or credentials in `application-dev.yml` are wrong;
-> - `Port 8080 was already in use` → something else (maybe the Node back-end) holds 8080, stop it first;
-> - Compile errors about JDK version → ensure `java -version` is 25 and `JAVA_HOME` points to JDK 25.
->
-> **Keep this terminal open** — the back-end runs in the foreground; press `Ctrl + C` to stop it.
-
-<details>
-<summary><b>Common configuration (click to expand)</b></summary>
-
-The database connection lives in `src/main/resources/application-dev.yml` and can be overridden via environment variables:
+**Database connection** lives in `src/main/resources/application-dev.yml` and can be overridden via environment variables:
 
 | Env var | Default | Description |
 | --- | --- | --- |
-| `DB_HOST` | `localhost` | Database host |
-| `DB_PORT` | `3306` | Database port |
-| `DB_USERNAME` | `root` | Database user |
-| `DB_PASSWORD` | `123456` | Database password |
+| `DB_HOST` / `DB_PORT` | `localhost` / `3306` | Database host / port |
+| `DB_USERNAME` / `DB_PASSWORD` | `root` / `123456` | Database user / password |
 
-Other key settings in `application.yml`:
+**Other key settings** (`src/main/resources/application.yml`):
 
 | Key | Description |
 | --- | --- |
 | `server.port` / `context-path` | `8080` / `/api` |
 | `sa-token.timeout` | accessToken lifetime (seconds, default 7200) |
 | `vben.auth.refresh-token-days` | refreshToken lifetime in days (default 7) |
-| `vben.auth.login-methods.*` | Login method switches (account/phone/qrcode/register/oauth) |
-| `vben.auth.sms-mock` / `email-mock` | SMS/email mock (verification codes echoed; disable in production) |
+| `vben.auth.login-methods.*` | Login method switches (account login only by default) |
+| `vben.auth.sms-mock` / `email-mock` | SMS/email mock (codes echoed in responses; disable in production) |
 | `vben.auth.upload-dir` | Upload directory (default `./uploads`) |
 | `app.message.mail-enabled` | Email notification switch for the message center |
 | `app.tenant.enabled` | Multi-tenancy switch |
 
-</details>
-
-<details>
-<summary><b>Package for production (click to expand)</b></summary>
-
-```bash
-# Stop any running back-end first, otherwise repackage fails because the jar is locked
-mvn clean package -DskipTests
-java -jar target/vben-backend-0.0.1-SNAPSHOT.jar
-```
-
-</details>
+> **Common failures**:
+> - `Connection refused` near database logs → MySQL is down or credentials don't match;
+> - `Port 8080 was already in use` → something else (maybe the Node back-end) holds 8080 — stop it first;
+> - Compile errors about the JDK version → make sure `java -version` is 25 and `JAVA_HOME` points to JDK 25.
 
 #### Option B: Node back-end (NestJS 12 + Fastify 5 + Prisma 7)
 
-**B-1. Install dependencies (first time)**
+**B-1. Install dependencies & prepare the env file**:
 
 ```bash
 cd vben-admin-backend/node-backend
 pnpm install
+
+# .env is not version-controlled (gitignored) — create it from the template on first run
+cp .env.example .env            # macOS / Linux / Git Bash
+Copy-Item .env.example .env     # Windows PowerShell
 ```
 
-Expected to end with `Done in x.xs`. ❓ If you see `[ERR_PNPM_IGNORED_BUILDS]`, set every `allowBuilds` entry in `pnpm-workspace.yaml` to `true` and retry.
+**B-2. Check the database connection**: open `.env` and make sure `DATABASE_URL` matches the credentials used in Step 1 (default `root/123456`).
 
-**B-2. Generate the Prisma Client (required on first run, otherwise startup fails)**
+**B-3. Generate the Prisma Client** (required on first run, otherwise startup fails with a PrismaClient init error):
 
 ```bash
 pnpm db:generate
+# expected output: ✔ Generated Prisma Client
 ```
 
-Expected output: `✔ Generated Prisma Client`.
-
-**B-3. Check the environment config**
-
-Open `node-backend/.env` and make sure `DATABASE_URL` matches the credentials used in Step 1 (default `root/123456`).
-
-**B-4. Start the back-end**
+**B-4. Start the back-end**:
 
 ```bash
-pnpm start            # runs the compiled dist/main.js (recommended)
-# or dev mode (auto restart on file changes)
-pnpm dev
+pnpm dev              # dev mode (tsx watch hot reload)
+# or pnpm build && pnpm start   # run the compiled output
 ```
 
-**B-5. Confirm startup**
-
-Success looks like this:
+**B-5. Confirm startup** — success looks like this (keep the terminal open; `Ctrl + C` to stop):
 
 ```
 数据库连接成功
@@ -379,87 +206,57 @@ Nest application successfully started
 API 文档: http://localhost:8080/api/docs
 ```
 
-**B-6. Verify connectivity**
-
-In a new terminal (JSON output means OK):
+**B-6. Verify connectivity** — in a new terminal (JSON output means OK):
 
 ```bash
 curl http://localhost:8080/api/auth/config
-# {"code":0,"data":{"account":true,...},"error":null,"message":"ok"}
+# expected: {"code":0,"data":{"account":true,...},"error":null,"message":"ok"}
 ```
 
-> ❓ **Common failures**:
-> - `Cannot find module '@prisma/client'` → you skipped B-2; run `pnpm db:generate`;
-> - `Can't reach database server` → MySQL is down or `.env` is wrong;
-> - `Port 8080 is already in use` → something else (maybe the Java back-end) holds 8080, stop it first.
->
-> **Keep this terminal open** — the back-end runs in the foreground; press `Ctrl + C` to stop it.
+**Key `.env` settings** (template: `.env.example`):
 
-<details>
-<summary><b>Configuration & commands (click to expand)</b></summary>
-
-All configuration lives in `node-backend/.env` (template: `.env.example`):
-
-| Variable | Default | Description |
+| Variable | Default (template) | Description |
 | --- | --- | --- |
 | `DATABASE_URL` | `mysql://root:123456@localhost:3306/vben_admin` | Database URL |
 | `PORT` | `8080` | Server port (must match the front-end proxy) |
 | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | dev placeholders | JWT signing secrets, **must be changed in production** |
-| `ACCESS_TOKEN_EXPIRES` | `2h` | accessToken lifetime |
-| `REFRESH_TOKEN_DAYS` | `7` | refreshToken lifetime in days |
-| `LOGIN_METHODS_*` | see file | Login method switches; the login page adapts accordingly |
-| `PHONE_AUTO_REGISTER` / `OAUTH_AUTO_REGISTER` | `true` | Auto-create account on first phone/OAuth login (set `false` in production) |
+| `ACCESS_TOKEN_EXPIRES` / `REFRESH_TOKEN_DAYS` | `2h` / `7` | Token lifetimes |
+| `LOGIN_METHODS_ACCOUNT/PHONE/QRCODE/REGISTER/OAUTH` | only `ACCOUNT=true` | Login method switches; the login page adapts accordingly |
+| `PHONE_AUTO_REGISTER` / `OAUTH_AUTO_REGISTER` | `false` | Auto-create account on first phone/OAuth login (keep `false` in production) |
 | `UPLOAD_DIR` | `./uploads` | Upload directory |
-| `SMS_MOCK` / `EMAIL_MOCK` | `true` | SMS/email mock (codes echoed in responses) |
+| `SMS_MOCK` / `EMAIL_MOCK` | `true` | SMS/email mock (codes echoed; disable in production) |
 
-Other commands:
+Other commands: `pnpm build` (compile to `dist/`), `pnpm db:studio` (Prisma visual data browser).
 
-```bash
-pnpm dev              # dev mode (tsx watch hot reload)
-pnpm build            # compile to dist/
-pnpm db:push          # sync schema from prisma/schema.prisma (normally not needed)
-pnpm db:studio        # Prisma visual data browser
-```
-
-> **Note**: pnpm 10+ blocks dependency build scripts by default. If `pnpm install` reports
-> `[ERR_PNPM_IGNORED_BUILDS]`, make sure every entry in `allowBuilds` inside
-> `node-backend/pnpm-workspace.yaml` is `true` (pre-configured in the repo), re-run
-> `pnpm install`, then run `pnpm db:generate` again.
-
-</details>
-
-> **Which back-end should I choose?**
-> - Feature-parity is 100% and the database is shared — switching is free (stop one → start the other → refresh & log in again);
-> - JVM-oriented teams or those needing flexible SQL via MyBatis → **Java**;
-> - Full-stack TS teams wanting instant startup and lightweight deployment → **Node**.
+> **Common failures**:
+> - `Cannot find module '@prisma/client'` → you skipped `pnpm db:generate`;
+> - `Can't reach database server` → MySQL is down or `.env` is wrong;
+> - `Port 8080 is already in use` → something else (maybe the Java back-end) holds 8080 — stop it first;
+> - `[ERR_PNPM_IGNORED_BUILDS]` on `pnpm install` → make sure every `allowBuilds` entry in `pnpm-workspace.yaml` is `true` (pre-configured in the repo), then re-install.
 
 ### Step 3: Start the Frontend (choose 1 of 4 UI apps)
 
-| App | UI framework | Dev port | pnpm filter |
+| App | UI framework | Dev port | Start command |
 | --- | --- | --- | --- |
-| `web-antd` | Ant Design Vue 4 | 5666 | `@vben/web-antd` |
-| `web-antdv-next` | Ant Design Vue (next) | 6001 | `@vben/web-antdv-next` |
-| `web-ele` | Element Plus | 5777 | `@vben/web-ele` |
-| `web-naive` | Naive UI | 5888 | `@vben/web-naive` |
+| `web-antd` | Ant Design Vue 4 | 5666 | `pnpm dev:antd` |
+| `web-antdv-next` | Ant Design Vue Next | 6001 | `pnpm dev:antdv-next` |
+| `web-ele` | Element Plus | 5777 | `pnpm dev:ele` |
+| `web-naive` | Naive UI | 5888 | `pnpm dev:naive` |
 
-**F-1. Install front-end dependencies (first time, installs all 4 apps)**
+**F-1. Install front-end dependencies** (first time; installs all 4 apps at once, hundreds of MB to download):
 
 ```bash
 cd vue-vben-admin-v5.7.0
 pnpm install
 ```
 
-Expected to end with `Done in x.xs` (the first install downloads hundreds of MB).
-
-**F-2. Start the chosen UI app (Ant Design Vue version, for example)**
+**F-2. Start the chosen app** (Ant Design Vue version, for example):
 
 ```bash
-pnpm --filter @vben/web-antd dev
+pnpm dev:antd        # equivalent to pnpm --filter @vben/web-antd dev
 ```
 
-**F-3. Confirm startup**
-
-Success looks like this (the first start warms up dependencies and may take 20–40 seconds):
+**F-3. Confirm startup** (the first start warms up dependencies; ~20–40 seconds):
 
 ```
 VITE v8.0.13  ready in xxxx ms
@@ -468,113 +265,46 @@ VITE v8.0.13  ready in xxxx ms
   ➜  Network: http://192.168.x.x:5666/
 ```
 
-**F-4. Open the browser and sign in**
+**F-4. Open the browser and sign in**: visit `http://localhost:5666`; you are redirected to the login page — complete the slider captcha and use a demo account (see Step 4).
 
-1. Visit `http://localhost:5666`;
-2. You are redirected to the login page — enter demo account `vben / 123456`;
-3. Complete the slider captcha and click "登录" (Sign in);
-4. You land on the analytics/workspace page → **deployment complete 🎉**
-
-> ❓ **Common failures**:
-> - `pnpm install` hangs or times out → use a mirror: `pnpm config set registry https://registry.npmmirror.com`, then retry;
-> - The page opens but API calls fail (500/404 in the Network panel) → the back-end is down or the port differs; go back to Step 2;
-> - Port 5666 is taken → change `VITE_PORT` in `apps/web-antd/.env.development` and restart.
->
-> **Keep this terminal open**; press `Ctrl + C` to stop the front-end.
-
-**F-5. Switch to another UI (optional)**
-
-All 4 apps are installed at once. Stop the current one and swap the filter only (ports in the table above):
+**F-5. Switch to another UI (optional)**: stop the current one and swap the start command (ports in the table above):
 
 ```bash
-pnpm --filter @vben/web-ele dev       # Element Plus → http://localhost:5777
-pnpm --filter @vben/web-naive dev     # Naive UI → http://localhost:5888
-pnpm --filter @vben/web-antdv-next dev
+pnpm dev:ele           # Element Plus → http://localhost:5777
+pnpm dev:naive         # Naive UI → http://localhost:5888
+pnpm dev:antdv-next    # Ant Design Vue Next → http://localhost:6001
 ```
 
-```bash
-pnpm --filter @vben/web-ele dev       # Element Plus → http://localhost:5777
-pnpm --filter @vben/web-naive dev     # Naive UI → http://localhost:5888
-pnpm --filter @vben/web-antdv-next dev
-```
-
-> **How do front-end and back-end connect?** Automatically. Every app's `vite.config.ts`
-> ships with a proxy: `/api/**` → `http://localhost:8080/api/**`. If your back-end runs on
-> the default port 8080, the front-end needs zero configuration. To use another port,
-> update `proxy.target` in `apps/<your-app>/vite.config.ts`.
+> - **Front-end ↔ back-end wiring is automatic**: every app's `vite.config.ts` ships with a proxy `/api/**` → `http://localhost:8080/api/**`. With the back-end on the default port 8080, no frontend configuration is needed; for another port, update `proxy.target` in `apps/<your-app>/vite.config.ts`;
+> - **Common failures**: `pnpm install` hangs → use a mirror (`pnpm config set registry https://registry.npmmirror.com`) and retry; API calls return 500/404 → the back-end is down or the port differs; port taken → change `VITE_PORT` in `apps/<your-app>/.env.development` and restart.
 
 ### Step 4: Sign In
 
-Use any demo account (password is `123456` for all):
+Demo accounts (password is `123456` for all):
 
 | Account | Role | Landing page | Scope |
 | --- | --- | --- | --- |
-| **vben** | super administrator | /analytics | All menus & all button permissions |
-| **admin** | admin | /workspace | System mgmt / monitor / tools; full user CRUD & role editing |
-| **jack** | user | /analytics | Read-only user management + role management; unauthorized access returns 403/404 |
+| **vben** | super administrator | /analytics | all menus & button permissions |
+| **admin** | admin | /workspace | system management / monitor / tools |
+| **jack** | user | /analytics | read-only user management + role management; unauthorized access returns 403/404 |
 
-> **Dev-time login methods**: account login is enabled by default. Phone code / QR /
-> register / OAuth entries are controlled by back-end switches (Java `application.yml`
-> enables only account login by default; Node `.env` enables all). Enabled entries appear
-> on the login page automatically, and verification codes are echoed in mock mode.
+Landing on the analytics/workspace page means the **deployment is complete**.
 
-## Feature Modules
+> Phone login / QR / register / OAuth entries are controlled by back-end switches (see Step 2 tables) and appear on the login page automatically when enabled. In mock mode, verification codes are echoed directly in API responses.
 
-| Module | Route | Minimum role | Description |
-| --- | --- | --- | --- |
-| Analytics | `/analytics` | all | user/role/dept/menu stats, traffic trends, distribution charts |
-| Workspace | `/workspace` | all | quick entries, todos, recent notices |
-| User mgmt | `/system/user` | super / admin / user(readonly) | pagination, search, CRUD, reset pwd, enable/disable, export |
-| Role mgmt | `/system/role` | super / admin / user | CRUD, menu permission tree |
-| Dept mgmt | `/system/dept` | super / admin | tree-shaped org CRUD |
-| Menu mgmt | `/system/menu` | super / admin | directory/menu/button levels, permission codes |
-| Online users | `/system/monitor-cat/online` | super / admin | session list, force logout |
-| Operation log | `/system/monitor-cat/operation-log` | super / admin | audit of back-end operations, export, clear |
-| Login log | `/system/monitor-cat/login-log` | super / admin | login records (with IP location) |
-| Audit log | `/system/monitor-cat/audit-log` | super | before/after data snapshots |
-| System monitor | `/system/monitor-cat/monitor` | super / admin | cache & runtime status |
-| Data dictionary | `/system/tools/dict` | super / admin | dictionary types + data |
-| Config | `/system/tools/config` | super / admin | system key-value parameters |
-| Scheduled jobs | `/system/tools/job` | super / admin | Cron scheduling, pause/resume/run-once |
-| Notice mgmt | `/system/tools/notice` | super / admin | send to users / broadcast by role |
-| Message center | `/system/tools/message` | super / admin | in-site messaging, read management |
-| Attachment center | `/system/tools/attachment` | super / admin | upload, preview, delete |
-| Workflow | `/system/tools/workflow` | super / admin | definitions, start, approve (approve/reject/withdraw) |
-| Profile | `/profile` | all | profile, avatar, change password |
+## Production Deployment
 
-## Permission Model
-
-The system uses **RBAC (user → role → menu/button)**; front-end and back-end share the same permission codes:
-
-```
-sys_user ──< sys_user_role >── sys_role ──< sys_role_menu >── sys_menu
-                                                              ├─ type=menu   → front-end routes / side menu
-                                                              └─ type=button → auth_code (button-level codes)
-```
-
-- **Menu permissions**: the back-end returns a per-user route tree (`GET /menu/all`). Unauthorized routes are never registered on the front-end (direct access returns 404);
-- **Button permissions**: `sys_menu(type=button).auth_code` (e.g. `AC_100010` = create user). The front-end toggles button visibility via the `v-access` directive / `hasAccessByCodes`, while the back-end enforces the same codes via `@SaCheckPermission` (Java) or `@Permissions` + `PermissionGuard` (Node) — **one set of codes, enforced on both sides**;
-- **Super administrator**: a role with `code=super` owns all permissions without per-item assignment.
-
-## Authentication
-
-After login, **dual tokens** are issued:
-
-1. **accessToken**: 2-hour lifetime, stored in localStorage, sent as `Authorization: Bearer <token>`;
-2. **refreshToken**: 7-day lifetime, stored in an **HttpOnly Cookie** (unreadable by JS, XSS-resistant);
-3. When the accessToken expires, the front-end silently calls `POST /auth/refresh` with the cookie — invisible to the user;
-4. Logout / admin force-logout revokes both tokens.
-
-## Production Build & Deployment
-
-### Front-end
+### Front-end build
 
 ```bash
 cd vue-vben-admin-v5.7.0
-pnpm --filter @vben/web-antd build     # output: apps/web-antd/dist
+pnpm install
+pnpm build:antd      # equivalent to pnpm --filter @vben/web-antd build; output: apps/web-antd/dist
 ```
 
-Sample Nginx configuration:
+Other UIs: `pnpm build:ele` / `pnpm build:naive` / `pnpm build:antdv-next`.
+
+**Sample Nginx configuration**:
 
 ```nginx
 server {
@@ -596,7 +326,7 @@ server {
 }
 ```
 
-### Back-end
+### Back-end build
 
 ```bash
 # Java (stop the running process first, otherwise the jar is locked)
@@ -609,14 +339,30 @@ cd vben-admin-backend/node-backend
 pnpm build && pnpm start
 ```
 
-**Production security checklist**:
+### Production security checklist
 
-- [ ] Change both JWT secrets in the Node `.env` and the database password
 - [ ] Change the default database password `123456`; retire or re-password demo accounts
+- [ ] Change `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` in the Node `.env`
 - [ ] Disable SMS/EMAIL mock (Java: `vben.auth.sms-mock=false`; Node: same keys in `.env`) and wire real providers
-- [ ] Disable knife4j/Swagger docs (Java: `springdoc.api-docs.enabled=false`)
-- [ ] Tighten login methods (disable register & third-party auto-registration)
+- [ ] Disable knife4j / Swagger docs (Java: `springdoc.api-docs.enabled=false`)
+- [ ] Tighten login methods (disable register & phone/OAuth auto-registration)
 - [ ] Enable secure cookies behind HTTPS (Java: `vben.auth.cookie-secure=true`; Node: `COOKIE_SECURE=true`)
+
+## How It Works
+
+**Permission model**: RBAC (user → role → menu/button) with one shared set of permission codes on both sides.
+
+```
+sys_user ──< sys_user_role >── sys_role ──< sys_role_menu >── sys_menu
+                                                              ├─ type=menu   → front-end routes / side menu
+                                                              └─ type=button → auth_code (button-level codes)
+```
+
+- **Menu permissions**: the back-end returns a per-user route tree (`GET /menu/all`); unauthorized routes are never registered on the front-end (direct access returns 404);
+- **Button permissions**: `auth_code` (e.g. `AC_100010` = create user) toggles button visibility via the `v-access` directive / `hasAccessByCodes` on the front-end, and is enforced by `@SaCheckPermission` (Java) / `@Permissions` + `PermissionGuard` (Node) on the back-end;
+- **Super administrator**: a role with `code=super` owns all permissions.
+
+**Authentication**: login issues dual tokens — accessToken (2h, localStorage, sent as `Authorization: Bearer <token>`) + refreshToken (7 days, HttpOnly Cookie, XSS-resistant). When the accessToken expires, the front-end silently calls `POST /auth/refresh`; logout / force-logout revokes both tokens.
 
 ## API Documentation
 
@@ -625,45 +371,28 @@ pnpm build && pnpm start
 | Java (knife4j) | <http://localhost:8080/api/doc.html> |
 | Node (Swagger) | <http://localhost:8080/api/docs> |
 
-For live debugging: call `POST /auth/login` to get an accessToken, then paste `Bearer <accessToken>` into the Authorize dialog.
-
-The full API contract lives at [`vben-admin-backend/docs/api-contract.md`](./vben-admin-backend/docs/api-contract.md).
+For live debugging: call `POST /auth/login` to get an accessToken, then paste `Bearer <accessToken>` into the Authorize dialog. The full API contract lives at [`vben-admin-backend/docs/api-contract.md`](./vben-admin-backend/docs/api-contract.md).
 
 ## FAQ
 
 **Q1: All requests fail / login doesn't respond?**
-Check in order: ① is the back-end running on 8080 (`curl http://localhost:8080/api/auth/config` should return JSON); ② has `init.sql` been executed; ③ are the database credentials correct (check the back-end startup log); ④ have both front-end and back-end been restarted (stale processes may hold old ports).
+Check in order: ① is the back-end running on 8080 (`curl http://localhost:8080/api/auth/config` should return JSON); ② has `init.sql` been imported; ③ are the database credentials correct (check the back-end startup log); ④ any stale processes left behind?
 
-**Q2: Node `pnpm install` reports `[ERR_PNPM_IGNORED_BUILDS]`?**
-pnpm 10+ blocks dependency build scripts by default. Confirm every `allowBuilds` entry in `node-backend/pnpm-workspace.yaml` is `true`, re-run `pnpm install`, then run `pnpm db:generate`.
+**Q2: Port 8080 is already in use / how do I switch back-ends?**
+Java and Node share 8080 — they cannot run simultaneously. To switch, stop one and start the other, then refresh the front-end and log in again (shared database, no migration needed). To compare them side by side: change `PORT` in the Node `.env` (e.g. 8081) and update `proxy.target` in the front-end `vite.config.ts`.
 
-**Q3: Port 8080 is already in use?**
-Java and Node back-ends share 8080 — they cannot run simultaneously. To compare them side by side: change `PORT` in the Node `.env` (e.g. 8081) and update `proxy.target` in the front-end `vite.config.ts`.
+**Q3: I don't see phone login / register / OAuth entries on the login page?**
+Login methods are controlled by back-end switches and delivered via `GET /auth/config`: enable them in `vben.auth.login-methods.*` (Java `application.yml`) or `LOGIN_METHODS_*` (Node `.env`).
 
-**Q4: How do I switch between the Java and Node back-ends?**
-Stop the current back-end → start the other one → refresh the front-end and log in again. The database is shared, so no migration is needed; both back-ends are behaviorally aligned (including error codes and messages).
+**Q4: I never receive verification codes?**
+Dev environments enable SMS/email mock by default — codes are echoed directly in API responses. Wire real providers and disable mocks for production.
 
-**Q5: I don't see phone login / register / OAuth entries on the login page?**
-Login methods are controlled by back-end switches and delivered via `GET /auth/config`. The Java side enables only account login by default (`vben.auth.login-methods.*` in `application.yml`); the Node side uses `LOGIN_METHODS_*` in `.env`.
+**Q5: Attachment upload fails with a size error?**
+The back-end limits a single file to ≤ 5MB (Java multipart cap is 10MB with a 5MB business check). Behind Nginx, also set `client_max_body_size 10m;`.
 
-**Q6: I never receive verification codes?**
-Dev environments enable SMS/email mock by default — codes are echoed directly in API responses (or returned as `mockCode`). Wire real providers and disable mocks for production.
-
-**Q7: Attachment upload fails with a size error?**
-The back-end limits a single file to ≤ 5MB (Java multipart cap is 10MB with a 5MB business check). When deploying behind Nginx also set `client_max_body_size 10m;`.
-
-**Q8: "Run once" on a scheduled job reports a missing bean/method?**
-The invoke target format is `beanName.methodName` (e.g. `sampleJob.run`) and the referenced bean must exist in the back-end code (Java: `@Component("xxx")`; Node: a registered job method). Verify the target exists before creating the job.
-
-## Demo Accounts
-
-| Account | Password | Role |
-| --- | --- | --- |
-| vben | 123456 | super (all permissions) |
-| admin | 123456 | admin |
-| jack | 123456 | user (partial permissions) |
+**Q6: "Run once" on a scheduled job reports a missing bean/method?**
+The invoke target format is `beanName.methodName` (e.g. `sampleJob.run`) and the referenced bean must exist in the back-end code (Java: `@Component("xxx")`; Node: a registered job method).
 
 ## License
 
 [MIT](./LICENSE)
-
