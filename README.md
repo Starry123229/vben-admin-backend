@@ -11,7 +11,7 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#许可证)
 
-**简体中文** | [English](./README.en.md)
+**简体中文** | [繁體中文](./i18n/README.zh-TW.md) | [English](./i18n/README.en.md) | [日本語](./i18n/README.ja.md) | [한국어](./i18n/README.ko.md) | [Français](./i18n/README.fr.md) | [Deutsch](./i18n/README.de.md) | [Español](./i18n/README.es.md) | [Русский](./i18n/README.ru.md)
 
 </div>
 
@@ -33,6 +33,8 @@
 
 ```
 vben/
+├── README.md                        # 简体中文文档（本文件）
+├── i18n/                            # 多语言文档（en / zh-TW / ja / ko / fr / de / es / ru）
 ├── vben-admin-backend/              # 后端
 │   ├── docs/api-contract.md         # API 契约（双端实现依据）
 │   ├── java-backend/                # Java 实现（Spring Boot）

@@ -11,7 +11,7 @@
 [![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#license)
 
-[简体中文](./README.md) | **English**
+[简体中文](../README.md) | [繁體中文](./README.zh-TW.md) | **English** | [日本語](./README.ja.md) | [한국어](./README.ko.md) | [Français](./README.fr.md) | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Русский](./README.ru.md)
 
 </div>
 
@@ -20,7 +20,7 @@
 ## Introduction
 
 - **Front-end**: based on the Vben Admin 5.7 monorepo with **4 UI framework apps**; the business code is identical — pick one;
-- **Back-end**: two fully equivalent implementations — Java (Spring Boot 4.1) and Node.js (NestJS 12) — sharing the same MySQL database and the same API contract ([`docs/api-contract.md`](./vben-admin-backend/docs/api-contract.md)). Pick either one;
+- **Back-end**: two fully equivalent implementations — Java (Spring Boot 4.1) and Node.js (NestJS 12) — sharing the same MySQL database and the same API contract ([`docs/api-contract.md`](../vben-admin-backend/docs/api-contract.md)). Pick either one;
 - All endpoints share the `/api` global prefix, and the frontend dev server ships with a pre-configured proxy — **zero configuration for local development**;
 - Built-in modules: authentication, users / roles / departments / menus, data dictionary, config management, scheduled jobs, notices & message center, attachments, workflow, operation/login/audit logs, online users & system monitor, profile.
 
@@ -74,7 +74,7 @@ java -version && mvn -v                  # Java back-end
 
 ### Step 1: Initialize the Database
 
-[`vben-admin-backend/sql/init.sql`](./vben-admin-backend/sql/init.sql) creates the database (`vben_admin`), all 20 tables, and demo data in one file — shared by both back-ends.
+[`vben-admin-backend/sql/init.sql`](../vben-admin-backend/sql/init.sql) creates the database (`vben_admin`), all 20 tables, and demo data in one file — shared by both back-ends.
 
 **1.1 Make sure MySQL is running**
 
@@ -371,7 +371,7 @@ sys_user ──< sys_user_role >── sys_role ──< sys_role_menu >── sy
 | Java (knife4j) | <http://localhost:8080/api/doc.html> |
 | Node (Swagger) | <http://localhost:8080/api/docs> |
 
-For live debugging: call `POST /auth/login` to get an accessToken, then paste `Bearer <accessToken>` into the Authorize dialog. The full API contract lives at [`vben-admin-backend/docs/api-contract.md`](./vben-admin-backend/docs/api-contract.md).
+For live debugging: call `POST /auth/login` to get an accessToken, then paste `Bearer <accessToken>` into the Authorize dialog. The full API contract lives at [`vben-admin-backend/docs/api-contract.md`](../vben-admin-backend/docs/api-contract.md).
 
 ## FAQ
 
@@ -395,4 +395,4 @@ The invoke target format is `beanName.methodName` (e.g. `sampleJob.run`) and the
 
 ## License
 
-[MIT](./LICENSE)
+[MIT](../LICENSE)
