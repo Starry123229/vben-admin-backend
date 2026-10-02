@@ -8,7 +8,7 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
 [![Java](https://img.shields.io/badge/Java-Spring%20Boot%204.1-6db33f.svg)](https://spring.io)
 [![Node](https://img.shields.io/badge/Node-NestJS%2012-40598f.svg)](https://nestjs.com)
-[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](https://www.mysql.com)
+[![MySQL](https://img.shields.io/badge/MySQL-9.x-4479a1.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#ライセンス)
 
 [简体中文](../README.md) | [繁體中文](./README.zh-TW.md) | [English](./README.en.md) | **日本語** | [한국어](./README.ko.md) | [Français](./README.fr.md) | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Русский](./README.ru.md)
@@ -53,13 +53,13 @@ vben/
 | フロントエンド UI（4 選 1） | Ant Design Vue 4 / Ant Design Vue Next / Element Plus / Naive UI |
 | Java バックエンド | Spring Boot 4.1（JDK 25）· Sa-Token 1.45 · MyBatis-Plus 3.5.17 · knife4j 5.0 |
 | Node バックエンド | NestJS 12 · Fastify 5 · Prisma 7 · JWT · Swagger |
-| データベース | MySQL 8.x（utf8mb4） |
+| データベース | MySQL 9.x（utf8mb4） |
 
 | ツール | バージョン要件 | 用途 |
 | --- | --- | --- |
 | Node.js | ≥ 22.18（24 LTS 推奨） | フロントエンド + Node バックエンド |
 | pnpm | ≥ 10（`npm i -g pnpm`） | フロントエンド + Node バックエンド |
-| MySQL | 8.x | 両バックエンドで共用 |
+| MySQL | 9.x | 両バックエンドで共用 |
 | JDK | 25 | Java バックエンドのみ |
 | Maven | 3.9+ | Java バックエンドのみ |
 
@@ -114,7 +114,7 @@ SELECT username FROM sys_user;        -- vben / admin / jack
 
 > - スクリプトには `CREATE DATABASE IF NOT EXISTS` と `USE vben_admin` が含まれており、インポート先は常に `vben_admin` です。
 > - テーブル作成は `IF NOT EXISTS` 付きで再実行可能ですが、デモデータの再投入は主キー重複で中断します。**フルインポートは初回のみ実行してください**。
-> - `Access denied` はパスワード誤り、`command not found` は mysql が `PATH` にないことを示します。フルパス（例：`"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`）を使用してください。
+> - `Access denied` はパスワード誤り、`command not found` は mysql が `PATH` にないことを示します。フルパス（例：`"C:\Program Files\MySQL\MySQL Server 9.0\bin\mysql.exe"`）を使用してください。
 
 ### ステップ 2：バックエンドの起動（Java / Node のいずれか）
 

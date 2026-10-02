@@ -8,7 +8,7 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
 [![Java](https://img.shields.io/badge/Java-Spring%20Boot%204.1-6db33f.svg)](https://spring.io)
 [![Node](https://img.shields.io/badge/Node-NestJS%2012-40598f.svg)](https://nestjs.com)
-[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](https://www.mysql.com)
+[![MySQL](https://img.shields.io/badge/MySQL-9.x-4479a1.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#라이선스)
 
 [简体中文](../README.md) | [繁體中文](./README.zh-TW.md) | [English](./README.en.md) | [日本語](./README.ja.md) | **한국어** | [Français](./README.fr.md) | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Русский](./README.ru.md)
@@ -53,13 +53,13 @@ vben/
 | 프런트엔드 UI(4개 중 1개) | Ant Design Vue 4 / Ant Design Vue Next / Element Plus / Naive UI |
 | Java 백엔드 | Spring Boot 4.1(JDK 25) · Sa-Token 1.45 · MyBatis-Plus 3.5.17 · knife4j 5.0 |
 | Node 백엔드 | NestJS 12 · Fastify 5 · Prisma 7 · JWT · Swagger |
-| 데이터베이스 | MySQL 8.x(utf8mb4) |
+| 데이터베이스 | MySQL 9.x(utf8mb4) |
 
 | 도구 | 버전 요구 사항 | 용도 |
 | --- | --- | --- |
 | Node.js | ≥ 22.18(24 LTS 권장) | 프런트엔드 + Node 백엔드 |
 | pnpm | ≥ 10(`npm i -g pnpm`) | 프런트엔드 + Node 백엔드 |
-| MySQL | 8.x | 두 백엔드 공용 |
+| MySQL | 9.x | 두 백엔드 공용 |
 | JDK | 25 | Java 백엔드 전용 |
 | Maven | 3.9+ | Java 백엔드 전용 |
 
@@ -114,7 +114,7 @@ SELECT username FROM sys_user;        -- vben / admin / jack
 
 > - 스크립트에 `CREATE DATABASE IF NOT EXISTS`와 `USE vben_admin`이 포함되어 있어 항상 `vben_admin`에 가져옵니다.
 > - 테이블 생성은 `IF NOT EXISTS`로 재실행해도 안전하지만, 데모 데이터를 다시 입력하면 기본 키 충돌로 중단됩니다. **전체 가져오기는 최초 한 번만 실행하세요**.
-> - `Access denied`는 비밀번호 오류, `command not found`는 mysql이 `PATH`에 없음을 의미합니다. 전체 경로(예: `"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`)를 사용하세요.
+> - `Access denied`는 비밀번호 오류, `command not found`는 mysql이 `PATH`에 없음을 의미합니다. 전체 경로(예: `"C:\Program Files\MySQL\MySQL Server 9.0\bin\mysql.exe"`)를 사용하세요.
 
 ### 2단계: 백엔드 시작(Java / Node 중 하나)
 

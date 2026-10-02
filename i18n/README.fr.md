@@ -8,7 +8,7 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
 [![Java](https://img.shields.io/badge/Java-Spring%20Boot%204.1-6db33f.svg)](https://spring.io)
 [![Node](https://img.shields.io/badge/Node-NestJS%2012-40598f.svg)](https://nestjs.com)
-[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](https://www.mysql.com)
+[![MySQL](https://img.shields.io/badge/MySQL-9.x-4479a1.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#licence)
 
 [简体中文](../README.md) | [繁體中文](./README.zh-TW.md) | [English](./README.en.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md) | **Français** | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Русский](./README.ru.md)
@@ -53,13 +53,13 @@ vben/
 | UI front-end (1 sur 4) | Ant Design Vue 4 / Ant Design Vue Next / Element Plus / Naive UI |
 | Back-end Java | Spring Boot 4.1 (JDK 25) · Sa-Token 1.45 · MyBatis-Plus 3.5.17 · knife4j 5.0 |
 | Back-end Node | NestJS 12 · Fastify 5 · Prisma 7 · JWT · Swagger |
-| Base de données | MySQL 8.x (utf8mb4) |
+| Base de données | MySQL 9.x (utf8mb4) |
 
 | Outil | Version | Requis pour |
 | --- | --- | --- |
 | Node.js | ≥ 22.18 (24 LTS recommandé) | Front-end + back-end Node |
 | pnpm | ≥ 10 (`npm i -g pnpm`) | Front-end + back-end Node |
-| MySQL | 8.x | Les deux back-ends |
+| MySQL | 9.x | Les deux back-ends |
 | JDK | 25 | Back-end Java uniquement |
 | Maven | 3.9+ | Back-end Java uniquement |
 
@@ -114,7 +114,7 @@ Si les trois requêtes correspondent, la base est prête.
 
 > - Le script contient `CREATE DATABASE IF NOT EXISTS` et `USE vben_admin` : l'import cible donc toujours `vben_admin` ;
 > - La création des tables est idempotente, mais réinsérer les données de démo échoue sur des conflits de clé primaire — **n'exécutez l'import complet qu'une seule fois** ;
-> - `Access denied` = mauvais mot de passe ; `command not found` = mysql n'est pas dans le `PATH` — utilisez le chemin complet (ex. `"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`).
+> - `Access denied` = mauvais mot de passe ; `command not found` = mysql n'est pas dans le `PATH` — utilisez le chemin complet (ex. `"C:\Program Files\MySQL\MySQL Server 9.0\bin\mysql.exe"`).
 
 ### Étape 2 : démarrer le back-end (Java / Node, au choix)
 

@@ -55,7 +55,18 @@
     "deptDistLabel": "Dept Distribution"
   },
   "systemMonitor": {
-    "title": "System Monitor"
+    "title": "System Monitor",
+    "monitor": "System Monitor",
+    "online": "Online Users",
+    "job": "Scheduled Tasks",
+    "operationLog": "Operation Log",
+    "loginLog": "Login Log",
+    "auditLog": "Audit Log"
+  },
+  "messageCenter": {
+    "title": "Message Center",
+    "notice": "Notice Management",
+    "message": "Message Center"
   },
   "systemTools": {
     "title": "System Tools"

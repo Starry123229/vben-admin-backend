@@ -8,7 +8,7 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
 [![Java](https://img.shields.io/badge/Java-Spring%20Boot%204.1-6db33f.svg)](https://spring.io)
 [![Node](https://img.shields.io/badge/Node-NestJS%2012-40598f.svg)](https://nestjs.com)
-[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](https://www.mysql.com)
+[![MySQL](https://img.shields.io/badge/MySQL-9.x-4479a1.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#授權條款)
 
 [简体中文](../README.md) | **繁體中文** | [English](./README.en.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md) | [Français](./README.fr.md) | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Русский](./README.ru.md)
@@ -53,13 +53,13 @@ vben/
 | 前端 UI（4 選 1） | Ant Design Vue 4 / Ant Design Vue Next / Element Plus / Naive UI |
 | Java 後端 | Spring Boot 4.1（JDK 25）· Sa-Token 1.45 · MyBatis-Plus 3.5.17 · knife4j 5.0 |
 | Node 後端 | NestJS 12 · Fastify 5 · Prisma 7 · JWT · Swagger |
-| 資料庫 | MySQL 8.x（utf8mb4） |
+| 資料庫 | MySQL 9.x（utf8mb4） |
 
 | 工具 | 版本需求 | 用途 |
 | --- | --- | --- |
 | Node.js | ≥ 22.18（建議 24 LTS） | 前端 + Node 後端 |
 | pnpm | ≥ 10（`npm i -g pnpm`） | 前端 + Node 後端 |
-| MySQL | 8.x | 雙後端共用 |
+| MySQL | 9.x | 雙後端共用 |
 | JDK | 25 | 僅 Java 後端 |
 | Maven | 3.9+ | 僅 Java 後端 |
 
@@ -113,7 +113,7 @@ SELECT username FROM sys_user;        -- vben / admin / jack
 
 > - 指令碼內建 `CREATE DATABASE IF NOT EXISTS` 與 `USE vben_admin`，匯入即寫入 `vben_admin` 資料庫；
 > - 建表均帶 `IF NOT EXISTS`，但示範資料重複插入會因主鍵衝突中斷，**僅首次匯入執行**；
-> - 報 `Access denied` 為密碼錯誤；報 `command not found` 表示 mysql 未加入 `PATH`，改用完整路徑（如 `"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`）。
+> - 報 `Access denied` 為密碼錯誤；報 `command not found` 表示 mysql 未加入 `PATH`，改用完整路徑（如 `"C:\Program Files\MySQL\MySQL Server 9.0\bin\mysql.exe"`）。
 
 ### 第 2 步：啟動後端（Java / Node 二選一）
 

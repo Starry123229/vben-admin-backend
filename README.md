@@ -8,7 +8,7 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
 [![Java](https://img.shields.io/badge/Java-Spring%20Boot%204.1-6db33f.svg)](https://spring.io)
 [![Node](https://img.shields.io/badge/Node-NestJS%2012-40598f.svg)](https://nestjs.com)
-[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](https://www.mysql.com)
+[![MySQL](https://img.shields.io/badge/MySQL-9.x-4479a1.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#许可证)
 
 **简体中文** | [繁體中文](./i18n/README.zh-TW.md) | [English](./i18n/README.en.md) | [日本語](./i18n/README.ja.md) | [한국어](./i18n/README.ko.md) | [Français](./i18n/README.fr.md) | [Deutsch](./i18n/README.de.md) | [Español](./i18n/README.es.md) | [Русский](./i18n/README.ru.md)
@@ -55,13 +55,13 @@ vben/
 | 前端 UI（4 选 1） | Ant Design Vue 4 / Ant Design Vue Next / Element Plus / Naive UI |
 | Java 后端 | Spring Boot 4.1（JDK 25）· Sa-Token 1.45 · MyBatis-Plus 3.5.17 · knife4j 5.0 |
 | Node 后端 | NestJS 12 · Fastify 5 · Prisma 7 · JWT · Swagger |
-| 数据库 | MySQL 8.x（utf8mb4） |
+| 数据库 | MySQL 9.x（utf8mb4） |
 
 | 工具 | 版本要求 | 用途 |
 | --- | --- | --- |
 | Node.js | ≥ 22.18（推荐 24 LTS） | 前端 + Node 后端 |
 | pnpm | ≥ 10（`npm i -g pnpm`） | 前端 + Node 后端 |
-| MySQL | 8.x | 双后端共用 |
+| MySQL | 9.x | 双后端共用 |
 | JDK | 25 | 仅 Java 后端 |
 | Maven | 3.9+ | 仅 Java 后端 |
 
@@ -115,7 +115,7 @@ SELECT username FROM sys_user;        -- vben / admin / jack
 
 > - 脚本内置 `CREATE DATABASE IF NOT EXISTS` 与 `USE vben_admin`，导入即写入 `vben_admin` 库；
 > - 建表均带 `IF NOT EXISTS`，但演示数据重复插入会因主键冲突中断，**仅首次导入执行**；
-> - 报 `Access denied` 为密码错误；报 `command not found` 说明 mysql 未加入 `PATH`，改用完整路径（如 `"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`）。
+> - 报 `Access denied` 为密码错误；报 `command not found` 说明 mysql 未加入 `PATH`，改用完整路径（如 `"C:\Program Files\MySQL\MySQL Server 9.0\bin\mysql.exe"`）。
 
 ### 第 2 步：启动后端（Java / Node 二选一）
 

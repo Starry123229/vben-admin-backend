@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- 后台管理系统数据库初始化脚本（Java / Node 双后端共用，契约见 docs/api-contract.md §6）
--- 数据库: MySQL 8.4+, 字符集 utf8mb4。执行本文件即完成建库建表并灌入演示数据。
+-- 数据库: MySQL 9.7+, 字符集 utf8mb4。执行本文件即完成建库建表并灌入演示数据。
 -- 演示账号: vben / admin / jack，密码均为 123456。
 -- ==============================================================================
 
@@ -229,23 +229,43 @@ INSERT INTO `sys_user` (`id`, `username`, `password_hash`, `real_name`, `home_pa
 INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 (1, 1), (2, 2), (3, 3);
 
--- 菜单（与前端实际视图对齐：各 app 通用的 Dashboard / 系统管理目录
--- （用户/角色/部门/菜单管理）+ 通知管理。组件路径对应 src/views/**/index.vue）
+-- 菜单（与前端实际视图对齐：Dashboard / 系统管理 / 系统监控 / 消息通知 四个顶级目录
+-- 系统管理：用户/角色/部门/菜单/字典/配置/附件/工作流
+-- 系统监控：监控/在线用户/定时任务/操作日志/登录日志/审计日志
+-- 消息通知：通知管理/消息中心
+-- 组件路径对应 src/views/**/index.vue）
 INSERT INTO `sys_menu` (`id`, `pid`, `name`, `type`, `path`, `component`, `redirect`, `status`, `sort`, `auth_code`, `meta`) VALUES
+-- ---- Dashboard 目录 ----
 (1,   0,   'Dashboard',               'catalog', '/dashboard',                NULL,                          '/analytics',                 1, 0, NULL,        '{"order":-1,"title":"page.dashboard.title"}'),
 (2,   1,   'Analytics',               'menu',    '/analytics',                '/dashboard/analytics/index',  NULL,                         1, 0, NULL,        '{"affixTab":true,"title":"page.dashboard.analytics"}'),
 (3,   1,   'Workspace',               'menu',    '/workspace',                '/dashboard/workspace/index',  NULL,                         1, 1, NULL,        '{"title":"page.dashboard.workspace"}'),
+-- ---- 个人中心（隐藏菜单） ----
 (21,  0,   'Profile',                 'menu',    '/profile',                  '_core/profile/index',          NULL,                         1, 3, NULL,        '{"hideInMenu":true,"icon":"lucide:user","title":"page.auth.profile"}'),
+-- ---- 系统管理目录 ----
 (100, 0,   'System',                  'catalog', '/system',                   NULL,                          '/system/user',               1, 1, NULL,        '{"icon":"lucide:settings","order":1,"title":"page.system.title"}'),
 (101, 100, 'SystemUser',              'menu',    'user',                      '/system/user/index',          NULL,                         1, 0, NULL,        '{"icon":"lucide:user","order":0,"title":"page.system.user"}'),
 (102, 100, 'SystemRole',              'menu',    'role',                      '/system/role/index',          NULL,                         1, 1, NULL,        '{"icon":"lucide:users","order":1,"title":"page.system.role"}'),
 (103, 100, 'SystemDept',              'menu',    'dept',                      '/system/dept/index',          NULL,                         1, 2, NULL,        '{"icon":"lucide:building-2","order":2,"title":"page.system.dept"}'),
 (104, 100, 'SystemMenu',              'menu',    'menu',                      '/system/menu/index',          NULL,                         1, 3, NULL,        '{"icon":"lucide:menu","order":3,"title":"page.system.menu"}'),
-(105, 100, 'Notice',                  'menu',    'notice',                    '/system/notice/index',        NULL,                         1, 10, NULL,       '{"icon":"lucide:bell","order":10,"title":"page.system.notice"}'),
-(106, 100, 'OperationLog',             'menu',    'operation-log',              '/system/operation-log/index', NULL,                        1, 4, NULL,        '{"icon":"lucide:file-text","order":4,"title":"page.system.operationLog"}'),
-(107, 100, 'LoginLog',                 'menu',    'login-log',                  '/system/login-log/index',     NULL,                        1, 5, NULL,        '{"icon":"lucide:log-in","order":5,"title":"page.system.loginLog"}'),
-(108, 100, 'Dict',                     'menu',    'dict',                       '/system/dict/index',           NULL,                        1, 6, NULL,        '{"icon":"lucide:book-open","order":6,"title":"page.system.dict"}'),
-(109, 100, 'DictData',                 'menu',    'dict/data/:typeId',          '/system/dict/data',            NULL,                        1, 0, NULL,        '{"activePath":"/system/dict","hideInMenu":true,"title":"字典数据"}'),
+(108, 100, 'Dict',                     'menu',    'dict',                       '/system/dict/index',           NULL,                        1, 4, NULL,        '{"icon":"lucide:book-open","order":4,"title":"page.system.dict"}'),
+(109, 100, 'DictData',                 'menu',    'dict/data/:typeId',          '/system/dict/data',            NULL,                        1, 5, NULL,        '{"activePath":"/system/dict","hideInMenu":true,"title":"字典数据"}'),
+(110, 100, 'Config',                   'menu',    'config',                     '/system/config/index',         NULL,                        1, 6, NULL,        '{"icon":"lucide:settings","order":6,"title":"page.system.config"}'),
+(1020,100, 'Attachment',               'menu',    'attachment',                 '/system/attachment/index',     NULL,                        1, 7, NULL,        '{"icon":"lucide:paperclip","order":7,"title":"page.system.attachment"}'),
+(1022,100, 'Workflow',                 'menu',    'workflow',                   '/system/workflow/index',       NULL,                        1, 8, NULL,        '{"icon":"lucide:git-branch","order":8,"title":"page.system.workflow"}'),
+-- ---- 系统监控目录 ----
+-- ---- 系统监控目录 ----
+(200, 0,   'SystemMonitor',            'catalog', '/monitor',                  NULL,                          '/monitor/monitor',           1, 2, NULL,        '{"icon":"lucide:monitor","order":2,"title":"page.systemMonitor.title"}'),
+(113, 200, 'Monitor',                  'menu',    '/monitor/monitor',          '/system/monitor/index',        NULL,                         1, 0, NULL,        '{"icon":"lucide:activity","order":0,"title":"page.systemMonitor.monitor"}'),
+(112, 200, 'Online',                   'menu',    '/monitor/online',           '/system/online/index',         NULL,                         1, 1, NULL,        '{"icon":"lucide:wifi","order":1,"title":"page.systemMonitor.online"}'),
+(111, 200, 'Job',                      'menu',    '/monitor/job',              '/system/job/index',            NULL,                         1, 2, NULL,        '{"icon":"lucide:clock","order":2,"title":"page.systemMonitor.job"}'),
+(106, 200, 'OperationLog',             'menu',    '/monitor/operation-log',    '/system/operation-log/index',  NULL,                         1, 3, NULL,        '{"icon":"lucide:file-text","order":3,"title":"page.systemMonitor.operationLog"}'),
+(107, 200, 'LoginLog',                 'menu',    '/monitor/login-log',        '/system/login-log/index',      NULL,                         1, 4, NULL,        '{"icon":"lucide:log-in","order":4,"title":"page.systemMonitor.loginLog"}'),
+(1021,200, 'AuditLog',                 'menu',    '/monitor/audit-log',        '/system/audit-log/index',      NULL,                         1, 5, NULL,        '{"icon":"lucide:file-search","order":5,"title":"page.systemMonitor.auditLog"}'),
+-- ---- 消息通知目录 ----
+(300, 0,   'MessageCenter',            'catalog', '/message',                  NULL,                          '/message/notice',            1, 3, NULL,        '{"icon":"lucide:message-square","order":3,"title":"page.messageCenter.title"}'),
+(105, 300, 'Notice',                  'menu',    '/message/notice',           '/system/notice/index',        NULL,                         1, 0, NULL,        '{"icon":"lucide:bell","order":0,"title":"page.messageCenter.notice"}'),
+(1019,300, 'Message',                  'menu',    '/message/message',          '/system/message/index',        NULL,                         1, 1, NULL,        '{"icon":"lucide:mail","order":1,"title":"page.messageCenter.message"}'),
+-- ---- 按钮权限码 ----
 (1001,101, 'SystemUserCreate',        'button',  NULL,                        NULL,                          NULL,                         1, 0, 'AC_100010', '{"title":"新增用户"}'),
 (1002,101, 'SystemUserUpdate',        'button',  NULL,                        NULL,                          NULL,                         1, 1, 'AC_100020', '{"title":"编辑用户"}'),
 (1003,101, 'SystemUserDelete',        'button',  NULL,                        NULL,                          NULL,                         1, 2, 'AC_100030', '{"title":"删除用户"}'),
@@ -265,10 +285,16 @@ INSERT INTO `sys_role_menu` (`role_id`, `menu_id`) VALUES
 (1,1),(1,2),(1,3),(1,21),
 (2,1),(2,2),(2,3),(2,21),
 (3,1),(3,2),(3,21),
--- 系统管理 + 通知管理：super / admin 全部页面；user 仅系统管理目录 + 用户管理页
-(1,100),(1,101),(1,102),(1,103),(1,104),(1,105),(1,106),(1,107),(1,108),(1,109),(1,110),(1,111),(1,112),(1,113),(1,1019),(1,1020),(1,1021),(1,1022),
-(2,100),(2,101),(2,102),(2,103),(2,104),(2,105),(2,106),(2,107),(2,108),(2,109),(2,110),(2,111),(2,112),(2,113),(2,1019),(2,1020),(2,1021),(2,1022),
+-- 系统管理目录：super / admin 全部页面；user 仅系统管理目录 + 用户管理页
+(1,100),(1,101),(1,102),(1,103),(1,104),(1,108),(1,109),(1,110),(1,1020),(1,1022),
+(2,100),(2,101),(2,102),(2,103),(2,104),(2,108),(2,109),(2,110),(2,1020),(2,1022),
 (3,100),(3,101),(3,102),
+-- 系统监控目录：super / admin 全部页面
+(1,200),(1,106),(1,107),(1,111),(1,112),(1,113),(1,1021),
+(2,200),(2,106),(2,107),(2,111),(2,112),(2,113),(2,1021),
+-- 消息通知目录：super / admin 全部页面
+(1,300),(1,105),(1,1019),
+(2,300),(2,105),(2,1019),
 -- 按钮权限：super/admin 全部；user = 用户只读(1006) + 角色查看/编辑(1004/1005)
 (1,1001),(1,1002),(1,1003),(1,1006),(1,1004),(1,1005),
 (2,1001),(2,1002),(2,1003),(2,1006),(2,1004),(2,1005),

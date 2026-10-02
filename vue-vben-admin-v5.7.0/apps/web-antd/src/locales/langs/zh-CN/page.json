@@ -51,7 +51,18 @@
     "loadDashboardFailed": "加载仪表盘数据失败"
   },
   "systemMonitor": {
-    "title": "系统监控"
+    "title": "系统监控",
+    "monitor": "系统监控",
+    "online": "在线用户",
+    "job": "定时任务",
+    "operationLog": "操作日志",
+    "loginLog": "登录日志",
+    "auditLog": "审计日志"
+  },
+  "messageCenter": {
+    "title": "消息通知",
+    "notice": "通知管理",
+    "message": "消息中心"
   },
   "systemTools": {
     "title": "系统工具"

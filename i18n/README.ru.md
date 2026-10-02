@@ -8,7 +8,7 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
 [![Java](https://img.shields.io/badge/Java-Spring%20Boot%204.1-6db33f.svg)](https://spring.io)
 [![Node](https://img.shields.io/badge/Node-NestJS%2012-40598f.svg)](https://nestjs.com)
-[![MySQL](https://img.shields.io/badge/MySQL-8.x-4479a1.svg)](https://www.mysql.com)
+[![MySQL](https://img.shields.io/badge/MySQL-9.x-4479a1.svg)](https://www.mysql.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#лицензия)
 
 [简体中文](../README.md) | [繁體中文](./README.zh-TW.md) | [English](./README.en.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md) | [Français](./README.fr.md) | [Deutsch](./README.de.md) | [Español](./README.es.md) | **Русский**
@@ -53,13 +53,13 @@ vben/
 | UI фронтенда (1 из 4) | Ant Design Vue 4 / Ant Design Vue Next / Element Plus / Naive UI |
 | Бэкенд Java | Spring Boot 4.1 (JDK 25) · Sa-Token 1.45 · MyBatis-Plus 3.5.17 · knife4j 5.0 |
 | Бэкенд Node | NestJS 12 · Fastify 5 · Prisma 7 · JWT · Swagger |
-| База данных | MySQL 8.x (utf8mb4) |
+| База данных | MySQL 9.x (utf8mb4) |
 
 | Инструмент | Версия | Требуется для |
 | --- | --- | --- |
 | Node.js | ≥ 22.18 (рекомендуется 24 LTS) | Фронтенд + бэкенд Node |
 | pnpm | ≥ 10 (`npm i -g pnpm`) | Фронтенд + бэкенд Node |
-| MySQL | 8.x | Оба бэкенда |
+| MySQL | 9.x | Оба бэкенда |
 | JDK | 25 | Только бэкенд Java |
 | Maven | 3.9+ | Только бэкенд Java |
 
@@ -114,7 +114,7 @@ SELECT username FROM sys_user;        -- vben / admin / jack
 
 > - Скрипт содержит `CREATE DATABASE IF NOT EXISTS` и `USE vben_admin`, поэтому импорт всегда направляется в `vben_admin`;
 > - Создание таблиц идемпотентно, но повторная вставка демо-данных прерывается конфликтами первичных ключей — **выполняйте полный импорт только один раз**;
-> - `Access denied` означает неверный пароль; `command not found` — что mysql не в `PATH`; используйте полный путь (например, `"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"`).
+> - `Access denied` означает неверный пароль; `command not found` — что mysql не в `PATH`; используйте полный путь (например, `"C:\Program Files\MySQL\MySQL Server 9.0\bin\mysql.exe"`).
 
 ### Шаг 2: запуск бэкенда (Java / Node, выберите одно)
 
