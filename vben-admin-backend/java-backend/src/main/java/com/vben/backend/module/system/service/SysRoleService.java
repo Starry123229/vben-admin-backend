@@ -131,7 +131,7 @@ public class SysRoleService {
                 .map(SysRoleMenu::getMenuId).toList();
     }
 
-    /** 重新分配角色菜单（全量替换） */
+    /** 重新分配角色菜单（全量替换，批量插入） */
     @Transactional
     public void assignMenus(Long roleId, AssignMenuRequest req) {
         if (roleId == null) {
@@ -142,13 +142,15 @@ public class SysRoleService {
             throw ServiceException.badRequest("角色不存在");
         }
         roleMenuMapper.delete(new LambdaQueryWrapper<SysRoleMenu>().eq(SysRoleMenu::getRoleId, roleId));
-        if (req.getMenuIds() != null) {
+        if (req.getMenuIds() != null && !req.getMenuIds().isEmpty()) {
+            List<SysRoleMenu> list = new java.util.ArrayList<>(req.getMenuIds().size());
             for (Long menuId : req.getMenuIds()) {
                 SysRoleMenu rm = new SysRoleMenu();
                 rm.setRoleId(roleId);
                 rm.setMenuId(menuId);
-                roleMenuMapper.insert(rm);
+                list.add(rm);
             }
+            roleMenuMapper.insertBatch(list);
         }
         cacheCleaner.evictAllPermissionCaches();
     }

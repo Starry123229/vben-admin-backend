@@ -52,6 +52,7 @@ model SysUserRole {
   role SysRole @relation(fields: [roleId], references: [id])
 
   @@id([userId, roleId])
+  @@index([roleId])
   @@map("sys_user_role")
 }
 
@@ -73,6 +74,8 @@ model SysMenu {
 
   roleMenus  SysRoleMenu[]
 
+  @@index([pid])
+  @@index([type, status])
   @@map("sys_menu")
 }
 
@@ -84,6 +87,7 @@ model SysRoleMenu {
   menu SysMenu @relation(fields: [menuId], references: [id])
 
   @@id([roleId, menuId])
+  @@index([menuId])
   @@map("sys_role_menu")
 }
 
@@ -290,6 +294,8 @@ model SysWorkflowTask {
   approveTime  DateTime? @default(now()) @map("approve_time") @db.DateTime(0)
 
   @@index([instanceId], map: "idx_instance")
+  @@index([instanceId, step], map: "idx_instance_step")
+  @@index([approverId], map: "idx_approver_id")
   @@map("sys_workflow_task")
 }
 

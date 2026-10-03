@@ -1,11 +1,7 @@
 package com.vben.backend.module.system.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.vben.backend.module.system.entity.SysDept;
-import com.vben.backend.module.system.entity.SysRole;
 import com.vben.backend.module.system.entity.SysUser;
-import com.vben.backend.module.system.entity.SysLoginLog;
-import com.vben.backend.module.system.entity.SysUserRole;
 import com.vben.backend.module.system.mapper.SysDeptMapper;
 import com.vben.backend.module.system.mapper.SysLoginLogMapper;
 import com.vben.backend.module.system.mapper.SysMenuMapper;
@@ -15,6 +11,7 @@ import com.vben.backend.module.system.mapper.SysUserRoleMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +20,7 @@ import java.util.Map;
  * 仪表盘统计服务：提供用户、角色、部门、菜单等维度统计数据。
  *
  * <p>所有已登录用户均可访问，统计结果中按用户角色权限做适度过滤。</p>
+ * <p>优化：所有聚合统计下推到 SQL 层，消除 N+1 查询。</p>
  *
  * @author Starry
  */
@@ -63,26 +61,25 @@ public class DashboardService {
 
     /**
      * 用户增长趋势（按创建时间月份分组）。
+     * 优化：SQL GROUP BY 替代全表加载到内存。
      */
     public List<Map<String, Object>> userTrends() {
-        List<SysUser> users = userMapper.selectList(null);
-        // 按月分组统计
-        java.util.Map<String, Long> monthlyCount = new java.util.TreeMap<>();
-        for (SysUser user : users) {
-            if (user.getCreateTime() != null) {
-                String month = user.getCreateTime().getYear() + "-"
-                        + String.format("%02d", user.getCreateTime().getMonthValue());
-                monthlyCount.merge(month, 1L, Long::sum);
-            }
+        List<Map<String, Object>> dbData = userMapper.countByMonth();
+        // 转为 Map 便于快速查找
+        java.util.Map<String, Integer> monthlyCount = new HashMap<>();
+        for (Map<String, Object> row : dbData) {
+            String month = (String) row.get("month");
+            Number count = (Number) row.get("cnt");
+            monthlyCount.put(month, count != null ? count.intValue() : 0);
         }
         // 补齐最近 12 个月（无数据的月份填 0），保证折线图正常展示
         java.time.YearMonth now = java.time.YearMonth.now();
-        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        List<Map<String, Object>> result = new ArrayList<>();
         for (int i = 11; i >= 0; i--) {
             String month = now.minusMonths(i).toString();
             Map<String, Object> item = new HashMap<>();
             item.put("month", month);
-            item.put("count", monthlyCount.getOrDefault(month, 0L).intValue());
+            item.put("count", monthlyCount.getOrDefault(month, 0));
             result.add(item);
         }
         return result;
@@ -90,55 +87,52 @@ public class DashboardService {
 
     /**
      * 角色分布统计：每个角色下的用户数。
+     * 优化：单次 JOIN + GROUP BY 替代 N 次 COUNT 查询。
      */
     public List<Map<String, Object>> roleDistribution() {
-        List<SysRole> roles = roleMapper.selectList(null);
-        return roles.stream().map(role -> {
+        List<Map<String, Object>> dbData = userRoleMapper.countByRole();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> row : dbData) {
             Map<String, Object> item = new HashMap<>();
-            item.put("name", role.getName());
-            long count = userRoleMapper.selectCount(new LambdaQueryWrapper<SysUserRole>()
-                    .eq(SysUserRole::getRoleId, role.getId()));
-            item.put("value", (int) count);
-            return item;
-        }).toList();
+            item.put("name", row.get("roleName"));
+            Number count = (Number) row.get("cnt");
+            item.put("value", count != null ? count.intValue() : 0);
+            result.add(item);
+        }
+        return result;
     }
 
     /**
      * 部门用户分布：每个部门下的用户数。
+     * 优化：单次 JOIN + GROUP BY 替代 N 次 COUNT 查询。
      */
     public List<Map<String, Object>> deptDistribution() {
-        List<SysDept> depts = deptMapper.selectList(null);
-        return depts.stream().map(dept -> {
+        List<Map<String, Object>> dbData = userMapper.countByDept();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> row : dbData) {
             Map<String, Object> item = new HashMap<>();
-            item.put("name", dept.getName());
-            long count = userMapper.selectCount(new LambdaQueryWrapper<SysUser>()
-                    .eq(SysUser::getDeptId, dept.getId()));
-            item.put("value", count);
-            return item;
-        }).toList();
+            item.put("name", row.get("deptName"));
+            Number count = (Number) row.get("cnt");
+            item.put("value", count != null ? count.intValue() : 0);
+            result.add(item);
+        }
+        return result;
     }
 
     /**
      * 浏览器分布统计：按登录日志中的浏览器分组计数。
+     * 优化：SQL GROUP BY 替代全表加载到内存。
      */
     public List<Map<String, Object>> browserDistribution() {
-        List<SysLoginLog> logs = loginLogMapper.selectList(null);
-        java.util.Map<String, Long> counter = new java.util.HashMap<>();
-        for (SysLoginLog log : logs) {
-            String browser = log.getBrowser();
-            if (browser == null || browser.isBlank() || "Unknown".equalsIgnoreCase(browser)) {
-                browser = "其他";
-            }
-            counter.merge(browser, 1L, Long::sum);
+        List<Map<String, Object>> dbData = loginLogMapper.countByBrowser();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> row : dbData) {
+            Map<String, Object> item = new HashMap<>();
+            item.put("name", row.get("browser"));
+            Number count = (Number) row.get("cnt");
+            item.put("value", count != null ? count.intValue() : 0);
+            result.add(item);
         }
-        return counter.entrySet().stream()
-                .sorted(java.util.Map.Entry.<String, Long>comparingByValue().reversed())
-                .map(e -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("name", e.getKey());
-                    item.put("value", e.getValue().intValue());
-                    return item;
-                })
-                .toList();
+        return result;
     }
 }

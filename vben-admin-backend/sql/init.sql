@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_username` (`username`),
     UNIQUE KEY `uk_phone` (`phone`),
-    UNIQUE KEY `uk_email` (`email`)
+    UNIQUE KEY `uk_email` (`email`),
+    KEY `idx_dept_id` (`dept_id`)
 ) ENGINE = InnoDB COMMENT = '用户表';
 
 -- ------------------------------------------------------------------------------ 角色表
@@ -45,7 +46,8 @@ CREATE TABLE IF NOT EXISTS `sys_role` (
 CREATE TABLE IF NOT EXISTS `sys_user_role` (
     `user_id` BIGINT NOT NULL COMMENT '用户ID',
     `role_id` BIGINT NOT NULL COMMENT '角色ID',
-    PRIMARY KEY (`user_id`, `role_id`)
+    PRIMARY KEY (`user_id`, `role_id`),
+    KEY `idx_role_id` (`role_id`)
 ) ENGINE = InnoDB COMMENT = '用户角色关联表';
 
 -- ------------------------------------------------------------------------------ 菜单表(catalog目录/menu页面/button按钮/embedded内嵌/link外链)
@@ -65,14 +67,17 @@ CREATE TABLE IF NOT EXISTS `sys_menu` (
     `create_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `update_time` DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_name` (`name`)
+    UNIQUE KEY `uk_name` (`name`),
+    KEY `idx_pid` (`pid`),
+    KEY `idx_type_status` (`type`, `status`)
 ) ENGINE = InnoDB COMMENT = '菜单表';
 
 -- ------------------------------------------------------------------------------ 角色-菜单关联表
 CREATE TABLE IF NOT EXISTS `sys_role_menu` (
     `role_id` BIGINT NOT NULL COMMENT '角色ID',
     `menu_id` BIGINT NOT NULL COMMENT '菜单ID',
-    PRIMARY KEY (`role_id`, `menu_id`)
+    PRIMARY KEY (`role_id`, `menu_id`),
+    KEY `idx_menu_id` (`menu_id`)
 ) ENGINE = InnoDB COMMENT = '角色菜单关联表';
 
 -- ------------------------------------------------------------------------------ 部门表
@@ -459,5 +464,7 @@ CREATE TABLE IF NOT EXISTS `sys_workflow_task` (
     `comment`       TEXT                              COMMENT '审批意见',
     `approve_time`  DATETIME     DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    INDEX `idx_instance` (`instance_id`)
+    INDEX `idx_instance` (`instance_id`),
+    INDEX `idx_instance_step` (`instance_id`, `step`),
+    INDEX `idx_approver_id` (`approver_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='工作流审批任务';

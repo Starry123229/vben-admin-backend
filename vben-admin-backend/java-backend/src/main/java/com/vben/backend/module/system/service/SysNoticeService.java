@@ -152,7 +152,12 @@ public class SysNoticeService {
         List<SysUserRole> userRoles = userRoleMapper.selectList(
                 new LambdaQueryWrapper<SysUserRole>()
                         .eq(SysUserRole::getRoleId, roleId));
-        int count = 0;
+        if (userRoles.isEmpty()) {
+            return 0;
+        }
+        // 批量构建通知记录，一次 INSERT 替代 N 次循环插入
+        LocalDateTime now = LocalDateTime.now();
+        List<SysNotice> notices = new ArrayList<>(userRoles.size());
         for (SysUserRole ur : userRoles) {
             SysNotice notice = new SysNotice();
             notice.setTitle(title);
@@ -163,10 +168,10 @@ public class SysNoticeService {
             notice.setUserId(ur.getUserId());
             notice.setRoleId(roleId);
             notice.setType(StringUtils.hasText(type) ? type : "info");
-            notice.setCreateTime(LocalDateTime.now());
-            noticeMapper.insert(notice);
-            count++;
+            notice.setCreateTime(now);
+            notices.add(notice);
         }
-        return count;
+        noticeMapper.insertBatch(notices);
+        return notices.size();
     }
 }

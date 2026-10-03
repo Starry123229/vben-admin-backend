@@ -37,8 +37,35 @@ export class SystemRoleService {
       this.prisma.sysRole.count({ where }),
     ]);
 
-    // 为每个角色附加 permissions（菜单 id 列表）
-    const items = await Promise.all(roles.map((r) => this.toVO(r)));
+    // 批量查询所有角色的菜单关联，消除 N+1 查询
+    const roleIds = roles.map((r) => r.id);
+    let roleMenusMap = new Map<bigint, bigint[]>();
+    if (roleIds.length > 0) {
+      const allRoleMenus = await this.prisma.sysRoleMenu.findMany({
+        where: { roleId: { in: roleIds } },
+        select: { roleId: true, menuId: true },
+      });
+      for (const rm of allRoleMenus) {
+        const arr = roleMenusMap.get(rm.roleId);
+        if (arr) {
+          arr.push(rm.menuId);
+        } else {
+          roleMenusMap.set(rm.roleId, [rm.menuId]);
+        }
+      }
+    }
+
+    const items = roles.map((r) => ({
+      id: r.id.toString(),
+      name: r.name,
+      code: r.code,
+      status: r.status,
+      remark: r.remark,
+      createTime: r.createTime
+        ? dayjs(r.createTime).format('YYYY/MM/DD HH:mm:ss')
+        : null,
+      permissions: roleMenusMap.get(r.id) ?? [],
+    }));
 
     return new PageResult(items, total);
   }

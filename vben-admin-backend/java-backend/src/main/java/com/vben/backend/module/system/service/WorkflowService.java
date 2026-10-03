@@ -198,9 +198,10 @@ public class WorkflowService {
      */
     public PageResult<SysWorkflowInstance> listInstances(int page, int pageSize, String status) {
         long userId = StpUtil.getLoginIdAsLong();
+        // 使用参数化 EXISTS 子查询，避免 SQL 注入风险
         LambdaQueryWrapper<SysWorkflowInstance> w = new LambdaQueryWrapper<SysWorkflowInstance>()
                 .and(q -> q.eq(SysWorkflowInstance::getApplicantId, userId)
-                        .or().exists("SELECT 1 FROM sys_workflow_task t WHERE t.instance_id = id AND t.approver_id = " + userId))
+                        .or().exists("SELECT 1 FROM sys_workflow_task t WHERE t.instance_id = id AND t.approver_id = {0}", userId))
                 .orderByDesc(SysWorkflowInstance::getCreateTime);
         if (status != null && !status.isBlank()) {
             w.eq(SysWorkflowInstance::getStatus, status);

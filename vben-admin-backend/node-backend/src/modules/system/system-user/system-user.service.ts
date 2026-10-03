@@ -42,7 +42,8 @@ export class SystemUserService {
       this.prisma.sysUser.count({ where }),
     ]);
 
-    const items = await Promise.all(users.map((u) => this.toVO(u)));
+    // 批量查询角色，消除 N+1
+    const items = await this.toVOBatch(users);
 
     return new PageResult(items, total);
   }
@@ -230,7 +231,7 @@ export class SystemUserService {
     await this.prisma.sysUserRole.createMany({ data });
   }
 
-  /** 实体转脱敏 VO（含角色） */
+  /** 实体转脱敏 VO（含角色）—— 单条，用于 getById 场景 */
   private async toVO(user: any): Promise<any> {
     const userRoles = await this.prisma.sysUserRole.findMany({
       where: { userId: user.id },
@@ -257,5 +258,51 @@ export class SystemUserService {
       roleIds,
       roleCodes,
     };
+  }
+
+  /**
+   * 批量实体转脱敏 VO（含角色）—— 消除 N+1 查询。
+   * 1 次查用户角色关联（含 role）替代 N 次 findMany。
+   */
+  private async toVOBatch(users: any[]): Promise<any[]> {
+    if (!users || users.length === 0) return [];
+
+    const userIds = users.map((u) => u.id);
+
+    // 1 次查询：批量获取所有用户-角色关联（含角色信息）
+    const allUserRoles = await this.prisma.sysUserRole.findMany({
+      where: { userId: { in: userIds } },
+      include: { role: true },
+    });
+
+    // 按 userId 分组
+    const userRoleMap = new Map<bigint, any[]>();
+    for (const ur of allUserRoles) {
+      const list = userRoleMap.get(ur.userId) || [];
+      list.push(ur);
+      userRoleMap.set(ur.userId, list);
+    }
+
+    return users.map((user) => {
+      const userRoles = userRoleMap.get(user.id) || [];
+      const roleIds = userRoles.map((ur) => ur.roleId.toString());
+      const roleCodes = userRoles.map((ur) => ur.role?.code).filter(Boolean);
+
+      return {
+        id: user.id.toString(),
+        username: user.username,
+        realName: user.realName,
+        avatar: user.avatar,
+        homePath: user.homePath,
+        deptId: user.deptId?.toString() || null,
+        status: user.status,
+        remark: user.remark,
+        createTime: user.createTime
+          ? dayjs(user.createTime).format('YYYY/MM/DD HH:mm:ss')
+          : null,
+        roleIds,
+        roleCodes,
+      };
+    });
   }
 }

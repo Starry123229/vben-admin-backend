@@ -27,9 +27,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 用户领域服务：用户查询、CRUD 与密码管理。
@@ -83,7 +86,7 @@ public class SysUserService {
             w.eq(SysUser::getDeptId, deptId);
         }
         IPage<SysUser> p = userMapper.selectPage(new Page<>(page, pageSize), w);
-        List<UserItemVO> items = p.getRecords().stream().map(this::toVO).toList();
+        List<UserItemVO> items = toVOBatch(p.getRecords());
         return new PageResult<>(items, p.getTotal());
     }
 
@@ -295,21 +298,23 @@ PasswordValidator.validate(req.getPassword());
 
     // ----------------------------------------------------------------- 私有方法
 
-    /** 替换用户-角色关联 */
+    /** 替换用户-角色关联（批量插入，消除 N 次循环 INSERT） */
     private void bindRoles(long userId, List<Long> roleIds) {
         userRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, userId));
         if (roleIds == null || roleIds.isEmpty()) {
             return;
         }
+        List<SysUserRole> list = new ArrayList<>(roleIds.size());
         for (Long roleId : roleIds) {
             SysUserRole ur = new SysUserRole();
             ur.setUserId(userId);
             ur.setRoleId(roleId);
-            userRoleMapper.insert(ur);
+            list.add(ur);
         }
+        userRoleMapper.insertBatch(list);
     }
 
-    /** 实体转脱敏 VO（含角色） */
+    /** 实体转脱敏 VO（含角色）—— 单条，仍用于 getById 场景 */
     private UserItemVO toVO(SysUser user) {
         UserItemVO vo = new UserItemVO();
         vo.setId(user.getId());
@@ -331,5 +336,55 @@ PasswordValidator.validate(req.getPassword());
                     .map(SysRole::getCode).toList());
         }
         return vo;
+    }
+
+    /**
+     * 批量实体转脱敏 VO（含角色）—— 消除 N+1 查询。
+     * 1 次查用户角色关联 + 1 次查角色信息，共 2 次额外查询替代 2N 次。
+     */
+    private List<UserItemVO> toVOBatch(List<SysUser> users) {
+        if (users == null || users.isEmpty()) {
+            return List.of();
+        }
+        List<Long> userIds = users.stream().map(SysUser::getId).toList();
+        // 1 次查询：批量获取所有用户-角色关联
+        List<SysUserRole> allUserRoles = userRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>()
+                .in(SysUserRole::getUserId, userIds));
+        // 按 userId 分组
+        Map<Long, List<Long>> userRoleIdMap = allUserRoles.stream()
+                .collect(Collectors.groupingBy(
+                        SysUserRole::getUserId,
+                        Collectors.mapping(SysUserRole::getRoleId, Collectors.toList())));
+        // 收集所有角色 ID，1 次查询：批量获取角色信息
+        Set<Long> allRoleIds = allUserRoles.stream()
+                .map(SysUserRole::getRoleId)
+                .collect(Collectors.toSet());
+        Map<Long, String> roleCodeMap;
+        if (allRoleIds.isEmpty()) {
+            roleCodeMap = Map.of();
+        } else {
+            roleCodeMap = roleMapper.selectList(new LambdaQueryWrapper<SysRole>()
+                            .in(SysRole::getId, allRoleIds)).stream()
+                    .collect(Collectors.toMap(SysRole::getId, SysRole::getCode));
+        }
+        // 组装 VO
+        List<UserItemVO> result = new ArrayList<>(users.size());
+        for (SysUser user : users) {
+            UserItemVO vo = new UserItemVO();
+            vo.setId(user.getId());
+            vo.setUsername(user.getUsername());
+            vo.setRealName(user.getRealName());
+            vo.setAvatar(user.getAvatar());
+            vo.setHomePath(user.getHomePath());
+            vo.setDeptId(user.getDeptId());
+            vo.setStatus(user.getStatus());
+            vo.setRemark(user.getRemark());
+            vo.setCreateTime(user.getCreateTime());
+            List<Long> roleIds = userRoleIdMap.getOrDefault(user.getId(), List.of());
+            vo.setRoleIds(roleIds);
+            vo.setRoleCodes(roleIds.stream().map(roleCodeMap::get).toList());
+            result.add(vo);
+        }
+        return result;
     }
 }
