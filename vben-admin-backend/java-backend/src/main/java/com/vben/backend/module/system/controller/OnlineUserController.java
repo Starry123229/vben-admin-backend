@@ -76,7 +76,12 @@ public class OnlineUserController {
         return R.ok(result);
     }
 
-    /** 强制下线：支持通过 token 或 userId 下线 */
+    /**
+     * 踢人下线：支持通过 token 或 userId 踢下线。
+     * 与 logout（主动注销）的区别：kickout 不会清除 Token 信息，而是打上踢下线标记，
+     * 被踢用户再次访问时会收到「Token 已被踢下线」提示（NotLoginException type=KICK_OUT），
+     * 从而让前端可以区分「主动注销」和「被管理员踢下线」。
+     */
     @DeleteMapping("/{tokenOrId}")
     public R<Void> forceLogout(@PathVariable String tokenOrId) {
         // 防止管理员强制下线自己
@@ -84,9 +89,9 @@ public class OnlineUserController {
         if (currentToken != null && currentToken.equals(tokenOrId)) {
             throw com.vben.backend.common.result.ServiceException.badRequest("不能强制下线当前登录账号");
         }
-        // 先尝试按 token 注销
-        StpUtil.logoutByTokenValue(tokenOrId);
-        // 同时尝试按 loginId 注销（兼容前端传 userId 的场景）
+        // 先尝试按 token 踢下线
+        StpUtil.kickoutByTokenValue(tokenOrId);
+        // 同时尝试按 loginId 踢下线（兼容前端传 userId 的场景）
         try {
             long userId = Long.parseLong(tokenOrId);
             // 防止通过 userId 下线自己
@@ -94,11 +99,11 @@ public class OnlineUserController {
             if (currentLoginId != null && String.valueOf(currentLoginId).equals(String.valueOf(userId))) {
                 throw com.vben.backend.common.result.ServiceException.badRequest("不能强制下线当前登录账号");
             }
-            StpUtil.logout(userId);
+            StpUtil.kickout(userId);
         } catch (com.vben.backend.common.result.ServiceException e) {
             throw e;
         } catch (NumberFormatException ignored) {
-            // 不是数字，仅按 token 注销即可
+            // 不是数字，仅按 token 踢下线即可
         }
         return R.ok();
     }

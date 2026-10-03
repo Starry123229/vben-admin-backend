@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Vben Admin Node.js 后端 — NestJS + Fastify + Prisma",
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "dev": "nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
     "start:tsx": "tsx src/main.ts",
@@ -33,12 +33,14 @@
     "class-validator": "^0.15.1",
     "dayjs": "^1.11.23",
     "fastify": "^5.12.5",
+    "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.3",
+    "@swc/core": "^1.16.13",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/uuid": "^10.0.0",

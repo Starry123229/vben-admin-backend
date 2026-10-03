@@ -25,7 +25,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- 第三方依赖版本集中管理 -->
-    <sa-token.version>1.45.0</sa-token.version>
+    <sa-token.version>1.46.0</sa-token.version>
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <!-- knife4j-next：社区维护分支，官方版暂不支持 Boot 4 -->
     <knife4j.version>5.0.18</knife4j.version>
@@ -86,6 +86,26 @@
       <groupId>cn.dev33</groupId>
       <artifactId>sa-token-spring-boot4-starter</artifactId>
       <version>${sa-token.version}</version>
+    </dependency>
+
+    <!-- Sa-Token Redis 集成（RedisTemplate 方案，1.46.0 推荐）：Session/Terminal 共享存储 -->
+    <!-- 官方文档: https://sa-token.com/up/integ-redis.html -->
+    <dependency>
+      <groupId>cn.dev33</groupId>
+      <artifactId>sa-token-redis-template</artifactId>
+      <version>${sa-token.version}</version>
+    </dependency>
+
+    <!-- Spring Data Redis：提供 RedisTemplate / StringRedisTemplate + Lettuce 连接池 -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+
+    <!-- 连接池实现（Lettuce 基于 commons-pool2 实现 netty 连接池） -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-pool2</artifactId>
     </dependency>
 
     <!-- 仅用其 BCrypt 实现，不引入 Security 过滤链 -->

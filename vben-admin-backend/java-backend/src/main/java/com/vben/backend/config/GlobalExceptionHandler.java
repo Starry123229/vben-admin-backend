@@ -1,5 +1,6 @@
 package com.vben.backend.config;
 
+import cn.dev33.satoken.exception.DisableServiceException;
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
@@ -49,6 +50,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotPermissionException.class)
     public ResponseEntity<R<Void>> handleNotPermission(NotPermissionException e) {
         return ResponseEntity.status(403).body(R.fail("无权限执行此操作"));
+    }
+
+    /** Sa-Token 账号封禁：403，提示具体封禁原因 */
+    @ExceptionHandler(DisableServiceException.class)
+    public ResponseEntity<R<Void>> handleDisable(DisableServiceException e) {
+        return ResponseEntity.status(403).body(R.fail("该账号已被封禁" + (e.getMessage() != null ? ": " + e.getMessage() : "")));
     }
 
     /** 参数校验失败：400 + 首条校验消息 */

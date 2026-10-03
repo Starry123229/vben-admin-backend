@@ -11,6 +11,20 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  # Redis（Sa-Token Session 共享 + 验证码/限流/缓存）
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DB:0}
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          max-wait: 3000ms
+        timeout: 3000ms
   # 邮件服务（邮箱验证码/通知邮件）：vben.auth.email-mock=true 时不依d赖此项；
   # 生产改为真实 SMTP 后将 email-mock 置 false，并通过 SPRING_MAIL_* 环境变量注入凭证。
   mail:
@@ -39,7 +53,7 @@ sa-token:
   token-prefix: Bearer
   timeout: 7200
   active-timeout: -1
-  is-concurrent: true
+  is-concurrent: false
   is-share: false
   token-style: uuid
   is-read-cookie: false

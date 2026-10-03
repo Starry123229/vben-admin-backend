@@ -24,3 +24,6 @@ vben:
   auth:
     phone-auto-register: true
     oauth-auto-register: true
+    login-methods:
+      phone: true
+      qrcode: true

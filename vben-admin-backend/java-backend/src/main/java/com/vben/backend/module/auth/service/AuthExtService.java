@@ -43,6 +43,8 @@ public class AuthExtService {
     private final AuthService authService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final CodeStore codeStore;
+    /** 二维码登录会话 Redis 存储 */
+    private final QrSessionStore qrSessionStore;
     /** 第三方 OAuth 配置（application.yml -> vben.auth.oauth.*） */
     private final OAuthProperties oauthProperties;
     /** 登录方式开关（application.yml -> vben.auth.login-methods.*，与 /auth/config 下发同源） */
@@ -174,7 +176,7 @@ public class AuthExtService {
         }
         String ticket = UUID.randomUUID().toString().replace("-", "");
         QrSession session = new QrSession(ticket);
-        QrSession.SESSIONS.put(ticket, session);
+        qrSessionStore.put(session);
         return session;
     }
 
@@ -184,13 +186,14 @@ public class AuthExtService {
         if (!loginMethods.isQrcode()) {
             throw ServiceException.forbidden("扫码登录已关闭");
         }
-        QrSession session = QrSession.SESSIONS.get(ticket);
+        QrSession session = qrSessionStore.get(ticket);
         if (session == null) {
             throw ServiceException.badRequest("二维码已失效");
         }
         long userId = StpUtil.getLoginIdAsLong();
         session.setLoginUserId(userId);
         session.setStatus("confirmed");
+        qrSessionStore.update(session);
     }
 
     /** 轮询二维码状态：confirmed 时返回该用户 accessToken（由前端提交 response 换 token）。 */
@@ -198,13 +201,15 @@ public class AuthExtService {
         if (!loginMethods.isQrcode()) {
             throw ServiceException.forbidden("扫码登录已关闭");
         }
-        QrSession session = QrSession.SESSIONS.get(ticket);
+        QrSession session = qrSessionStore.get(ticket);
         if (session == null) {
             throw ServiceException.badRequest("二维码已失效");
         }
-        if ("confirmed".equals(session.getStatus()) && session.getLoginUserId() != null) {
+        if ("confirmed".equals(session.getStatus()) && session.getLoginUserId() != null && session.getAccessToken() == null) {
             // 给轮询端签发独立登录态，前端存储后注入请求头
             session.setAccessToken(authService.loginByUserId(session.getLoginUserId(), response));
+            // 签发后立即删除会话，防止二维码被重复使用
+            qrSessionStore.remove(ticket);
         }
         return session;
     }

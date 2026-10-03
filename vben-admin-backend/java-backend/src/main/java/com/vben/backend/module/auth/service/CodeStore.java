@@ -1,44 +1,42 @@
 package com.vben.backend.module.auth.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.Duration;
 
 /**
- * 一次性验证码内存存储（开发期跑通用；生产可替换为 Redis）。
+ * 一次性验证码 Redis 存储。
  * 用于：手机短信验证码、忘记密码邮箱验证码。
+ * 多实例共享，自动 TTL 过期。
  *
  * @author Starry
  */
 @Component
+@RequiredArgsConstructor
 public class CodeStore {
 
     private static final SecureRandom RANDOM = new SecureRandom();
-    private static final long EXPIRE_MS = 5 * 60 * 1000L;
+    private static final long EXPIRE_SECONDS = 5 * 60L;
 
-    private final ConcurrentHashMap<String, Entry> store = new ConcurrentHashMap<>();
+    private final StringRedisTemplate redis;
 
     /** 生成并保存 6 位验证码，返回明文（开发期经 mock 通道回显） */
     public String put(String key) {
         String code = String.format("%06d", RANDOM.nextInt(1_000_000));
-        store.put(key, new Entry(code, System.currentTimeMillis() + EXPIRE_MS));
+        redis.opsForValue().set("vben:code:" + key, code, Duration.ofSeconds(EXPIRE_SECONDS));
         return code;
     }
 
     /** 校验验证码（成功后即作废）。key 不存在/过期/不匹配均返回 false。 */
     public boolean verify(String key, String code) {
-        Entry entry = store.get(key);
-        if (entry == null || entry.expireAt < System.currentTimeMillis()) {
-            store.remove(key);
+        String stored = redis.opsForValue().get("vben:code:" + key);
+        if (stored == null || !stored.equals(code)) {
             return false;
         }
-        if (!entry.code.equals(code)) {
-            return false;
-        }
-        store.remove(key);
+        redis.delete("vben:code:" + key);
         return true;
     }
-
-    private record Entry(String code, long expireAt) {}
 }

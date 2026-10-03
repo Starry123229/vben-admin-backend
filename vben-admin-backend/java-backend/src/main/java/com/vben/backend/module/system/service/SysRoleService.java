@@ -13,6 +13,7 @@ import com.vben.backend.module.system.entity.SysUserRole;
 import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysRoleMenuMapper;
 import com.vben.backend.module.system.mapper.SysUserRoleMapper;
+import com.vben.backend.module.system.util.CacheCleaner;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class SysRoleService {
     private final SysRoleMapper roleMapper;
     private final SysRoleMenuMapper roleMenuMapper;
     private final SysUserRoleMapper userRoleMapper;
+    private final CacheCleaner cacheCleaner;
 
     /** 角色分页列表 */
     public PageResult<SysRole> listRoles(int page, int pageSize, String name, Integer status) {
@@ -96,6 +98,7 @@ public class SysRoleService {
         }
         role.setRemark(req.getRemark());
         roleMapper.updateById(role);
+        cacheCleaner.evictAllPermissionCaches();
     }
 
     /** 删除角色：禁止删除 super，有用户关联时拒绝删除，并级联清理菜单关联 */
@@ -118,6 +121,7 @@ public class SysRoleService {
         }
         roleMenuMapper.delete(new LambdaQueryWrapper<SysRoleMenu>().eq(SysRoleMenu::getRoleId, id));
         roleMapper.deleteById(id);
+        cacheCleaner.evictAllPermissionCaches();
     }
 
     /** 查询角色已分配的菜单 ID 列表 */
@@ -146,5 +150,6 @@ public class SysRoleService {
                 roleMenuMapper.insert(rm);
             }
         }
+        cacheCleaner.evictAllPermissionCaches();
     }
 }

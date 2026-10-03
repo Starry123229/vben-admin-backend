@@ -25,6 +25,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -33,11 +34,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * 认证服务：双 token 方案。
@@ -64,13 +66,8 @@ public class AuthService {
     private final SysLoginLogMapper loginLogMapper;
     private final SysConfigService configService;
     private final BCryptPasswordEncoder passwordEncoder;
-
-    /**
-     * 按用户的登录失败计数与锁定（内存实现，单机部署）。
-     * username -> [0]失败窗口起始毫秒 [1]窗口内失败次数 [2]锁定截止毫秒（0=未锁定）
-     * 参数来自 sys_config：sys.login.max-fail-count（默认5）、sys.login.lock-minutes（默认30）。
-     */
-    private final Map<String, long[]> loginFailCache = new ConcurrentHashMap<>();
+    private final StringRedisTemplate stringRedisTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${vben.auth.refresh-token-days:7}")
     private int refreshDays;
@@ -100,41 +97,42 @@ public class AuthService {
 
     /**
      * 校验账号是否处于锁定状态，锁定中则拒绝登录。
+     * 基于 Redis 实现，多实例共享。
      */
     private void checkUserLock(String username) {
-        long[] entry = loginFailCache.get(username);
-        if (entry != null && entry[2] > System.currentTimeMillis()) {
-            long minutesLeft = (entry[2] - System.currentTimeMillis()) / 60000L + 1;
+        String lockKey = "vben:login:lock:" + username;
+        String locked = stringRedisTemplate.opsForValue().get(lockKey);
+        if (locked != null) {
+            long ttl = stringRedisTemplate.getExpire(lockKey);
+            long minutesLeft = ttl > 0 ? (ttl / 60 + 1) : 1;
             throw ServiceException.badRequest("失败次数过多，账号已锁定，请 " + minutesLeft + " 分钟后再试");
         }
     }
 
     /**
      * 记录一次登录失败：窗口内达到阈值则锁定该账号。
+     * 基于 Redis 计数实现，多实例共享。
      */
     private void recordLoginFail(String username) {
         int maxFail = intConfig("sys.login.max-fail-count", 5);
         int lockMinutes = intConfig("sys.login.lock-minutes", 30);
-        long now = System.currentTimeMillis();
-        loginFailCache.compute(username, (k, v) -> {
-            if (v == null || now - v[0] > 30 * 60_000L) {
-                v = new long[]{now, 0, 0};
-            }
-            v[1]++;
-            if (v[1] >= maxFail) {
-                v[2] = now + lockMinutes * 60_000L;
-                v[1] = 0;
-                log.warn("账号 [{}] 连续登录失败达 {} 次，锁定 {} 分钟", username, maxFail, lockMinutes);
-            }
-            return v;
-        });
+        String failKey = "vben:login:fail:" + username;
+        Long count = stringRedisTemplate.opsForValue().increment(failKey);
+        if (count != null && count == 1) {
+            stringRedisTemplate.expire(failKey, Duration.ofMinutes(30));
+        }
+        if (count != null && count >= maxFail) {
+            stringRedisTemplate.opsForValue().set("vben:login:lock:" + username, "1", Duration.ofMinutes(lockMinutes));
+            stringRedisTemplate.delete(failKey);
+            log.warn("账号 [{}] 连续登录失败达 {} 次，锁定 {} 分钟", username, maxFail, lockMinutes);
+        }
     }
 
     /**
      * 登录成功后清除失败计数。
      */
     private void clearLoginFail(String username) {
-        loginFailCache.remove(username);
+        stringRedisTemplate.delete("vben:login:fail:" + username);
     }
 
     private int intConfig(String key, int defVal) {
@@ -155,6 +153,8 @@ public class AuthService {
         if (user.getStatus() != null && user.getStatus() == 0) {
             throw ServiceException.forbidden("该账号已被禁用，请联系管理员");
         }
+        // Sa-Token 账号封禁校验：防止被封禁账号重新登录
+        StpUtil.checkDisable(userId);
         StpUtil.login(userId);
         issueRefreshToken(userId, response);
         recordLoginLog(userId, user.getUsername(), getCurrentRequest(), "account", 1, "登录成功");
@@ -204,8 +204,15 @@ public class AuthService {
     }
 
     /** 当前用户权限码：启用角色 → 授权菜单 → 启用的 button 型 authCode。
-     * 超级管理员拥有全部权限码，与 buildRoutesByUserId 的 super 逻辑保持一致。 */
+     * 超级管理员拥有全部权限码，与 buildRoutesByUserId 的 super 逻辑保持一致。
+     * 结果缓存到 Redis（TTL 10 分钟），角色/菜单变更时由 CacheCleaner 主动清除。 */
     public List<String> getCodes(long userId) {
+        String cacheKey = "vben:user:codes:" + userId;
+        String cached = stringRedisTemplate.opsForValue().get(cacheKey);
+        if (cached != null) {
+            List<String> cachedList = objectMapper.readValue(cached, new TypeReference<List<String>>() {});
+            return cachedList;
+        }
         List<Long> roleIds = userRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>()
                         .eq(SysUserRole::getUserId, userId)).stream()
                 .map(SysUserRole::getRoleId).toList();
@@ -221,40 +228,53 @@ public class AuthService {
         }
         // 超级管理员拥有全部权限码：直接返回所有启用的 button 型菜单的 authCode
         boolean isSuper = activeRoles.stream().anyMatch(r -> "super".equals(r.getCode()));
+        List<String> result;
         if (isSuper) {
-            return menuMapper.selectList(new LambdaQueryWrapper<SysMenu>()
+            result = menuMapper.selectList(new LambdaQueryWrapper<SysMenu>()
                         .eq(SysMenu::getType, "button")
                         .eq(SysMenu::getStatus, 1)
                         .isNotNull(SysMenu::getAuthCode)).stream()
                 .map(SysMenu::getAuthCode).distinct().toList();
-        }
-        List<Long> activeRoleIds = activeRoles.stream().map(SysRole::getId).toList();
-        List<Long> menuIds = roleMenuMapper.selectList(new LambdaQueryWrapper<SysRoleMenu>()
+        } else {
+            List<Long> activeRoleIds = activeRoles.stream().map(SysRole::getId).toList();
+            List<Long> menuIds = roleMenuMapper.selectList(new LambdaQueryWrapper<SysRoleMenu>()
                         .in(SysRoleMenu::getRoleId, activeRoleIds)).stream()
                 .map(SysRoleMenu::getMenuId).toList();
-        if (menuIds.isEmpty()) {
-            return List.of();
-        }
-        return menuMapper.selectList(new LambdaQueryWrapper<SysMenu>()
+            if (menuIds.isEmpty()) {
+                return List.of();
+            }
+            result = menuMapper.selectList(new LambdaQueryWrapper<SysMenu>()
                         .in(SysMenu::getId, menuIds)
                         .eq(SysMenu::getType, "button")
                         .eq(SysMenu::getStatus, 1)
                         .isNotNull(SysMenu::getAuthCode)).stream()
                 .map(SysMenu::getAuthCode).distinct().toList();
+        }
+        stringRedisTemplate.opsForValue().set(cacheKey, objectMapper.writeValueAsString(result), Duration.ofMinutes(10));
+        return result;
     }
 
-    /** 当前用户角色编码列表 */
+    /** 当前用户角色编码列表。
+     * 结果缓存到 Redis（TTL 10 分钟），角色变更时由 CacheCleaner 主动清除。 */
     public List<String> getRoleCodes(long userId) {
+        String cacheKey = "vben:user:roles:" + userId;
+        String cached = stringRedisTemplate.opsForValue().get(cacheKey);
+        if (cached != null) {
+            List<String> cachedList = objectMapper.readValue(cached, new TypeReference<List<String>>() {});
+            return cachedList;
+        }
         List<Long> roleIds = userRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>()
                         .eq(SysUserRole::getUserId, userId)).stream()
                 .map(SysUserRole::getRoleId).toList();
         if (roleIds.isEmpty()) {
             return List.of();
         }
-        return roleMapper.selectList(new LambdaQueryWrapper<SysRole>()
+        List<String> result = roleMapper.selectList(new LambdaQueryWrapper<SysRole>()
                         .in(SysRole::getId, roleIds)
                         .eq(SysRole::getStatus, 1)).stream()
                 .map(SysRole::getCode).toList();
+        stringRedisTemplate.opsForValue().set(cacheKey, objectMapper.writeValueAsString(result), Duration.ofMinutes(10));
+        return result;
     }
 
     // ---------------------------------------------------------------------------- 私有方法

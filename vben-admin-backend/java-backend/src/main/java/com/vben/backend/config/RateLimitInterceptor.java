@@ -3,25 +3,27 @@ package com.vben.backend.config;
 import com.vben.backend.common.result.ServiceException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.Duration;
 
 /**
- * 登录限流拦截器：基于内存计数，防止暴力破解。
+ * 登录限流拦截器：基于 Redis 计数，防止暴力破解（多实例共享）。
  * 限制：同一 IP 1分钟内最多 10 次登录请求。
  *
  * @author Starry
  */
 @Component
+@RequiredArgsConstructor
 public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final int MAX_ATTEMPTS = 10;
-    private static final long WINDOW_MS = 60 * 1000L;
+    private static final long WINDOW_SECONDS = 60L;
 
-    private final Map<String, long[]> cache = new ConcurrentHashMap<>();
+    private final StringRedisTemplate redis;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -31,16 +33,13 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
 
         String ip = getClientIp(request);
-        long now = System.currentTimeMillis();
-        long[] entry = cache.compute(ip, (k, v) -> {
-            if (v == null || now - v[0] > WINDOW_MS) {
-                return new long[]{now, 1};
-            }
-            v[1]++;
-            return v;
-        });
+        String key = "vben:rate:login:" + ip;
+        Long count = redis.opsForValue().increment(key);
+        if (count != null && count == 1) {
+            redis.expire(key, Duration.ofSeconds(WINDOW_SECONDS));
+        }
 
-        if (entry[1] > MAX_ATTEMPTS) {
+        if (count != null && count > MAX_ATTEMPTS) {
             throw ServiceException.badRequest("登录尝试过于频繁，请1分钟后再试");
         }
         return true;

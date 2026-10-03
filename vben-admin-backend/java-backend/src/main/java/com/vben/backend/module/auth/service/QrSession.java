@@ -1,51 +1,29 @@
 package com.vben.backend.module.auth.service;
 
-import java.util.concurrent.ConcurrentHashMap;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/** 二维码登录会话（内存态，生产可迁移 Redis/Tair）。
- * ticket 唯一标识一次登录请求，前端轮询 status。 */
-public class QrSession {
+import java.io.Serializable;
 
-    public static final ConcurrentHashMap<String, QrSession> SESSIONS = new ConcurrentHashMap<>();
+/**
+ * 二维码登录会话（Redis 存储，多实例共享）。
+ * ticket 唯一标识一次登录请求，前端轮询 status。
+ *
+ * @author Starry
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class QrSession implements Serializable {
 
-    private final String ticket;
-
+    private String ticket;
     private String status;
-
     private Long loginUserId;
-
     private String accessToken;
 
     public QrSession(String ticket) {
         this.ticket = ticket;
         this.status = "pending";
-    }
-
-    public String getTicket() {
-        return ticket;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Long getLoginUserId() {
-        return loginUserId;
-    }
-
-    public void setLoginUserId(Long loginUserId) {
-        this.loginUserId = loginUserId;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
     }
 }

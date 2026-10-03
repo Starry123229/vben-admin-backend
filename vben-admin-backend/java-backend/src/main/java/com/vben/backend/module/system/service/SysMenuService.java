@@ -11,6 +11,7 @@ import com.vben.backend.module.system.mapper.SysMenuMapper;
 import com.vben.backend.module.system.mapper.SysRoleMapper;
 import com.vben.backend.module.system.mapper.SysRoleMenuMapper;
 import com.vben.backend.module.system.mapper.SysUserRoleMapper;
+import com.vben.backend.module.system.util.CacheCleaner;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +39,7 @@ public class SysMenuService {
     private final SysRoleMenuMapper roleMenuMapper;
     private final SysRoleMapper roleMapper;
     private final ObjectMapper objectMapper;
+    private final CacheCleaner cacheCleaner;
 
     /**
      * 用户可访问的路由树（契约 §3.6）：
@@ -124,6 +126,7 @@ public class SysMenuService {
         checkPathRequired(type, path, component);
         checkUnique(req.getName(), req.getPath(), req.getId());
         menuMapper.updateById(toEntity(req, menu));
+        cacheCleaner.evictAllPermissionCaches();
     }
 
     /**
@@ -169,6 +172,7 @@ public class SysMenuService {
         // 级联清理角色-菜单关联
         roleMenuMapper.delete(new LambdaQueryWrapper<SysRoleMenu>().eq(SysRoleMenu::getMenuId, id));
         menuMapper.deleteById(id);
+        cacheCleaner.evictAllPermissionCaches();
     }
 
     /** 菜单名是否存在（排除指定 ID，用于唯一性校验） */

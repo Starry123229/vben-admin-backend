@@ -18,6 +18,7 @@ import com.vben.backend.module.system.mapper.SysUserMapper;
 import com.vben.backend.module.system.mapper.SysUserRoleMapper;
 import com.vben.backend.module.system.storage.FileStorageProvider;
 import com.vben.backend.module.system.util.PasswordValidator;
+import com.vben.backend.module.system.util.CacheCleaner;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ public class SysUserService {
     private final SysUserRoleMapper userRoleMapper;
     private final BCryptPasswordEncoder passwordEncoder;
     private final FileStorageProvider fileStorageProvider;
+    private final CacheCleaner cacheCleaner;
 
     private static final long AVATAR_MAX_SIZE = 5 * 1024 * 1024L;
     private static final Set<String> AVATAR_EXTENSIONS = Set.of(".jpg", ".jpeg", ".png", ".webp", ".gif");
@@ -148,9 +150,24 @@ PasswordValidator.validate(req.getPassword());
         user.setRemark(req.getRemark());
         user.setUpdateTime(LocalDateTime.now());
         userMapper.updateById(user);
+        cacheCleaner.evictUserCache(user.getId());
+
+        // 账号封禁/解封联动 Sa-Token
+        if (req.getStatus() != null) {
+            if (req.getStatus() == 0) {
+                // 禁用用户：先踢下线，再封禁（-1=永久封禁）
+                StpUtil.kickout(user.getId());
+                StpUtil.disable(user.getId(), -1);
+            } else {
+                // 启用用户：解除封禁
+                StpUtil.untieDisable(user.getId());
+            }
+        }
+
         // 仅当请求携带角色列表时才重新绑定（空列表=清空，null=保持不变）
         if (req.getRoleIds() != null) {
             bindRoles(user.getId(), req.getRoleIds());
+            cacheCleaner.evictAllPermissionCaches();
         }
     }
 
@@ -168,8 +185,12 @@ PasswordValidator.validate(req.getPassword());
         if (user == null) {
             throw ServiceException.badRequest("用户不存在");
         }
+        // 先踢下线并封禁，防止残留 token 复用
+        StpUtil.kickout(id);
+        StpUtil.disable(id, -1);
         userRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, id));
         userMapper.deleteById(id);
+        cacheCleaner.evictUserCache(id);
     }
 
     /** 当前用户更新自己的资料（个人中心-基本设置：姓名/简介） */
@@ -186,6 +207,7 @@ PasswordValidator.validate(req.getPassword());
         user.setIntro(req.getIntro());
         user.setUpdateTime(LocalDateTime.now());
         userMapper.updateById(user);
+        cacheCleaner.evictUserCache(loginId);
     }
 
     /**
@@ -212,6 +234,7 @@ PasswordValidator.validate(req.getPassword());
         // 使用 FileStorageProvider 上传到 avatar 目录
         String url = fileStorageProvider.upload(file, "avatar");
         applyAvatar(loginId, url);
+        cacheCleaner.evictUserCache(loginId);
         return url;
     }
 
@@ -247,6 +270,7 @@ PasswordValidator.validate(req.getPassword());
         user.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
         user.setUpdateTime(LocalDateTime.now());
         userMapper.updateById(user);
+        cacheCleaner.evictUserCache(loginId);
     }
 
     /** 管理员重置某用户密码（无需原密码） */
@@ -266,6 +290,7 @@ PasswordValidator.validate(req.getPassword());
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setUpdateTime(LocalDateTime.now());
         userMapper.updateById(user);
+        cacheCleaner.evictUserCache(id);
     }
 
     // ----------------------------------------------------------------- 私有方法

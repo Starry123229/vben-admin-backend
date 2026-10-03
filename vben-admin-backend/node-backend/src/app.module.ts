@@ -22,10 +22,12 @@ import { SystemAuditLogModule } from './modules/system/system-audit-log/system-a
 import { SystemWorkflowModule } from './modules/system/system-workflow/system-workflow.module.js';
 import { AvatarModule } from './modules/avatar/avatar.module.js';
 import { FileModule } from './modules/file/file.module.js';
+import { RedisModule } from './common/redis/redis.module.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    RedisModule,
     PrismaModule,
     AuthModule,
     UserModule,
