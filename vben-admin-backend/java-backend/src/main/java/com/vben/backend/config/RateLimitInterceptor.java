@@ -48,10 +48,17 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("X-Real-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
         if (ip != null && ip.contains(",")) {
             ip = ip.split(",")[0].trim();
+        }
+        // IPv6 localhost 归一化为 IPv4，确保限流 key 一致
+        if ("0:0:0:0:0:0:0:1".equals(ip) || "::1".equals(ip)) {
+            ip = "127.0.0.1";
         }
         return ip != null ? ip : "unknown";
     }

@@ -5,10 +5,13 @@ import jwt from 'jsonwebtoken';
  * JWT 工具（对标 Java 端 AuthService 中的 token 管理）
  */
 
-/** 签发 accessToken（对标 Sa-Token 的 StpUtil.login + getTokenValue） */
+/** 签发 accessToken（对标 Sa-Token 的 StpUtil.login + getTokenValue）
+ *  包含 jti（JWT ID）确保同一秒内签发的 token 也不重复，
+ *  避免登出后立即重新登录时新 token 与旧 token 相同而被黑名单误拒。
+ */
 export function signAccessToken(userId: string | bigint): string {
   return jwt.sign(
-    { userId: userId.toString() },
+    { userId: userId.toString(), jti: crypto.randomBytes(8).toString('hex') },
     process.env.JWT_ACCESS_SECRET as jwt.Secret,
     { expiresIn: (process.env.ACCESS_TOKEN_EXPIRES || '2h') as any },
   );
