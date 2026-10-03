@@ -5,18 +5,21 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { RedisService } from '../redis/redis.service.js';
 import { ServiceException } from '../result.js';
 
 /**
  * JWT 鉴权 Guard（对标 Java 端 SaInterceptor）
  * 从 Authorization: Bearer 头提取 token → 校验 → 挂载 request.user
  * 同时检查用户是否被禁用（与 Java 端 SaTokenConfig 实时校验一致）
+ * 同时检查 token 是否在 logout 黑名单中（对标 Java 端 Sa-Token 会话失效）
  */
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,6 +37,12 @@ export class JwtAuthGuard implements CanActivate {
         secret: process.env.JWT_ACCESS_SECRET,
       });
     } catch {
+      throw ServiceException.unauthorized();
+    }
+
+    // 检查 token 是否在 logout 黑名单中
+    const blacklisted = await this.redis.getRaw(`token:blacklist:${token}`);
+    if (blacklisted) {
       throw ServiceException.unauthorized();
     }
 

@@ -147,8 +147,17 @@ export class AuthService {
     return signAccessToken(user.id);
   }
 
-  /** 登出：作废 refresh、清理 Cookie；恒成功 */
+  /** 登出：作废 refresh、清理 Cookie、将 accessToken 加入黑名单；恒成功 */
   async logout(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    // 将 accessToken 加入 Redis 黑名单（TTL 与 token 过期时间对齐）
+    const authHeader = request.headers?.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const accessToken = authHeader.slice(7);
+      // JWT 默认 2h 过期，设置黑名单 TTL 为 7200 秒
+      const accessTokenTtl = Number(process.env.ACCESS_TOKEN_EXPIRES_HOURS || 2) * 3600;
+      await this.redis.set(`token:blacklist:${accessToken}`, '1', accessTokenTtl);
+    }
+
     const token = readRefreshCookie(request);
     if (token) {
       const record = await this.prisma.sysRefreshToken.findUnique({
