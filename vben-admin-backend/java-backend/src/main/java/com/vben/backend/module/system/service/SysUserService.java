@@ -130,6 +130,13 @@ PasswordValidator.validate(req.getPassword());
         if (user == null) {
             throw ServiceException.badRequest("用户不存在");
         }
+        // 禁用当前登录用户校验：禁止把自己禁用，避免锁死系统
+        if (req.getStatus() != null && req.getStatus() == 0) {
+            long loginId = StpUtil.getLoginIdAsLong();
+            if (req.getId() == loginId) {
+                throw ServiceException.badRequest("不能禁用当前登录账号");
+            }
+        }
         if (StringUtils.hasText(req.getUsername())) {
             long dup = userMapper.selectCount(new LambdaQueryWrapper<SysUser>()
                     .eq(SysUser::getUsername, req.getUsername()).ne(SysUser::getId, req.getId()));
