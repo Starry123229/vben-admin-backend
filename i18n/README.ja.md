@@ -1,1 +1,203 @@
-PGRpdiBhbGlnbj0iY2VudGVyIj4KCiMgVmJlbiBBZG1pbiDnrqHnkIbjgrfjgrnjg4bjg6AKCjxwPuOCquODvOODl+ODs+OCveODvOOCueOBrueuoeeQhuOCt+OCueODhuODoOahhuaetu+8iFZ1ZSAzIEFkbWluIFRlbXBsYXRlIC8gRGFzaGJvYXJk77yJ77yaVmJlbiBBZG1pbiA1Ljcg44KS5Z+644Gr44GX44Gf44OV44Or44K544K/44OD44Kv5qeL5oiQ44CCVnVlIDMgKyBWaXRlIOODleODreODs+ODiOOCqOODs+ODieOAgUphdmEgU3ByaW5nIEJvb3QgNCAvIE5vZGUuanMgTmVzdEpTIDEyIOOBruODh+ODpeOCouODq+ODkOODg+OCr+OCqOODs+ODieOAgVJCQUMg5qip6ZmQ44CBSldUIOODh+ODpeOCouODq+ODiOODvOOCr+ODs+OAgU15U1FM44CC44GZ44GQ44Gr5L2/44GI44Gm44CBTUlUIOODqeOCpOOCu+ODs+OCueOBp+WVhueUqOWIqeeUqOeEoeaWmTwvcD4KClshW1Z1ZV0oaHR0cHM6Ly9pbWcuc2hpZWxkcy5pby9iYWRnZS9WdWUtMy54LTQyYjg4My5zdmcpXShodHRwczovL3Z1ZWpzLm9yZykKWyFbVml0ZV0oaHR0cHM6Ly9pbWcuc2hpZWxkcy5pby9iYWRnZS9WaXRlLTgtNjQ2Y2ZmLnN2ZyldKGh0dHBzOi8vdml0ZWpzLmRldikKWyFbSmF2YV0oaHR0cHM6Ly9pbWcuc2hpZWxkcy5pby9iYWRnZS9KYXZhLVNwcmluZyUyMEJvb3QlMjA0LjEtNmRiMzNmLnN2ZyldKGh0dHBzOi8vc3ByaW5nLmlvKQpbIVtOb2RlXShodHRwczovL2ltZy5zaGllbGRzLmlvL2JhZGdlL05vZGUtTmVzdEpTJTIwMTItNDA1OThmLnN2ZyldKGh0dHBzOi8vbmVzdGpzLmNvbSkKWyFbTXlTUUxdKGh0dHBzOi8vaW1nLnNoaWVsZHMuaW8vYmFkZ2UvTXlTUUwtOS54LTQ0NzlhMS5zdmcpXShodHRwczovL3d3dy5teXNxbC5jb20pClshW0xpY2Vuc2VdKGh0dHBzOi8vaW1nLnNoaWVsZHMuaW8vYmFkZ2UvTGljZW5zZS1NSVQtYmx1ZS5zdmcpXSgj44Op44Kk44K744Oz44K5KQpbIVtHaXRIdWIgU3RhcnNdKGh0dHBzOi8vaW1nLnNoaWVsZHMuaW8vZ2l0aHViL3N0YXJzL1N0YXJyeTEyMzIyOS92YmVuLWFkbWluLWJhY2tlbmQ/c3R5bGU9c29jaWFsKV0oaHR0cHM6Ly9naXRodWIuY29tL1N0YXJyeTEyMzIyOS92YmVuLWFkbWluLWJhY2tlbmQvc3RhcmdhemVycykKWyFbR2l0SHViIEZvcmtzXShodHRwczovL2ltZy5zaGllbGRzLmlvL2dpdGh1Yi9mb3Jrcy9TdGFycnkxMjMyMjkvdmJlbi1hZG1pbi1iYWNrZW5kP3N0eWxlPXNvY2lhbCldKGh0dHBzOi8vZ2l0aHViLmNvbS9TdGFycnkxMjMyMjkvdmJlbi1hZG1pbi1iYWNrZW5kL25ldHdvcmsvbWVtYmVycykKWyFbR2l0SHViIElzc3Vlc10oaHR0cHM6Ly9pbWcuc2hpZWxkcy5pby9naXRodWIvaXNzdWVzL1N0YXJyeTEyMzIyOS92YmVuLWFkbWluLWJhY2tlbmQpXShodHRwczovL2dpdGh1Yi5jb20vU3RhcnJ5MTIzMjI5L3ZiZW4tYWRtaW4tYmFja2VuZC9pc3N1ZXMpCgpb566A5L2T5Lit5paHXSguLi9SRUFETUUubWQpIHwgW+e5gemrlOS4reaWh10oLi9SRUFETUUuemgtVFcubWQpIHwgW0VuZ2xpc2hdKC4vUkVBRE1FLmVuLm1kKSB8ICoq5pel5pys6KqeKiogfCBb7ZWc6rWt7Ja0XSguL1JFQURNRS5rby5tZCkgfCBbRnJhbsOnYWlzXSguL1JFQURNRS5mci5tZCkgfCBbRGV1dHNjaF0oLi9SRUFETUUuZGUubWQpIHwgW0VzcGHDsW9sXSguL1JFQURNRS5lcy5tZCkgfCBb0KDRg9GB0YHQutC40LldKC4vUkVBRE1FLnJ1Lm1kKQoKPC9kaXY+CgotLS0KCiMjIOODh+OCo+ODrOOCr+ODiOODquani+aIkAoKYGBgCnZiZW4vCuKUnOKUgOKUgCB2YmVuLWFkbWluLWJhY2tlbmQvICAgICAgICAgICAgICAjIOODkOODg+OCr+OCqOODs+ODiQrilIIgICDilJzilIDilIAgZG9jcy9hcGktY29udHJhY3QubWQgICAgICAgICAjIEFQSSDlpZHntITvvIjkuKHlrp/oo4Xjga7lhbHpgJrku5Xmp5jvvIkK4pSCICAg4pSc4pSA4pSAIGphdmEtYmFja2VuZC8gICAgICAgICAgICAgICAgIyBKYXZhIOWun+ijhe+8iFNwcmluZyBCb29077yJCuKUgiAgIOKUnOKUgOKUgCBub2RlLWJhY2tlbmQvICAgICAgICAgICAgICAgICMgTm9kZSDlrp/oo4XvvIhOZXN0SlMgKyBQcmlzbWHvvIkK4pSCICAg4pSU4pSA4pSAIHNxbC9pbml0LnNxbCAgICAgICAgICAgICAgICAgIyBEQiDkvZzmiJAgKyAyMCDjg4bjg7zjg5bjg6sgKyDjg4fjg6Ljg4fjg7zjgr/vvIjkuIDmi6zjgqTjg7Pjg53jg7zjg4jvvIkK4pSU4pSA4pSAIHZ1ZS12YmVuLWFkbWluLXY1LjcuMC8gICAgICAgICAgICMg44OV44Ot44Oz44OI44Ko44Oz44OJIG1vbm9yZXBv77yIcG5wbSB3b3Jrc3BhY2XvvIkKICAgIOKUnOKUgOKUgCBhcHBzLyAgICAgICAgICAgICAgICAgICAgICAgICMgNCDjgaTjga4gVUkg44Ki44OX44OqCiAgICDilJzilIDilIAgcGFja2FnZXMvICAgICAgICAgICAgICAgICAgICAjIOWFseacieODkeODg+OCseODvOOCuAogICAg4pSU4pSA4pSAIGludGVybmFsLyAgICAgICAgICAgICAgICAgICAgIyDjg5Pjg6vjg4njg7tMaW50IOioreWumgpgYGAKCiMjIOaKgOihk+OCueOCv+ODg+OCrwoKfCDjgrXjgqTjg4kgfCDmioDooZMgfAp8IC0tLSB8IC0tLSB8Cnwg44OV44Ot44Oz44OI44Ko44Oz44OJIHwgVnVlIDMuNSDCtyBWaXRlIDggwrcgVHlwZVNjcmlwdCDCtyBQaW5pYSDCtyBwbnBtIG1vbm9yZXBvIHwKfCDjg5Xjg63jg7Pjg4jjgqjjg7Pjg4kgVUnvvIg0IOmBuCAx77yJIHwgQW50IERlc2lnbiBWdWUgNCAvIEFudCBEZXNpZ24gVnVlIE5leHQgLyBFbGVtZW50IFBsdXMgLyBOYWl2ZSBVSSB8CnwgSmF2YSDjg5Djg4Pjgq/jgqjjg7Pjg4kgfCBTcHJpbmcgQm9vdCA0LjHvvIhKREsgMjXvvInCtyBTYS1Ub2tlbiAxLjQ1IMK3IE15QmF0aXMtUGx1cyAzLjUuMTcgfAp8IE5vZGUg44OQ44OD44Kv44Ko44Oz44OJIHwgTmVzdEpTIDEyIMK3IEZhc3RpZnkgNSDCtyBQcmlzbWEgNyDCtyBKV1QgfAp8IOODh+ODvOOCv+ODmeODvOOCuSB8IE15U1FMIDkueO+8iHV0ZjhtYjTvvIkgfAoKIyMg44Kv44Kk44OD44Kv44K544K/44O844OICgojIyMgMS4g44OH44O844K/44OZ44O844K544Gu5Yid5pyf5YyWCgpgYGBiYXNoCiMgTXlTUUwg44GM6LW35YuV44GX44Gm44GE44KL44GT44Go44KS56K66KqN44GX44CB5LiA5ous44Kk44Oz44Od44O844OICm15c3FsIC11cm9vdCAtcCA8IHZiZW4tYWRtaW4tYmFja2VuZC9zcWwvaW5pdC5zcWwKYGBgCgo+IGBpbml0LnNxbGAg44GvIDEg44OV44Kh44Kk44Or44Gn44OH44O844K/44OZ44O844K55L2c5oiQ77yIYHZiZW5fYWRtaW5g77yJ4oaSIDIwIOODhuODvOODluODq+S9nOaIkCDihpIg44OH44Oi44OH44O844K/5oqV5YWl44G+44Gn5a6M5LqG44GX44G+44GZ44CC5Lih44OQ44OD44Kv44Ko44Oz44OJ44Gn5YWx55So44CCCgojIyMgMi4g44OQ44OD44Kv44Ko44Oz44OJ44Gu6LW35YuV77yISmF2YSAvIE5vZGUg44GE44Ga44KM44GL77yJCgpgYGBiYXNoCiMg44Kq44OX44K344On44OzIEHvvJpKYXZhIOODkOODg+OCr+OCqOODs+ODiQpjZCB2YmVuLWFkbWluLWJhY2tlbmQvamF2YS1iYWNrZW5kCm12biBzcHJpbmctYm9vdDpydW4KCiMg44Kq44OX44K344On44OzIELvvJpOb2RlIOODkOODg+OCr+OCqOODs+ODiQpjZCB2YmVuLWFkbWluLWJhY2tlbmQvbm9kZS1iYWNrZW5kCnBucG0gaW5zdGFsbApjcCAuZW52LmV4YW1wbGUgLmVudiAgICAgICAgICAjIFdpbmRvd3M6IENvcHktSXRlbSAuZW52LmV4YW1wbGUgLmVudgpwbnBtIGRiOmdlbmVyYXRlCnBucG0gZGV2CmBgYAoKPiDkuKHjg5Djg4Pjgq/jgqjjg7Pjg4njga/jg53jg7zjg4ggODA4MCDjgpLlhbHnlKjjgZnjgovjgZ/jgoHjgIHlkIzmmYLjgasgMSDjgaTjgZfjgYvotbfli5XjgafjgY3jgb7jgZvjgpPjgILjg4fjg7zjgr/jg5njg7zjgrnjga7jg4fjg5Xjgqnjg6vjg4jjga8gYHJvb3QvMTIzNDU2YOOAguWkieabtOOBmeOCi+WgtOWQiOOBr+WQhOioreWumuODleOCoeOCpOODq+OCkuWPgueFp+OBl+OBpuOBj+OBoOOBleOBhOOAggoKIyMjIDMuIOODleODreODs+ODiOOCqOODs+ODieOBrui1t+WLle+8iDQg44Gk44GL44KJIDEg44Gk6YG45oqe77yJCgpgYGBiYXNoCmNkIHZ1ZS12YmVuLWFkbWluLXY1LjcuMApwbnBtIGluc3RhbGwKcG5wbSBkZXY6YW50ZCAgICAgICAgIyBBbnQgRGVzaWduIFZ1ZSAg4oaSIGh0dHA6Ly9sb2NhbGhvc3Q6NTY2NgojIHBucG0gZGV2OmVsZSAgICAgICAjIEVsZW1lbnQgUGx1cyAgICAg4oaSIGh0dHA6Ly9sb2NhbGhvc3Q6NTc3NwojIHBucG0gZGV2Om5haXZlICAgICAjIE5haXZlIFVJICAgICAgICAg4oaSIGh0dHA6Ly9sb2NhbGhvc3Q6NTg4OAojIHBucG0gZGV2OmFudGR2LW5leHQgIyBBbnQgRGVzaWduIFZ1ZSBOZXh0IOKGkiBodHRwOi8vbG9jYWxob3N0OjYwMDEKYGBgCgojIyMgNC4g44Ot44Kw44Kk44OzCgrjg4fjg6LjgqLjgqvjgqbjg7Pjg4jvvIjjg5Hjgrnjg6/jg7zjg4njga/jgZnjgbnjgaYgYDEyMzQ1NmDvvInvvJoKCnwg44Ki44Kr44Km44Oz44OIIHwg44Ot44O844OrIHwg5qip6ZmQ56+E5ZuyIHwKfCAtLS0gfCAtLS0gfCAtLS0gfAp8ICoqdmJlbioqIHwg44K544O844OR44O8566h55CG6ICFIHwg44GZ44G544Gm44Gu44Oh44OL44Ol44O844Go44Oc44K/44Oz5qip6ZmQIHwKfCAqKmFkbWluKiogfCDnrqHnkIbogIUgfCDjgrfjgrnjg4bjg6DnrqHnkIYgLyDnm6PoppYgLyDjg4Tjg7zjg6sgfAp8ICoqamFjayoqIHwg5LiA6Iis44Om44O844K244O8IHwg44Om44O844K244O8566h55CG77yI6Kqt44G/5Y+W44KK5bCC55So77yJ44Go44Ot44O844Or566h55CGIHwKCiMjIOacrOeVquODh+ODl+ODreOCpAoKIyMjIOODleODreODs+ODiOOCqOODs+ODieOBruODk+ODq+ODiQoKYGBgYmFzaApjZCB2dWUtdmJlbi1hZG1pbi12NS43LjAKcG5wbSBidWlsZDphbnRkICAgICAgIyDlh7rlipvvvJphcHBzL3dlYi1hbnRkL2Rpc3QKYGBgCgojIyMg44OQ44OD44Kv44Ko44Oz44OJ44Gu44OT44Or44OJCgpgYGBiYXNoCiMgSmF2YQpjZCB2YmVuLWFkbWluLWJhY2tlbmQvamF2YS1iYWNrZW5kCm12biBjbGVhbiBwYWNrYWdlIC1Ec2tpcFRlc3RzCmphdmEgLWphciB0YXJnZXQvdmJlbi1iYWNrZW5kLTAuMC4xLVNOQVBTSE9ULmphcgoKIyBOb2RlCmNkIHZiZW4tYWRtaW4tYmFja2VuZC9ub2RlLWJhY2tlbmQKcG5wbSBidWlsZCAmJiBwbnBtIHN0YXJ0CmBgYAoKIyMjIE5naW54IOioreWumuS+iwoKYGBgbmdpbngKc2VydmVyIHsKICAgIGxpc3RlbiA4MDsKICAgIHNlcnZlcl9uYW1lIHlvdXItZG9tYWluLmNvbTsKICAgIHJvb3QgL3Zhci93d3cvdmJlbi1kaXN0OwogICAgaW5kZXggaW5kZXguaHRtbDsKCiAgICBsb2NhdGlvbiAvIHsKICAgICAgICB0cnlfZmlsZXMgJHVyaSAkdXJpLyAvaW5kZXguaHRtbDsKICAgIH0KCiAgICBsb2NhdGlvbiAvYXBpLyB7CiAgICAgICAgcHJveHlfcGFzcyBodHRwOi8vMTI3LjAuMC4xOjgwODA7CiAgICAgICAgcHJveHlfc2V0X2hlYWRlciBIb3N0ICRob3N0OwogICAgICAgIHByb3h5X3NldF9oZWFkZXIgWC1SZWFsLUlQICRyZW1vdGVfYWRkcjsKICAgICAgICBjbGllbnRfbWF4X2JvZHlfc2l6ZSAxMG07CiAgICB9Cn0KYGBgCgojIyDjgrfjgrnjg4bjg6Djga7ku5XntYTjgb8KCioq5qip6ZmQ44Oi44OH44OrKirvvJpSQkFD77yI44Om44O844K244O8IOKGkiDjg63jg7zjg6sg4oaSIOODoeODi+ODpeODvCAvIOODnOOCv+ODs++8ieOAguODleODreODs+ODiOOCqOODs+ODieOBqOODkOODg+OCr+OCqOODs+ODieOBp+WQjOS4gOOBruaoqemZkOOCs+ODvOODieOCkuWFseacieOAggoKYGBgCnN5c191c2VyIOKUgOKUgDwgc3lzX3VzZXJfcm9sZSA+4pSA4pSAIHN5c19yb2xlIOKUgOKUgDwgc3lzX3JvbGVfbWVudSA+4pSA4pSAIHN5c19tZW51CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg4pSc4pSAIHR5cGU9bWVudSAgIOKGkiDjg5Xjg63jg7Pjg4jjgqjjg7Pjg4njga7jg6vjg7zjg4ggLyDjgrXjgqTjg4njg6Hjg4vjg6Xjg7wKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDilJTilIAgdHlwZT1idXR0b24g4oaSIGF1dGhfY29kZe+8iOODnOOCv+ODs+WNmOS9jeOBruaoqemZkOOCs+ODvOODie+8iQpgYGAKCioq6KqN6Ki844OV44Ot44O8KirvvJoKCmBgYArjg63jgrDjgqTjg7Mg4oaSIOODh+ODpeOCouODq+ODiOODvOOCr+ODs+eZuuihjAogIOKUnOKUgCBhY2Nlc3NUb2tlbu+8iDJo44CBbG9jYWxTdG9yYWdl44CB44Oq44Kv44Ko44K544OI44OY44OD44OA44O8IEF1dGhvcml6YXRpb246IEJlYXJlcu+8iQogIOKUlOKUgCByZWZyZXNoVG9rZW7vvIg3ZOOAgUh0dHBPbmx5IENvb2tpZeOAgVhTUyDlr77nrZbvvIkKICAgICAg4pSU4pSAIGFjY2Vzc1Rva2VuIOacn+mZkOWIh+OCjCDihpIg44OV44Ot44Oz44OI44Ko44Oz44OJ44GM6Ieq5YuV44GnIFBPU1QgL2F1dGgvcmVmcmVzaCDjgpLlkbzjgbPlh7rjgZfjgrXjgqTjg6zjg7Pjg4jmm7TmlrAKICAgICAg4pSU4pSAIOODreOCsOOCouOCpuODiCAvIOW8t+WItuODreOCsOOCouOCpuODiCDihpIg5Lih44OI44O844Kv44Oz5aSx5Yq5CmBgYAoKKirjg6Hjg4vjg6Xjg7zjgajjg5zjgr/jg7PmqKnpmZAqKu+8mgoKLSAqKuODoeODi+ODpeODvOaoqemZkCoq77ya44OQ44OD44Kv44Ko44Oz44OJ44GM44Ot44O844Or44Gr5b+c44GY44Gm44Or44O844OI44OE44Oq44O844KS5YuV55qE44Gr6L+U44GX44G+44GZ77yIYEdFVCAvbWVudS9hbGxg77yJ44CC5qip6ZmQ44Gu44Gq44GE44Or44O844OI44Gv44OV44Ot44Oz44OI44Ko44Oz44OJ44Gr55m76Yyy44GV44KM44G+44Gb44KT44CCCi0gKirjg5zjgr/jg7PmqKnpmZAqKu+8mmBhdXRoX2NvZGVg77yI5L6L77yaYEFDXzEwMDAxMGDvvInjga/jg5Xjg63jg7Pjg4jjgqjjg7Pjg4njgacgYHYtYWNjZXNzYCDjg4fjgqPjg6zjgq/jg4bjgqPjg5bjgafooajnpLrjgpLliLblvqHjgZfjgIHjg5Djg4Pjgq/jgqjjg7Pjg4njgacgYEBTYUNoZWNrUGVybWlzc2lvbmDvvIhKYXZh77yJLyBgQFBlcm1pc3Npb25zYO+8iE5vZGXvvInjgacgQVBJIOOCkuaknOiovOOBl+OBvuOBmeOAggotICoq44K544O844OR44O8566h55CG6ICFKirvvJpgY29kZT1zdXBlcmAg44Gu44Ot44O844Or44Gv44GZ44G544Gm44Gu5qip6ZmQ44KS5oyB44Gh44G+44GZ44CCCgojIyBBUEkg44OJ44Kt44Ol44Oh44Oz44OICgp8IOODkOODg+OCr+OCqOODs+ODiSB8IFVSTCB8CnwgLS0tIHwgLS0tIHwKfCBKYXZh77yIa25pZmU0au+8iSB8IGh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC9hcGkvZG9jLmh0bWwgfAp8IE5vZGXvvIhTd2FnZ2Vy77yJIHwgaHR0cDovL2xvY2FsaG9zdDo4MDgwL2FwaS9kb2NzIHwKCuWujOWFqOOBqiBBUEkg5aWR57SE44GvIFtgdmJlbi1hZG1pbi1iYWNrZW5kL2RvY3MvYXBpLWNvbnRyYWN0Lm1kYF0oLi4vdmJlbi1hZG1pbi1iYWNrZW5kL2RvY3MvYXBpLWNvbnRyYWN0Lm1kKSDjgavjgYLjgorjgb7jgZnjgIIKCiMjIOKdkyDjgojjgY/jgYLjgovos6rllY8KCioqMS4gSmF2YSDjg5Djg4Pjgq/jgqjjg7Pjg4njgaggTm9kZSDjg5Djg4Pjgq/jgqjjg7Pjg4njga/jganjgYbliIfjgormm7/jgYjjgb7jgZnjgYvvvJ8qKgrkuKHjg5Djg4Pjgq/jgqjjg7Pjg4njga/lkIzjgZggQVBJIOWlkee0hOOCkuWun+ijheOBl+OAgeWQjOOBmOODh+ODvOOCv+ODmeODvOOCueOBqCA4MDgwIOODneODvOODiOOCkuWFseacieOBl+OBpuOBhOOBvuOBmeOAgueJh+aWueOCkuWBnOatouOBl+OBpuOCguOBhueJh+aWueOCkui1t+WLleOBmeOCi+OBoOOBkeOBp+OAgeODleODreODs+ODiOOCqOODs+ODieOBruWkieabtOOBr+S4jeimgeOBp+OBmeOAggoKKioyLiDjg4fjg5Xjgqnjg6vjg4jjga7jg63jgrDjgqTjg7PjgqLjgqvjgqbjg7Pjg4jjgajjg5Hjgrnjg6/jg7zjg4njga/vvJ8qKgrkuIroqJjjgIzjgq/jgqTjg4Pjgq/jgrnjgr/jg7zjg4gg4oaSIOODreOCsOOCpOODs+OAjeOCkuWPgueFp+OAguODh+ODouOCouOCq+OCpuODs+ODiOOBruODkeOCueODr+ODvOODieOBr+OBmeOBueOBpiBgMTIzNDU2YCDjgafjgZnjgIIKCioqMy4g44OR44K544Ov44O844OJ44KS5b+Y44KM44GfIC8g44OH44Oi44OH44O844K/44KS44Oq44K744OD44OI44GX44Gf44GE77yfKioKYG15c3FsIC11cm9vdCAtcCA8IHZiZW4tYWRtaW4tYmFja2VuZC9zcWwvaW5pdC5zcWxgIOOCkuWGjeWun+ihjOOBmeOCi+OBqOOAgeODh+ODouODh+ODvOOCv+OCkuOBmeOBueOBpuW+qeWFg+OBp+OBjeOBvuOBme+8iOaXouWtmOODh+ODvOOCv+OBr+a2iOWOu+OBleOCjOOCi+OBn+OCgeazqOaEj++8ieOAggoKKio0LiBQb3N0Z3JlU1FMIC8gT3JhY2xlIOOBr+OCteODneODvOODiOOBl+OBpuOBhOOBvuOBmeOBi++8nyoqCuePvuWcqOOBriBTUUwg44K544Kv44Oq44OX44OI44GvIE15U1FMIOaWueiogO+8iHV0ZjhtYjTvvInjgafjgZnjgIJKYXZhIOWBtOOBryBNeUJhdGlzLVBsdXPjgIFOb2RlIOWBtOOBryBQcmlzbWEg44KS5L2/55So44GX44Gm44GK44KK44CB44OH44O844K/44OZ44O844K55YiH44KK5pu/44GI44Gu5Z+655uk44GM44GC44KK44G+44GZ44CCUFIg44KS5q2T6L+O44GX44G+44GZ44CCCgoqKjUuIOODneODvOODiOOBjOS9v+eUqOS4reOBruWgtOWQiOOBr+OBqeOBhuWkieabtOOBl+OBvuOBmeOBi++8nyoqCuODkOODg+OCr+OCqOODs+ODieOBr+aXouWumuOBpyBgODA4MGDjgIHjg5Xjg63jg7Pjg4jjgqjjg7Pjg4njga4gNCDjgqLjg5fjg6rjga8gYDU2NjYgLyA1Nzc3IC8gNTg4OCAvIDYwMDFgIOOBp+OBmeOAguOBneOCjOOBnuOCjOOBruioreWumuODleOCoeOCpOODq+OBp+WkieabtOOBp+OBjeOBvuOBmeOAggoKKio2LiDllYbnlKjliKnnlKjjga/jgafjgY3jgb7jgZnjgYvvvJ8qKgrjga/jgYTjgIJNSVQg44Op44Kk44K744Oz44K544Gr44KI44KK5ZWG55So5Yip55So44Gv54Sh5paZ44Gn44GZ44CC6JGX5L2c5qip6KGo56S644Gu5q6L5a2Y44KS44GK6aGY44GE44GX44G+44GZ44CCCgojIyDwn5KsIOOCs+ODn+ODpeODi+ODhuOCo+OBqOODleOCo+ODvOODieODkOODg+OCrwoKLSDwn5CbIOODkOOCsOWgseWRiiAvIOapn+iDveaPkOahiO+8mltJc3N1ZXNdKGh0dHBzOi8vZ2l0aHViLmNvbS9TdGFycnkxMjMyMjkvdmJlbi1hZG1pbi1iYWNrZW5kL2lzc3VlcykKLSDwn5KhIOizquWVjyAvIOaDheWgseWFseacie+8mltEaXNjdXNzaW9uc10oaHR0cHM6Ly9naXRodWIuY29tL1N0YXJyeTEyMzIyOS92YmVuLWFkbWluLWJhY2tlbmQvZGlzY3Vzc2lvbnMpCgojIyDjg6njgqTjgrvjg7PjgrkKCltNSVRdKC4uL0xJQ0VOU0UpCg==
+<div align="center">
+
+# Vben Admin 管理システム
+
+<p>オープンソースの管理システム框架（Vue 3 Admin Template / Dashboard）：Vben Admin 5.7 を基にしたフルスタック構成。Vue 3 + Vite フロントエンド、Java Spring Boot 4 / Node.js NestJS 12 のデュアルバックエンド、RBAC 権限、JWT デュアルトークン、MySQL。すぐに使えて、MIT ライセンスで商用利用無料</p>
+
+[![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org)
+[![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
+[![Java](https://img.shields.io/badge/Java-Spring%20Boot%204.1-6db33f.svg)](https://spring.io)
+[![Node](https://img.shields.io/badge/Node-NestJS%2012-40598f.svg)](https://nestjs.com)
+[![MySQL](https://img.shields.io/badge/MySQL-9.x-4479a1.svg)](https://www.mysql.com)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](#ライセンス)
+[![GitHub Stars](https://img.shields.io/github/stars/Starry123229/vben-admin-backend?style=social)](https://github.com/Starry123229/vben-admin-backend/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/Starry123229/vben-admin-backend?style=social)](https://github.com/Starry123229/vben-admin-backend/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/Starry123229/vben-admin-backend)](https://github.com/Starry123229/vben-admin-backend/issues)
+
+[简体中文](../README.md) | [繁體中文](./README.zh-TW.md) | [English](./README.en.md) | **日本語** | [한국어](./README.ko.md) | [Français](./README.fr.md) | [Deutsch](./README.de.md) | [Español](./README.es.md) | [Русский](./README.ru.md)
+
+</div>
+
+---
+
+## ディレクトリ構成
+
+```
+vben/
+├── vben-admin-backend/              # バックエンド
+│   ├── docs/api-contract.md         # API 契約（両実装の共通仕様）
+│   ├── java-backend/                # Java 実装（Spring Boot）
+│   ├── node-backend/                # Node 実装（NestJS + Prisma）
+│   └── sql/init.sql                 # DB 作成 + 20 テーブル + デモデータ（一括インポート）
+└── vue-vben-admin-v5.7.0/           # フロントエンド monorepo（pnpm workspace）
+    ├── apps/                        # 4 つの UI アプリ
+    ├── packages/                    # 共有パッケージ
+    └── internal/                    # ビルド・Lint 設定
+```
+
+## 技術スタック
+
+| サイド | 技術 |
+| --- | --- |
+| フロントエンド | Vue 3.5 · Vite 8 · TypeScript · Pinia · pnpm monorepo |
+| フロントエンド UI（4 選 1） | Ant Design Vue 4 / Ant Design Vue Next / Element Plus / Naive UI |
+| Java バックエンド | Spring Boot 4.1（JDK 25）· Sa-Token 1.45 · MyBatis-Plus 3.5.17 |
+| Node バックエンド | NestJS 12 · Fastify 5 · Prisma 7 · JWT |
+| データベース | MySQL 9.x（utf8mb4） |
+
+## クイックスタート
+
+### 1. データベースの初期化
+
+```bash
+# MySQL が起動していることを確認し、一括インポート
+mysql -uroot -p < vben-admin-backend/sql/init.sql
+```
+
+> `init.sql` は 1 ファイルでデータベース作成（`vben_admin`）→ 20 テーブル作成 → デモデータ投入まで完了します。両バックエンドで共用。
+
+### 2. バックエンドの起動（Java / Node いずれか）
+
+```bash
+# オプション A：Java バックエンド
+cd vben-admin-backend/java-backend
+mvn spring-boot:run
+
+# オプション B：Node バックエンド
+cd vben-admin-backend/node-backend
+pnpm install
+cp .env.example .env          # Windows: Copy-Item .env.example .env
+pnpm db:generate
+pnpm dev
+```
+
+> 両バックエンドはポート 8080 を共用するため、同時に 1 つしか起動できません。データベースのデフォルトは `root/123456`。変更する場合は各設定ファイルを参照してください。
+
+### 3. フロントエンドの起動（4 つから 1 つ選択）
+
+```bash
+cd vue-vben-admin-v5.7.0
+pnpm install
+pnpm dev:antd        # Ant Design Vue  → http://localhost:5666
+# pnpm dev:ele       # Element Plus     → http://localhost:5777
+# pnpm dev:naive     # Naive UI         → http://localhost:5888
+# pnpm dev:antdv-next # Ant Design Vue Next → http://localhost:6001
+```
+
+### 4. ログイン
+
+デモアカウント（パスワードはすべて `123456`）：
+
+| アカウント | ロール | 権限範囲 |
+| --- | --- | --- |
+| **vben** | スーパー管理者 | すべてのメニューとボタン権限 |
+| **admin** | 管理者 | システム管理 / 監視 / ツール |
+| **jack** | 一般ユーザー | ユーザー管理（読み取り専用）とロール管理 |
+
+## 本番デプロイ
+
+### フロントエンドのビルド
+
+```bash
+cd vue-vben-admin-v5.7.0
+pnpm build:antd      # 出力：apps/web-antd/dist
+```
+
+### バックエンドのビルド
+
+```bash
+# Java
+cd vben-admin-backend/java-backend
+mvn clean package -DskipTests
+java -jar target/vben-backend-0.0.1-SNAPSHOT.jar
+
+# Node
+cd vben-admin-backend/node-backend
+pnpm build && pnpm start
+```
+
+### Nginx 設定例
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/vben-dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        client_max_body_size 10m;
+    }
+}
+```
+
+## システムの仕組み
+
+**権限モデル**：RBAC（ユーザー → ロール → メニュー / ボタン）。フロントエンドとバックエンドで同一の権限コードを共有。
+
+```
+sys_user ──< sys_user_role >── sys_role ──< sys_role_menu >── sys_menu
+                                                              ├─ type=menu   → フロントエンドのルート / サイドメニュー
+                                                              └─ type=button → auth_code（ボタン単位の権限コード）
+```
+
+**認証フロー**：
+
+```
+ログイン → デュアルトークン発行
+  ├─ accessToken（2h、localStorage、リクエストヘッダー Authorization: Bearer）
+  └─ refreshToken（7d、HttpOnly Cookie、XSS 対策）
+      └─ accessToken 期限切れ → フロントエンドが自動で POST /auth/refresh を呼び出しサイレント更新
+      └─ ログアウト / 強制ログアウト → 両トークン失効
+```
+
+**メニューとボタン権限**：
+
+- **メニュー権限**：バックエンドがロールに応じてルートツリーを動的に返します（`GET /menu/all`）。権限のないルートはフロントエンドに登録されません。
+- **ボタン権限**：`auth_code`（例：`AC_100010`）はフロントエンドで `v-access` ディレクティブで表示を制御し、バックエンドで `@SaCheckPermission`（Java）/ `@Permissions`（Node）で API を検証します。
+- **スーパー管理者**：`code=super` のロールはすべての権限を持ちます。
+
+## API ドキュメント
+
+| バックエンド | URL |
+| --- | --- |
+| Java（knife4j） | http://localhost:8080/api/doc.html |
+| Node（Swagger） | http://localhost:8080/api/docs |
+
+完全な API 契約は [`vben-admin-backend/docs/api-contract.md`](../vben-admin-backend/docs/api-contract.md) にあります。
+
+## ❓ よくある質問
+
+**1. Java バックエンドと Node バックエンドはどう切り替えますか？**
+両バックエンドは同じ API 契約を実装し、同じデータベースと 8080 ポートを共有しています。片方を停止してもう片方を起動するだけで、フロントエンドの変更は不要です。
+
+**2. デフォルトのログインアカウントとパスワードは？**
+上記「クイックスタート → ログイン」を参照。デモアカウントのパスワードはすべて `123456` です。
+
+**3. パスワードを忘れた / デモデータをリセットしたい？**
+`mysql -uroot -p < vben-admin-backend/sql/init.sql` を再実行すると、デモデータをすべて復元できます（既存データは消去されるため注意）。
+
+**4. PostgreSQL / Oracle はサポートしていますか？**
+現在の SQL スクリプトは MySQL 方言（utf8mb4）です。Java 側は MyBatis-Plus、Node 側は Prisma を使用しており、データベース切り替えの基盤があります。PR を歓迎します。
+
+**5. ポートが使用中の場合はどう変更しますか？**
+バックエンドは既定で `8080`、フロントエンドの 4 アプリは `5666 / 5777 / 5888 / 6001` です。それぞれの設定ファイルで変更できます。
+
+**6. 商用利用はできますか？**
+はい。MIT ライセンスにより商用利用は無料です。著作権表示の残存をお願いします。
+
+## 💬 コミュニティとフィードバック
+
+- 🐛 バグ報告 / 機能提案：[Issues](https://github.com/Starry123229/vben-admin-backend/issues)
+- 💡 質問 / 情報共有：[Discussions](https://github.com/Starry123229/vben-admin-backend/discussions)
+
+## ライセンス
+
+[MIT](../LICENSE)
