@@ -2,7 +2,7 @@
 
 # Vben Admin — Système d'administration
 
-<p>Système d'administration d'entreprise découplé front-end / back-end, construit avec Vue 3 + Vben Admin 5.7</p>
+<p>Framework d'administration open source (Vue 3 Admin Template / Dashboard) : solution full-stack basée sur Vben Admin 5.7 — front-end Vue 3 + Vite, doubles back-ends Java Spring Boot 4 / Node.js NestJS 12, RBAC, double jeton JWT, MySQL. Prêt à l'emploi, sous licence MIT, utilisation commerciale gratuite</p>
 
 [![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)

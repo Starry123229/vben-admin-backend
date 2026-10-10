@@ -2,7 +2,7 @@
 
 # Vben Admin — Система администрирования
 
-<p>Корпоративная система администрирования с разделёнными фронтендом и бэкендом на базе Vue 3 + Vben Admin 5.7</p>
+<p>Открытый фреймворк для админ-панелей (Vue 3 Admin Template / Dashboard): полноценное решение на базе Vben Admin 5.7 — фронтенд Vue 3 + Vite, двойной бэкенд Java Spring Boot 4 / Node.js NestJS 12, RBAC, двойной JWT-токен, MySQL. Готов к запуску, лицензия MIT, бесплатно для коммерческого использования</p>
 
 [![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)

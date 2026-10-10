@@ -2,7 +2,7 @@
 
 # Vben Admin 관리 시스템
 
-<p>Vue 3 + Vben Admin 5.7로 구축한 프런트엔드·백엔드 분리형 엔터프라이즈 관리 시스템</p>
+<p>오픈소스 관리 시스템 프레임워크(Vue 3 Admin Template / Dashboard): Vben Admin 5.7 기반 풀스택 구성. Vue 3 + Vite 프런트엔드, Java Spring Boot 4 / Node.js NestJS 12 듀얼 백엔드, RBAC 권한, JWT 듀얼 토큰, MySQL. 즉시 사용 가능하며 MIT 라이선스로 상업적 이용 무료</p>
 
 [![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
