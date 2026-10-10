@@ -2,7 +2,7 @@
 
 # Vben Admin System
 
-<p>Enterprise admin system built with Vue 3 + Vben Admin 5.7 (decoupled front-end / back-end)</p>
+<p>Open-source admin framework (Vue 3 Admin Template / Dashboard): a full-stack Vben Admin 5.7 solution with Vue 3 + Vite front-end, Java Spring Boot 4 / Node.js NestJS 12 dual backends, RBAC, JWT dual-token, MySQL — ready to run, MIT licensed</p>
 
 [![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)

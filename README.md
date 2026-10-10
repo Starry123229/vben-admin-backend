@@ -2,7 +2,7 @@
 
 # Vben Admin 后台管理系统
 
-<p>基于 Vue 3 + Vben Admin 5.7 的前后端分离企业级中后台管理系统</p>
+<p>开源后台管理框架（Vue 3 Admin Template / Dashboard）：基于 Vben Admin 5.7 的全栈方案，Vue 3 + Vite 前端，Java Spring Boot 4 / Node.js NestJS 12 双后端，RBAC 权限、JWT 双 Token、MySQL，开箱即用，MIT 免费商用</p>
 
 [![Vue](https://img.shields.io/badge/Vue-3.x-42b883.svg)](https://vuejs.org)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)](https://vitejs.dev)
